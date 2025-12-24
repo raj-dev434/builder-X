@@ -5,12 +5,15 @@ import { useCanvasStore } from '../../store/canvasStore';
 import { useTemplateStore } from '../../store/templateStore';
 import { BlockTemplate, Block } from '../../schema/types';
 import { Canvas } from '../canvas/Canvas';
-import { BlockSpecificInspector } from '../inspector/BlockSpecificInspector';
+import { Inspector } from '../inspector/Inspector';
 import { Toolbar } from './Toolbar';
 import { Sidebar } from './Sidebar';
 import { PreviewControlBar } from './PreviewBar';
 import { GlobalStyles } from './GlobalStyles';
 import { AssetManager } from '../assets/AssetManager';
+
+import { LayersPanel } from './LayersPanel';
+import { HistoryPanel } from './HistoryPanel';
 
 export const Layout: React.FC = () => {
   const { selectedBlockIds, isPreviewMode } = useCanvasStore();
@@ -31,16 +34,58 @@ export const Layout: React.FC = () => {
 
   const [activeTemplate, setActiveTemplate] = useState<BlockTemplate | null>(null);
   const [activeBlock, setActiveBlock] = useState<Block | null>(null);
-  const [leftPanelMode, setLeftPanelMode] = useState<'blocks' | 'properties'>('blocks');
+  const [leftPanelMode, setLeftPanelMode] = useState<'blocks' | 'properties' | 'layers' | 'history'>('blocks');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOverInfo, setDragOverInfo] = useState<DragOverInfo | null>(null);
+  
+  // Resizable Sidebar State
+  const [sidebarWidth, setSidebarWidth] = useState(320);
+  const [isResizingSidebar, setIsResizingSidebar] = useState(false);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizingSidebar) return;
+      
+      const newWidth = e.clientX;
+      if (newWidth >= 200 && newWidth <= 600) {
+        setSidebarWidth(newWidth);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsResizingSidebar(false);
+      document.body.style.cursor = 'default';
+    };
+
+    if (isResizingSidebar) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'col-resize';
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'default';
+    };
+  }, [isResizingSidebar]);
+
+  const startResizing = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizingSidebar(true);
+  };
+
 
   useEffect(() => {
     if (selectedBlockId) {
-      setLeftPanelMode('properties');
+      if (leftPanelMode !== 'layers' && leftPanelMode !== 'history') {
+        setLeftPanelMode('properties');
+      }
     } else {
-      setLeftPanelMode('blocks');
+       if (leftPanelMode === 'properties') {
+        setLeftPanelMode('blocks');
+       }
     }
   }, [selectedBlockId]);
 
@@ -48,8 +93,32 @@ export const Layout: React.FC = () => {
     if (!isSidebarOpen) {
       setIsSidebarOpen(true);
       setLeftPanelMode('blocks');
+    } else if (leftPanelMode === 'blocks') {
+      setIsSidebarOpen(false);
     } else {
-      setLeftPanelMode(prev => prev === 'blocks' ? 'properties' : 'blocks');
+      setLeftPanelMode('blocks');
+    }
+  };
+
+  const handleToggleLayers = () => {
+    if (!isSidebarOpen) {
+      setIsSidebarOpen(true);
+      setLeftPanelMode('layers');
+    } else if (leftPanelMode === 'layers') {
+      setIsSidebarOpen(false);
+    } else {
+      setLeftPanelMode('layers');
+    }
+  };
+
+  const handleToggleHistory = () => {
+    if (!isSidebarOpen) {
+      setIsSidebarOpen(true);
+      setLeftPanelMode('history');
+    } else if (leftPanelMode === 'history') {
+      setIsSidebarOpen(false);
+    } else {
+      setLeftPanelMode('history');
     }
   };
 
@@ -90,6 +159,13 @@ export const Layout: React.FC = () => {
     if (!over) {
       setDragOverInfo(null);
       return;
+    }
+
+    // If over a DropZone, let the DropZone component handle the visual feedback (green line)
+    // We can clear our generic drag indicator
+    if (over.data.current?.type === 'DROP_ZONE') {
+       setDragOverInfo(null);
+       return;
     }
 
     const overNode = over.data.current?.sortable?.node || document.getElementById(over.id.toString());
@@ -158,7 +234,46 @@ export const Layout: React.FC = () => {
     const { active, over } = event;
     if (!over) return;
     const data = active.data.current;
+    
+    // Check if we dropped on a DropZone
+    if (over.data.current?.type === 'DROP_ZONE') {
+        const { parentId, index: dropIndex } = over.data.current;
+        const blocks = useCanvasStore.getState().blocks;
+        const { moveBlock, addBlock } = useCanvasStore.getState();
 
+        if (data?.type === 'template') {
+           // Adding new block from sidebar - straightforward insert
+           addBlock(data.template.block, parentId || undefined, dropIndex);
+        } else if (data?.type === 'block') {
+           // Moving existing block
+           // Check for self-drop (shouldn't happen with valid zones but safety first)
+           if (active.id === over.id) return;
+
+           const activePos = findBlockPosition(blocks, active.id.toString());
+           if (activePos) {
+              let finalIndex = dropIndex;
+              
+              // CRITICAL FIX: Block Loss / Misplacement
+              // When moving a block DOWN within the SAME container:
+              // The removal of the block (at 'oldIndex') shifts all subsequent items up by 1.
+              // So a drop at 'newIndex' (which was calculated based on the list WITH the item)
+              // actually needs to target 'newIndex - 1'.
+              if (activePos.parentId === parentId && activePos.index < dropIndex) {
+                 finalIndex -= 1;
+              }
+              
+              // Prevent unnecessary moves (dropping exactly where it started)
+              if (activePos.parentId === parentId && activePos.index === finalIndex) {
+                  return;
+              }
+
+              moveBlock(active.id.toString(), parentId, finalIndex);
+           }
+        }
+        return;
+    }
+
+    // Fallback to legacy logic for dropping directly on blocks (nesting)
     const blocks = useCanvasStore.getState().blocks;
     const { moveBlock, addBlock } = useCanvasStore.getState();
 
@@ -167,15 +282,6 @@ export const Layout: React.FC = () => {
     const targetBlock = useCanvasStore.getState().blocks.find(b => b.id === over.id) || overPos?.block;
 
     if (!targetBlock) {
-      // Dropped on canvas background or invalid target -> Add to root
-      if (data?.type === 'template') {
-        addBlock(data.template.block, undefined, blocks.length);
-      } else if (data?.type === 'block') {
-        const activePos = findBlockPosition(blocks, active.id.toString());
-        if (activePos) {
-          moveBlock(active.id.toString(), '', blocks.length); // Move to root end
-        }
-      }
       return;
     }
 
@@ -211,11 +317,15 @@ export const Layout: React.FC = () => {
       }
     }
 
+    // List of block types that can accept children (Containers)
+    const CONTAINER_TYPES = ['section', 'row', 'column', 'container', 'form', 'group', 'div', 'body'];
+    const isContainer = targetBlock && CONTAINER_TYPES.includes(targetBlock.type);
+
     // EXECUTE DROP
     if (data?.type === 'template') {
       // Dragging from sidebar
-      if (!isEdgeDrop) {
-        // Nest inside target
+      if (!isEdgeDrop && isContainer) {
+        // Nest inside target (only if container)
         addBlock(data.template.block, targetBlock.id, targetBlock.children ? targetBlock.children.length : 0);
       } else {
         // Drop as sibling
@@ -227,15 +337,16 @@ export const Layout: React.FC = () => {
       // Reordering existing block
       const activePos = findBlockPosition(blocks, active.id.toString());
       if (activePos && overPos) {
-        if (!isEdgeDrop) {
-          // Nest inside target
-          // Prevent dropping into self or children (handled by DndContext mostly, but safety check)
-          if (active.id !== targetBlock.id) {
-            moveBlock(active.id.toString(), targetBlock.id, targetBlock.children ? targetBlock.children.length : 0);
-          }
+        // If dropping precisely on an edge of a block (not a DropZone, but the block itself via 'edgeDrop'),
+        // we want to place it as a sibling.
+        if (!isEdgeDrop && isContainer) {
+           // Nesting logic
+           if (active.id !== targetBlock.id) {
+             moveBlock(active.id.toString(), targetBlock.id, targetBlock.children ? targetBlock.children.length : 0);
+           }
         } else {
-          // Drop as sibling
-          const parentId = overPos.parentId;
+          // Sibling logic
+          const parentId = overPos.parentId; // This defaults to the target's parent. 
           let index = overPos.index;
           if (edgePos === 'bottom') index += 1;
 
@@ -260,32 +371,53 @@ export const Layout: React.FC = () => {
         ) : (
           <Toolbar
             onToggleComponents={handleToggleBlocks}
-            componentsPanelOpen={isSidebarOpen}
+            onToggleLayers={handleToggleLayers}
+            onToggleHistory={handleToggleHistory}
+            componentsPanelOpen={isSidebarOpen && leftPanelMode === 'blocks'}
+            layersPanelOpen={isSidebarOpen && leftPanelMode === 'layers'}
+            historyPanelOpen={isSidebarOpen && leftPanelMode === 'history'}
           />
         )}
 
         <div className="flex-1 flex overflow-hidden">
           {!isPreviewMode && (
-            <div
-              className={`
-                h-full 
-                transition-all duration-300 ease-in-out 
-                ${isSidebarOpen ? 'w-80' : 'w-0'}
-                overflow-hidden
-                shrink-0
-              `}
+              <div
+                className={`
+                  h-full 
+                  transition-all duration-300 ease-in-out 
+                  overflow-visible
+                  shrink-0
+                  relative
+                  flex
+                  z-[50]
+                `}
+              style={{ width: isSidebarOpen ? sidebarWidth : 0 }}
             >
-              <div className="w-80 h-full">
+              <div className="h-full overflow-hidden" style={{ width: sidebarWidth }}>
                 {leftPanelMode === 'blocks' ? (
                   <div className="h-full bg-gray-800 border-r border-gray-700">
                     <Sidebar onClose={handleCloseSidebar} />
                   </div>
+                ) : leftPanelMode === 'layers' ? (
+                  <div className="h-full bg-gray-800 border-r border-gray-700">
+                     <LayersPanel onClose={handleCloseSidebar} />
+                  </div>
+                ) : leftPanelMode === 'history' ? (
+                   <HistoryPanel onClose={handleCloseSidebar} />
                 ) : (
                   <div className="h-full">
-                    <BlockSpecificInspector />
+                    <Inspector />
                   </div>
                 )}
               </div>
+              
+              {/* Resizer Handle */}
+              {isSidebarOpen && (
+                <div
+                  className={`w-1 h-full cursor-col-resize hover:bg-blue-500 active:bg-blue-600 transition-colors z-50 absolute right-0 top-0 translate-x-1/2`}
+                  onMouseDown={startResizing}
+                />
+              )}
             </div>
           )}
 

@@ -26,46 +26,6 @@ export const TextBlock: React.FC<TextBlockProps> = ({
   const [showToolbar, setShowToolbar] = useState(false);
   const textRef = useRef<HTMLDivElement>(null);
 
-  const {
-    fontSize,
-    fontWeight,
-    color,
-    textAlign,
-    lineHeight,
-    fontFamily,
-    letterSpacing,
-    textTransform,
-    textDecoration,
-    fontStyle,
-    textShadow,
-    padding,
-    margin,
-    backgroundColor,
-    border,
-    borderRadius,
-    opacity
-  } = block.props;
-
-  const style: React.CSSProperties = {
-    fontSize,
-    fontWeight,
-    color,
-    textAlign,
-    lineHeight,
-    fontFamily,
-    letterSpacing,
-    textTransform,
-    textDecoration,
-    fontStyle,
-    textShadow,
-    padding,
-    margin,
-    backgroundColor,
-    border,
-    borderRadius,
-    opacity
-  };
-
   // Update content when block props change
   useEffect(() => {
     setContent(block.props.content);
@@ -152,56 +112,89 @@ export const TextBlock: React.FC<TextBlockProps> = ({
     }
   };
 
+  // Get alignSelf from props to determine alignment behavior
+  const alignSelf = block.props.alignSelf;
+
+  // Calculate alignment styles using margin instead of alignSelf for better compatibility
+  const getAlignmentStyles = (): React.CSSProperties => {
+    if (!alignSelf || alignSelf === 'stretch') {
+      return { width: '100%' };
+    }
+
+    // Use margin auto for alignment
+    // If no explicit width is set, use a reasonable default (50%) to make alignment visible
+    const styles: React.CSSProperties = {
+      width: block.props.width || '50%',
+      maxWidth: block.props.maxWidth || '100%',
+      display: 'block'
+    };
+
+    if (alignSelf === 'flex-start') {
+      styles.marginRight = 'auto';
+      styles.marginLeft = '0';
+    } else if (alignSelf === 'center') {
+      styles.marginLeft = 'auto';
+      styles.marginRight = 'auto';
+    } else if (alignSelf === 'flex-end') {
+      styles.marginLeft = 'auto';
+      styles.marginRight = '0';
+    }
+
+    return styles;
+  };
+
   return (
     <BaseBlock
       block={block}
       isSelected={isSelected}
       onSelect={onSelect}
       onDelete={onDelete}
-      className="w-full relative"
+      className=""
     >
-      {isEditing && (
-        <TextFormattingToolbar
-          isVisible={showToolbar}
-          onFormat={handleFormat}
-          onClose={() => setShowToolbar(false)}
-        />
-      )}
+      <div className="relative" style={getAlignmentStyles()}>
+        {isEditing && (
+          <TextFormattingToolbar
+            isVisible={showToolbar}
+            onFormat={handleFormat}
+            onClose={() => setShowToolbar(false)}
+          />
+        )}
 
-      {isEditing ? (
-        <div
-          ref={textRef}
-          contentEditable
-          suppressContentEditableWarning
-          className="outline-none w-full min-h-[1.5em] border border-primary-300 rounded px-2 py-1 focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
-          style={style}
-          onInput={handleInput}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
-          onMouseUp={handleSelectionChange}
-          onKeyUp={handleSelectionChange}
-          role="textbox"
-          aria-label="Edit text content"
-          tabIndex={0}
-          dangerouslySetInnerHTML={{ __html: content }}
-        />
-      ) : (
-        <p
-          className="w-full cursor-pointer hover:bg-gray-50 rounded px-1 py-0.5 transition-colors"
-          style={style}
-          onDoubleClick={handleDoubleClick}
-          role="button"
-          aria-label="Double-click to edit text"
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              handleDoubleClick();
-            }
-          }}
-          dangerouslySetInnerHTML={{ __html: content }}
-        />
-      )}
+        {isEditing ? (
+          <div
+            ref={textRef}
+            contentEditable
+            suppressContentEditableWarning
+            className="outline-none w-full min-h-[1.5em] border border-primary-300 rounded px-2 py-1 focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+            style={{ font: 'inherit', color: 'inherit', textAlign: 'inherit' }}
+            onInput={handleInput}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            onMouseUp={handleSelectionChange}
+            onKeyUp={handleSelectionChange}
+            role="textbox"
+            aria-label="Edit text content"
+            tabIndex={0}
+            dangerouslySetInnerHTML={{ __html: content }}
+          />
+        ) : (
+          <p
+            className="w-full cursor-pointer hover:bg-black/5 transition-colors"
+            style={{ font: 'inherit', color: 'inherit', textAlign: 'inherit' }}
+            onDoubleClick={handleDoubleClick}
+            role="button"
+            aria-label="Double-click to edit text"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleDoubleClick();
+              }
+            }}
+            dangerouslySetInnerHTML={{ __html: content }}
+          />
+        )}
+      </div>
     </BaseBlock>
   );
 };

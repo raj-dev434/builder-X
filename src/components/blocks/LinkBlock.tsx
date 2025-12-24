@@ -40,10 +40,30 @@ export const LinkBlock: React.FC<LinkBlockProps> = ({
     text = 'Click here',
     url = '#',
     target = '_self',
-    ...styleProps
+    rel,
+    // Typography
+    fontFamily,
+    fontSize,
+    fontWeight,
+    textDecoration,
+    textAlign,
+    // Colors
+    color = '#3b82f6',
+    backgroundColor,
+    hoverColor,
+    hoverBackgroundColor,
+    // Box Model
+    padding,
+    margin,
+    border,
+    borderRadius,
+    // Animation
+    hoverAnimation,
+    ...otherProps
   } = block.props;
 
   const [isEditing, setIsEditing] = React.useState(false);
+  const [isHovered, setIsHovered] = React.useState(false);
   const textRef = React.useRef<HTMLAnchorElement>(null);
   const { isPreviewMode } = useCanvasStore();
 
@@ -74,7 +94,6 @@ export const LinkBlock: React.FC<LinkBlockProps> = ({
   React.useEffect(() => {
     if (isEditing && textRef.current) {
       textRef.current.focus();
-      // Move cursor to end
       const range = document.createRange();
       const sel = window.getSelection();
       range.selectNodeContents(textRef.current);
@@ -84,32 +103,66 @@ export const LinkBlock: React.FC<LinkBlockProps> = ({
     }
   }, [isEditing]);
 
+  // Separate styles for wrapper (BaseBlock) and link element
+  const linkStyle: React.CSSProperties = {
+    fontFamily,
+    fontSize,
+    fontWeight: fontWeight as any,
+    textDecoration,
+    textAlign: textAlign as any,
+    color: isHovered && hoverColor ? hoverColor : color,
+    backgroundColor: isHovered && hoverBackgroundColor ? hoverBackgroundColor : backgroundColor,
+    padding,
+    border,
+    borderRadius,
+    display: 'inline-block', // allows padding/dims
+    cursor: isEditing ? 'text' : 'pointer',
+    outline: 'none',
+    transition: 'all 0.3s ease',
+    ...otherProps // any other specific styles
+  };
+
+  // Wrapper handles positioning and margins
+  const wrapperStyle: React.CSSProperties = {
+     margin,
+     // We don't want to double-apply padding/bg if they are meant for the link "button" look
+     // BaseBlock handles layout/positioning mainly.
+  };
+  
+  // Animation Class
+  const getAnimationClass = () => {
+      if (!hoverAnimation || hoverAnimation === 'none') return '';
+      switch (hoverAnimation) {
+          case 'grow': return 'hover:scale-105';
+          case 'fade': return 'hover:opacity-75';
+          case 'underline': return 'hover:underline'; // simple fallback, typically slide underline needs custom css
+          default: return '';
+      }
+  };
+
   return (
     <BaseBlock
       block={block}
       isSelected={isSelected}
       onSelect={onSelect}
       onDelete={onDelete}
-      style={styleProps}
+      style={wrapperStyle}
     >
       <a
         ref={textRef}
         href={normalizeUrl(url)}
         target={target}
-        rel={target === '_blank' ? 'noopener noreferrer' : undefined}
+        rel={rel || (target === '_blank' ? 'noopener noreferrer' : undefined)}
         contentEditable={isEditing}
         suppressContentEditableWarning
         onDoubleClick={handleDoubleClick}
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
-        style={{
-          textDecoration: 'none',
-          outline: 'none',
-          cursor: isEditing ? 'text' : 'pointer',
-          ...styleProps
-        }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className={`transition-all duration-300 ${getAnimationClass()}`}
+        style={linkStyle}
         onClick={(e) => {
-          // Allow link to work normally in preview mode
           if (!isPreviewMode && (isSelected || isEditing)) {
             e.preventDefault();
           }

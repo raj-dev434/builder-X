@@ -64,7 +64,7 @@ export const CanvasHighlighter: React.FC = () => {
     if (isPreviewMode) return null;
 
     return createPortal(
-        <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
+        <div className="pointer-events-none fixed inset-0 z-[40] overflow-hidden">
             {/* Hover Highlighter */}
             {hoverRect && hoveredBlockId !== selectedBlockId && (
                 <div

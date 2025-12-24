@@ -33,15 +33,33 @@ export const ColumnBlock: React.FC<ColumnBlockProps> = ({
         height,
         minHeight,
         maxHeight,
+        display = 'flex',
         flexDirection = 'column',
         justifyContent,
         alignItems,
+        gridTemplateColumns,
         gap = '0.5rem',
         padding = '1rem',
+        paddingTop,
+        paddingRight,
+        paddingBottom,
+        paddingLeft,
         margin,
+        marginTop,
+        marginRight,
+        marginBottom,
+        marginLeft,
         backgroundColor,
+        backgroundImage,
+        backgroundSize,
+        backgroundPosition,
+        backgroundRepeat,
+        backgroundAttachment,
         borderRadius,
         border,
+        borderWidth,
+        borderColor,
+        borderStyle,
         borderTop,
         borderRight,
         borderBottom,
@@ -50,6 +68,13 @@ export const ColumnBlock: React.FC<ColumnBlockProps> = ({
         overflow,
         overflowX,
         overflowY,
+        opacity,
+        zIndex,
+        position,
+        top,
+        right,
+        bottom,
+        left,
     } = block.props;
 
     // Apply responsive width based on viewDevice
@@ -65,9 +90,6 @@ export const ColumnBlock: React.FC<ColumnBlockProps> = ({
         // effectively making columns stack on tablet unless overridden
         responsiveWidth = width_tablet || '100%';
         responsiveFlex = width_tablet ? undefined : '0 0 100%';
-        // If you want to keep columns side-by-side on tablet by default, 
-        // you would use: responsiveWidth = width_tablet || width;
-        // But requested behavior is "must go to nxt row in table" (tablet)
     }
 
     const style: React.CSSProperties = {
@@ -83,10 +105,26 @@ export const ColumnBlock: React.FC<ColumnBlockProps> = ({
         alignItems,
         gap,
         padding,
+        paddingTop,
+        paddingRight,
+        paddingBottom,
+        paddingLeft,
         margin,
+        marginTop,
+        marginRight,
+        marginBottom,
+        marginLeft,
         backgroundColor,
+        backgroundImage,
+        backgroundSize,
+        backgroundPosition,
+        backgroundRepeat,
+        backgroundAttachment,
         borderRadius,
         border,
+        borderWidth,
+        borderColor,
+        borderStyle: borderStyle as any,
         borderTop,
         borderRight,
         borderBottom,
@@ -95,7 +133,14 @@ export const ColumnBlock: React.FC<ColumnBlockProps> = ({
         overflow,
         overflowX,
         overflowY,
-        display: 'flex',
+        opacity: opacity as number,
+        zIndex: zIndex as number,
+        position: position as any,
+        top,
+        right,
+        bottom,
+        left,
+        display: 'flex', // Ensures the column itself behaves as a flex item usually
     };
 
     return (
@@ -118,14 +163,16 @@ export const ColumnBlock: React.FC<ColumnBlockProps> = ({
             >
                 {children ? (
                     <div
-                        className="flex w-full h-full"
+                        className="w-full h-full"
                         style={{
+                            display: display || 'flex',
                             width: '100%',
                             maxWidth: '100%',
                             gap,
-                            flexDirection,
+                            flexDirection: (!display || display === 'flex') ? flexDirection : undefined,
                             justifyContent,
-                            alignItems
+                            alignItems,
+                            gridTemplateColumns: display === 'grid' ? gridTemplateColumns : undefined
                         }}
                     >
                         {children}

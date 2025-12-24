@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BaseBlock } from './BaseBlock';
 import { ProductBlock as ProductBlockType, Block } from '../../schema/types';
 
@@ -10,234 +10,130 @@ export const ProductBlock: React.FC<{
   onDelete: () => void;
 }> = ({ block, isSelected, onSelect, onUpdate, onDelete }) => {
   const {
-    title = 'Product Name',
-    description = 'Product description goes here',
-    price = '$99.99',
-    originalPrice = '$149.99',
+    title = 'Premium Product',
+    description = 'Experience the best quality with our latest collection.',
+    price = '99.99',
+    originalPrice = '149.99',
     currency = '$',
     imageUrl = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=300&h=200',
     imageAlt = 'Product Image',
-    buttonText = 'Buy Now',
+    buttonText = 'Add to Cart',
     buttonUrl = '#',
-    buttonColor = '#3b82f6',
-    backgroundColor = '#ffffff',
-    textColor = '#1f2937',
-    priceColor = '#059669',
-    originalPriceColor = '#6b7280',
     layout = 'vertical',
     showOriginalPrice = true,
     showButton = true,
     showDescription = true,
-    discount = '33% OFF',
-    rating = 4.5,
-    reviewCount = 128,
-    badge = 'NEW',
-    badgeColor = '#ef4444',
-    padding = '20px',
-    borderRadius = '8px',
-    border = '1px solid #e5e7eb',
-    shadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+    discount = '30% OFF',
+    rating = 4.8,
+    reviewCount = 120,
+    badge = 'BESTSELLER',
+    
+    // Styling
+    priceColor = '#10b981',
+    originalPriceColor = '#9ca3af',
+    badgeBgColor = '#ef4444',
+    badgeTextColor = '#ffffff',
+    buttonColor = '#3b82f6',
+    buttonTextColor = '#ffffff'
   } = block.props;
 
+  const [isHovered, setIsHovered] = useState(false);
 
   const renderStars = (rating: number) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 !== 0;
-
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(
-        <span key={i} className="text-yellow-400">★</span>
-      );
-    }
-
-    if (hasHalfStar) {
-      stars.push(
-        <span key="half" className="text-yellow-400">☆</span>
-      );
-    }
-
-    const remainingStars = 5 - Math.ceil(rating);
-    for (let i = 0; i < remainingStars; i++) {
-      stars.push(
-        <span key={`empty-${i}`} className="text-gray-300">★</span>
-      );
-    }
-
-    return stars;
+    return (
+      <div className="flex text-yellow-400 text-xs">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <span key={i}>{i < Math.floor(rating) ? '★' : '☆'}</span>
+        ))}
+        {reviewCount > 0 && <span className="text-gray-400 ml-1 text-[10px]">({reviewCount})</span>}
+      </div>
+    );
   };
 
-  const containerStyle: React.CSSProperties = {
-    backgroundColor,
-    color: textColor,
-    padding,
-    borderRadius,
-    border,
-    boxShadow: shadow,
-    display: 'flex',
-    flexDirection: layout === 'horizontal' ? 'row' : 'column',
-    alignItems: layout === 'horizontal' ? 'center' : 'stretch',
-    gap: '16px',
-    position: 'relative',
-    overflow: 'hidden',
-    minWidth: '280px',
-    maxWidth: '100%',
-    width: block.props.width || 'auto',
-    flexGrow: 1,
-    flexShrink: 1,
-    flexBasis: 'auto'
-  };
-
-  const imageStyle: React.CSSProperties = {
-    width: layout === 'horizontal' ? '120px' : '100%',
-    height: layout === 'horizontal' ? '120px' : '200px',
-    objectFit: 'cover',
-    borderRadius: '4px',
-    flexShrink: 0
-  };
-
-  const contentStyle: React.CSSProperties = {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px'
-  };
-
-  const priceStyle: React.CSSProperties = {
-    color: priceColor,
-    fontSize: '1.5rem',
-    fontWeight: 'bold',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px'
-  };
-
-  const originalPriceStyle: React.CSSProperties = {
-    color: originalPriceColor,
-    textDecoration: 'line-through',
-    fontSize: '1rem'
-  };
-
-  const buttonStyle: React.CSSProperties = {
-    backgroundColor: buttonColor,
-    color: '#ffffff',
-    border: 'none',
-    padding: '8px 16px',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontSize: '0.875rem',
-    fontWeight: '500',
-    textDecoration: 'none',
-    display: 'inline-block',
-    textAlign: 'center',
-    transition: 'background-color 0.2s'
-  };
-
-  const badgeStyle: React.CSSProperties = {
-    position: 'absolute',
-    top: '8px',
-    right: '8px',
-    backgroundColor: badgeColor,
-    color: '#ffffff',
-    padding: '4px 8px',
-    borderRadius: '4px',
-    fontSize: '0.75rem',
-    fontWeight: 'bold',
-    zIndex: 1
-  };
+  const isHorizontal = layout === 'horizontal';
 
   return (
-    <BaseBlock block={block} isSelected={isSelected} onSelect={onSelect} onUpdate={onUpdate} onDelete={onDelete}>
-      <div
-        className={`builderx-product ${isSelected ? 'outline-dashed outline-2 outline-blue-500' : ''}`}
-        style={containerStyle}
-        onClick={onSelect}
-        data-testid="product-block"
+    <BaseBlock 
+      block={block} 
+      isSelected={isSelected} 
+      onSelect={onSelect} 
+      onUpdate={onUpdate} 
+      onDelete={onDelete}
+      className="group"
+    >
+      <div 
+        className={`flex ${isHorizontal ? 'flex-row' : 'flex-col'} w-full overflow-hidden transition-all duration-300`}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
-        {badge && (
-          <div style={badgeStyle}>
-            {badge}
+        {/* Image Section */}
+        <div 
+          className={`relative overflow-hidden ${isHorizontal ? 'w-1/3 min-w-[120px]' : 'w-full aspect-[4/3]'}`}
+        >
+          {badge && (
+            <div 
+              className="absolute top-3 right-3 px-2 py-1 rounded text-[10px] font-black uppercase tracking-tighter z-10 shadow-lg"
+              style={{ backgroundColor: badgeBgColor, color: badgeTextColor }}
+            >
+              {badge}
+            </div>
+          )}
+          {discount && isHovered && (
+            <div className="absolute top-3 left-3 px-2 py-1 rounded bg-emerald-500 text-white text-[10px] font-bold z-10 animate-in fade-in slide-in-from-left-2">
+              {discount}
+            </div>
+          )}
+          <img
+            src={imageUrl}
+            alt={imageAlt}
+            className={`w-full h-full object-cover transition-transform duration-700 ${isHovered ? 'scale-110' : 'scale-100'}`}
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x300?text=Product';
+            }}
+          />
+        </div>
+
+        {/* Content Section */}
+        <div className={`flex-1 flex flex-col p-4 ${isHorizontal ? 'justify-center' : ''}`}>
+          <div className="mb-2">
+            <h3 className="text-lg font-black leading-tight tracking-tight group-hover:text-blue-500 transition-colors">
+              {title}
+            </h3>
+            {rating > 0 && renderStars(rating)}
           </div>
-        )}
 
-        {imageUrl && (
-          <div style={{ position: 'relative' }}>
-            <img
-              src={imageUrl}
-              alt={imageAlt}
-              style={imageStyle}
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = 'https://via.placeholder.com/300x200?text=Product+Image';
-              }}
-            />
-            {discount && (
-              <div style={{
-                position: 'absolute',
-                top: '8px',
-                left: '8px',
-                backgroundColor: '#ef4444',
-                color: '#ffffff',
-                padding: '2px 6px',
-                borderRadius: '4px',
-                fontSize: '0.75rem',
-                fontWeight: 'bold'
-              }}>
-                {discount}
-              </div>
-            )}
-          </div>
-        )}
-
-        <div style={contentStyle}>
-          <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '600' }}>
-            {title}
-          </h3>
-
-          {showDescription && (
-            <p style={{ margin: 0, fontSize: '0.875rem', opacity: 0.8 }}>
+          {showDescription && description && (
+            <p className="text-sm opacity-60 line-clamp-2 mb-4 leading-relaxed">
               {description}
             </p>
           )}
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={priceStyle}>
-              {currency}{price}
+          <div className="mt-auto">
+            <div className="flex items-baseline gap-2 mb-4">
+              <span className="text-2xl font-black" style={{ color: priceColor }}>
+                {currency}{price}
+              </span>
               {showOriginalPrice && originalPrice && (
-                <span style={originalPriceStyle}>
+                <span className="text-sm line-through opacity-40 italic" style={{ color: originalPriceColor }}>
                   {currency}{originalPrice}
                 </span>
               )}
             </div>
+
+            {showButton && (
+              <a
+                href={buttonUrl}
+                className="inline-flex items-center justify-center w-full py-2.5 rounded-lg font-bold text-sm transition-all hover:translate-y-[-2px] active:translate-y-[0] shadow-md hover:shadow-lg"
+                style={{ backgroundColor: buttonColor, color: buttonTextColor }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {buttonText}
+              </a>
+            )}
           </div>
-
-          {rating > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ display: 'flex' }}>
-                {renderStars(rating)}
-              </div>
-              <span style={{ fontSize: '0.875rem', opacity: 0.7 }}>
-                ({reviewCount} reviews)
-              </span>
-            </div>
-          )}
-
-          {showButton && (
-            <a
-              href={buttonUrl}
-              style={buttonStyle}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.opacity = '0.9';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.opacity = '1';
-              }}
-            >
-              {buttonText}
-            </a>
-          )}
         </div>
       </div>
     </BaseBlock>
   );
 };
+

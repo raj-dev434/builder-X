@@ -44,21 +44,33 @@ export const ButtonBlock: React.FC<ButtonBlockProps> = ({
   });
 
   const getVariantClasses = () => {
+    // If custom colors are provided, we skip the variant's background/text classes
+    const hasCustomBg = !!block.props.backgroundColor;
+    const hasCustomColor = !!block.props.textColor || !!block.props.color;
+
+    if (hasCustomBg || hasCustomColor) {
+      return 'transition-all duration-200 transform active:scale-95 outline-none font-medium rounded-lg';
+    }
+
     switch (variant) {
       case 'secondary':
-        return 'bg-gray-600 text-white hover:bg-gray-700';
+        return 'bg-gray-600 text-white hover:bg-gray-700 font-medium rounded-lg transition-all duration-200 transform active:scale-95 outline-none';
       case 'outline':
-        return 'bg-transparent border-2 border-primary-500 text-primary-500 hover:bg-primary-50';
+        return 'bg-transparent border-2 border-primary-500 text-primary-500 hover:bg-primary-50 font-medium rounded-lg transition-all duration-200 transform active:scale-95 outline-none';
       case 'ghost':
-        return 'bg-transparent text-primary-600 hover:bg-primary-50';
+        return 'bg-transparent text-primary-600 hover:bg-primary-50 font-medium rounded-lg transition-all duration-200 transform active:scale-95 outline-none';
       case 'danger':
-        return 'bg-red-500 text-white hover:bg-red-600';
+        return 'bg-red-500 text-white hover:bg-red-600 font-medium rounded-lg transition-all duration-200 transform active:scale-95 outline-none';
       default: // primary
-        return 'bg-primary-600 text-white hover:bg-primary-700 shadow-md hover:shadow-lg';
+        return 'bg-primary-600 text-white hover:bg-primary-700 shadow-md hover:shadow-lg font-medium rounded-lg transition-all duration-200 transform active:scale-95 outline-none';
     }
   };
 
   const getSizeClasses = () => {
+    // If custom padding is provided, we skip the size's padding classes
+    if (block.props.padding || block.props.paddingTop || block.props.paddingBottom) {
+       return '';
+    }
     switch (size) {
       case 'small':
         return 'px-3 py-1.5 text-xs';
@@ -80,25 +92,31 @@ export const ButtonBlock: React.FC<ButtonBlockProps> = ({
   const linkUrl = getHref();
   const Component = linkUrl ? 'a' : 'button';
 
+  // Override text color if provided
+  const finalStyle: React.CSSProperties = {
+    ...styleProps,
+    color: (block.props.textColor || block.props.color) || undefined,
+  };
+
   return (
     <BaseBlock
       block={block}
       isSelected={isSelected}
       onSelect={onSelect}
       onDelete={onDelete}
-      className="w-full"
+      className={`w-full ${block.props.textAlign === 'center' ? 'flex justify-center' : block.props.textAlign === 'right' ? 'flex justify-end' : ''}`}
     >
-      <div className="flex justify-start w-full">
+      <div className="w-full">
         <Component
           href={linkUrl}
-          target={linkUrl ? "_blank" : undefined}
-          rel={linkUrl ? "noopener noreferrer" : undefined}
+          target={block.props.target || (linkUrl ? "_blank" : undefined)}
+          rel={block.props.rel || (linkUrl ? "noopener noreferrer" : undefined)}
           className={`
-            inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 transform active:scale-95 outline-none
+            inline-flex items-center justify-center
             ${getVariantClasses()}
             ${getSizeClasses()}
           `}
-          style={styleProps}
+          style={finalStyle}
           onClick={(e) => {
             if (isSelected) e.preventDefault(); // Prevent link navigation when selected
           }}

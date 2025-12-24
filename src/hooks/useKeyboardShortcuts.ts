@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect } from "react";
 
 interface KeyboardShortcut {
   key: string;
@@ -16,7 +16,13 @@ export const useKeyboardShortcuts = (shortcuts: KeyboardShortcut[]) => {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Check if we're in an input field
       const target = event.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.contentEditable === 'true') {
+      const isInput =
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.tagName === "SELECT" ||
+        target.isContentEditable;
+
+      if (isInput) {
         return;
       }
 
@@ -39,7 +45,7 @@ export const useKeyboardShortcuts = (shortcuts: KeyboardShortcut[]) => {
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [shortcuts]);
 };

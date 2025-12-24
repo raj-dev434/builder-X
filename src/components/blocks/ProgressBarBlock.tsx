@@ -1,37 +1,9 @@
 import React from 'react';
 import { BaseBlock } from './BaseBlock';
-import { Block } from '../../schema/types';
-
-export interface ProgressBarBlockProps {
-  id: string;
-  type: 'progress-bar';
-  props: {
-    value?: number;
-    max?: number;
-    title?: string;
-    description?: string;
-    showPercentage?: boolean;
-    showValue?: boolean;
-    backgroundColor?: string;
-    progressColor?: string;
-    textColor?: string;
-    borderColor?: string;
-    borderRadius?: string;
-    padding?: string;
-    margin?: string;
-    height?: string;
-    fontSize?: string;
-    fontWeight?: string;
-    textAlign?: 'left' | 'center' | 'right';
-    animated?: boolean;
-    striped?: boolean;
-    size?: 'small' | 'medium' | 'large';
-    variant?: 'default' | 'success' | 'warning' | 'danger' | 'info';
-  };
-}
+import { Block, ProgressBarBlock as ProgressBarBlockType } from '../../schema/types';
 
 export const ProgressBarBlock: React.FC<{
-  block: ProgressBarBlockProps;
+  block: ProgressBarBlockType;
   isSelected: boolean;
   onSelect: () => void;
   onUpdate: (updates: Partial<Block>) => void;
@@ -41,19 +13,15 @@ export const ProgressBarBlock: React.FC<{
     value = 65,
     max = 100,
     title = 'Progress',
+    showTitle = true,
     description = 'Current progress status',
+    showDescription = true,
     showPercentage = true,
     showValue = true,
-    backgroundColor = '#f3f4f6',
+    style = 'line',
+    thickness = '12px',
     progressColor = '#3b82f6',
-    textColor = '#1f2937',
-    borderColor = '#e5e7eb',
-    borderRadius = '8px',
-    padding = '20px',
-    margin = '0',
-    height = '20px',
-    fontSize = '16px',
-    textAlign = 'left',
+    barBackgroundColor = 'rgba(0,0,0,0.1)',
     animated = true,
     striped = false,
     size = 'medium',
@@ -62,7 +30,7 @@ export const ProgressBarBlock: React.FC<{
 
   const percentage = Math.min(Math.max((value / max) * 100, 0), 100);
   
-  const getVariantColor = (variant: string) => {
+  const getVariantColor = () => {
     switch (variant) {
       case 'success': return '#10b981';
       case 'warning': return '#f59e0b';
@@ -72,75 +40,99 @@ export const ProgressBarBlock: React.FC<{
     }
   };
 
-  const getSizeHeight = (size: string) => {
-    switch (size) {
-      case 'small': return '8px';
-      case 'large': return '32px';
-      default: return height;
-    }
+  const activeColor = getVariantColor();
+  const baseSize = size === 'small' ? '0.75rem' : size === 'large' ? '1.5rem' : '1rem';
+
+  const renderLine = () => (
+    <div className="w-full">
+      <div 
+        className="w-full rounded-full relative overflow-hidden transition-all duration-300"
+        style={{ 
+          height: thickness, 
+          backgroundColor: barBackgroundColor 
+        }}
+      >
+        <div 
+          className={`h-full rounded-full transition-all duration-1000 ease-out relative ${striped ? 'overflow-hidden' : ''}`}
+          style={{ 
+            width: `${percentage}%`, 
+            backgroundColor: activeColor,
+            boxShadow: animated ? `0 0 10px ${activeColor}40` : 'none'
+          }}
+        >
+          {striped && (
+            <div 
+              className="absolute inset-0 opacity-20 animate-[move-bg_1s_linear_infinite]"
+              style={{
+                backgroundImage: 'linear-gradient(45deg, rgba(255,255,255,0.7) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0.7) 75%, transparent 75%, transparent)',
+                backgroundSize: '20px 20px'
+              }}
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderCircle = () => {
+    const radius = 40;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (percentage / 100) * circumference;
+
+    return (
+      <div className="relative flex items-center justify-center" style={{ width: '120px', height: '120px' }}>
+        <svg className="w-full h-full transform -rotate-90">
+          <circle
+            cx="60"
+            cy="60"
+            r={radius}
+            stroke={barBackgroundColor}
+            strokeWidth="8"
+            fill="transparent"
+          />
+          <circle
+            cx="60"
+            cy="60"
+            r={radius}
+            stroke={activeColor}
+            strokeWidth="8"
+            fill="transparent"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+            className="transition-all duration-1000 ease-out"
+            style={{ filter: animated ? `drop-shadow(0 0 4px ${activeColor}40)` : 'none' }}
+          />
+        </svg>
+        <div className="absolute flex flex-col items-center">
+            {showPercentage && <span className="text-xl font-black" style={{ color: activeColor }}>{Math.round(percentage)}%</span>}
+            {showValue && <span className="text-[10px] opacity-60">{value}/{max}</span>}
+        </div>
+      </div>
+    );
   };
 
-  const containerStyle: React.CSSProperties = {
-    backgroundColor: '#ffffff',
-    padding,
-    margin,
-    borderRadius,
-    border: `1px solid ${borderColor}`,
-    width: '100%',
-  };
+  const renderDash = () => {
+    const segments = 10;
+    const activeSegments = Math.round((percentage / 100) * segments);
 
-  const titleStyle: React.CSSProperties = {
-    fontSize,
-    fontWeight: '600',
-    color: textColor,
-    margin: '0 0 8px 0',
-    textAlign,
-  };
-
-  const descriptionStyle: React.CSSProperties = {
-    fontSize: '14px',
-    color: '#6b7280',
-    margin: '0 0 16px 0',
-    textAlign,
-  };
-
-  const progressContainerStyle: React.CSSProperties = {
-    backgroundColor,
-    borderRadius: '4px',
-    height: getSizeHeight(size),
-    position: 'relative',
-    overflow: 'hidden',
-    marginBottom: '8px',
-  };
-
-  const progressBarStyle: React.CSSProperties = {
-    backgroundColor: getVariantColor(variant),
-    height: '100%',
-    width: `${percentage}%`,
-    borderRadius: '4px',
-    transition: animated ? 'width 0.3s ease-in-out' : 'none',
-    position: 'relative',
-    overflow: 'hidden',
-  };
-
-  const stripedStyle: React.CSSProperties = striped ? {
-    backgroundImage: 'linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent)',
-    backgroundSize: '20px 20px',
-    animation: animated ? 'progress-bar-stripes 1s linear infinite' : 'none',
-  } : {};
-
-  const valueStyle: React.CSSProperties = {
-    fontSize: '14px',
-    fontWeight: '500',
-    color: textColor,
-    textAlign,
-  };
-
-  const percentageStyle: React.CSSProperties = {
-    fontSize: '18px',
-    fontWeight: '700',
-    color: getVariantColor(variant),
-    textAlign,
+    return (
+      <div className="flex gap-1.5 w-full">
+        {Array.from({ length: segments }).map((_, i) => (
+          <div 
+            key={i}
+            className="flex-1 rounded-sm transition-all duration-500"
+            style={{ 
+              height: thickness,
+              backgroundColor: i < activeSegments ? activeColor : barBackgroundColor,
+              opacity: i < activeSegments ? 1 : 0.3,
+              transform: i < activeSegments && animated ? 'scaleY(1.1)' : 'scaleY(1)',
+              transitionDelay: `${i * 50}ms`
+            }}
+          />
+        ))}
+      </div>
+    );
   };
 
   return (
@@ -152,43 +144,35 @@ export const ProgressBarBlock: React.FC<{
       onDelete={onDelete}
       className="w-full"
     >
-      <div style={containerStyle}>
-        {title && <h4 style={titleStyle}>{title}</h4>}
-        {description && <p style={descriptionStyle}>{description}</p>}
-        
-        <div style={progressContainerStyle}>
-          <div style={{ ...progressBarStyle, ...stripedStyle }}>
-            {striped && animated && (
-              <style>
-                {`
-                  @keyframes progress-bar-stripes {
-                    0% { background-position: 0 0; }
-                    100% { background-position: 20px 0; }
-                  }
-                `}
-              </style>
-            )}
-          </div>
-        </div>
-        
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          {showValue && (
-            <div style={valueStyle}>
-              {value} / {max}
-            </div>
-          )}
-          {showPercentage && (
-            <div style={percentageStyle}>
-              {Math.round(percentage)}%
-            </div>
-          )}
-        </div>
-        
-        {!showValue && !showPercentage && (
-          <div style={{ ...valueStyle, textAlign: 'center' }}>
-            {Math.round(percentage)}% Complete
+      <div className="flex flex-col items-center text-center p-2 w-full">
+        {(showTitle || showDescription) && (
+          <div className="mb-4 w-full">
+            {showTitle && title && <h4 className="font-bold tracking-tight mb-1" style={{ fontSize: baseSize }}>{title}</h4>}
+            {showDescription && description && <p className="text-xs opacity-60">{description}</p>}
           </div>
         )}
+
+        <div className="w-full flex justify-center py-2">
+            {style === 'line' && renderLine()}
+            {style === 'circle' && renderCircle()}
+            {style === 'dash' && renderDash()}
+        </div>
+
+        {style !== 'circle' && (showValue || showPercentage) && (
+          <div className="w-full flex justify-between items-center mt-3 text-[11px] font-bold uppercase tracking-wider opacity-80">
+            {showValue && <span>{value} / {max}</span>}
+            {showPercentage && <span style={{ color: activeColor }}>{Math.round(percentage)}% complete</span>}
+          </div>
+        )}
+
+        <style>
+          {`
+            @keyframes move-bg {
+              0% { background-position: 0 0; }
+              100% { background-position: 20px 0; }
+            }
+          `}
+        </style>
       </div>
     </BaseBlock>
   );

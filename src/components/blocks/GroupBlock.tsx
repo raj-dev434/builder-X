@@ -1,32 +1,9 @@
 import React from 'react';
 import { BaseBlock } from './BaseBlock';
-import { Block } from '../../schema/types';
-
-export interface GroupBlockProps {
-  id: string;
-  type: 'group';
-  props: {
-    title?: string;
-    description?: string;
-    backgroundColor?: string;
-    borderColor?: string;
-    borderWidth?: string;
-    borderStyle?: 'solid' | 'dashed' | 'dotted' | 'double' | 'none';
-    borderRadius?: string;
-    padding?: string;
-    margin?: string;
-    boxShadow?: string;
-    minHeight?: string;
-    maxWidth?: string;
-    textAlign?: 'left' | 'center' | 'right';
-    showTitle?: boolean;
-    showDescription?: boolean;
-    children?: React.ReactNode;
-  };
-}
+import { Block, GroupBlock as GroupBlockType } from '../../schema/types';
 
 export const GroupBlock: React.FC<{
-  block: GroupBlockProps;
+  block: GroupBlockType;
   isSelected: boolean;
   onSelect: () => void;
   onUpdate: (updates: Partial<Block>) => void;
@@ -35,35 +12,10 @@ export const GroupBlock: React.FC<{
 }> = ({ block, isSelected, onSelect, onUpdate, onDelete, children }) => {
   const { 
     title = 'Group',
-    description = 'Logical grouping of elements',
-    backgroundColor = '#f8f9fa',
-    borderColor = '#e5e7eb',
-    borderWidth = '1px',
-    borderStyle = 'solid',
-    borderRadius = '8px',
-    padding = '20px',
-    margin = '0',
-    boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)',
-    minHeight = '100px',
-    maxWidth = '100%',
-    textAlign = 'left',
+    description = '',
     showTitle = true,
     showDescription = false
   } = block.props;
-
-  const containerStyle: React.CSSProperties = {
-    backgroundColor,
-    border: `${borderWidth} ${borderStyle} ${borderColor}`,
-    borderRadius,
-    padding,
-    margin,
-    boxShadow,
-    minHeight,
-    maxWidth,
-    textAlign,
-    width: '100%',
-    display: 'block',
-  };
 
   return (
     <BaseBlock
@@ -72,56 +24,31 @@ export const GroupBlock: React.FC<{
       onSelect={onSelect}
       onUpdate={onUpdate}
       onDelete={onDelete}
-      className="w-full"
+      className={`w-full group ${!children ? 'min-h-[120px]' : ''}`}
     >
-      <div
-        style={containerStyle}
-        role="group"
-        aria-label={title || 'Content group'}
-      >
-        {showTitle && title && (
-          <div style={{ 
-            marginBottom: '12px', 
-            fontSize: '18px', 
-            fontWeight: '600',
-            color: '#1f2937',
-            borderBottom: '1px solid #e5e7eb',
-            paddingBottom: '8px'
-          }}>
-            {title}
+      <div className="w-full">
+        {(showTitle || showDescription) && (
+          <div className="mb-4 border-b border-gray-100/10 pb-3">
+            {showTitle && title && (
+              <h3 className="text-lg font-semibold tracking-tight text-gray-800 dark:text-gray-100">{title}</h3>
+            )}
+            {showDescription && description && (
+              <p className="text-xs text-gray-500 mt-1 font-medium opacity-70">{description}</p>
+            )}
           </div>
         )}
         
-        {showDescription && description && (
-          <div style={{ 
-            marginBottom: '16px', 
-            fontSize: '14px', 
-            color: '#6b7280',
-            fontStyle: 'italic'
-          }}>
-            {description}
-          </div>
-        )}
-        
-        {children || (
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: '60px',
-            color: '#9ca3af',
-            fontSize: '14px',
-            textAlign: 'center',
-            border: '2px dashed #d1d5db',
-            borderRadius: '6px',
-            padding: '20px'
-          }}>
-            <div style={{ fontSize: '24px', marginBottom: '8px' }}>📦</div>
-            <div style={{ fontWeight: '500', marginBottom: '4px' }}>Group Block</div>
-            <div style={{ fontSize: '12px' }}>Add content inside this group</div>
-          </div>
-        )}
+        <div className="w-full">
+          {children || (
+            <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-300/20 rounded-lg bg-black/5 text-gray-400 min-h-[120px] transition-all hover:bg-black/10 hover:border-blue-500/30">
+              <div className="w-12 h-12 rounded-full bg-blue-500/5 flex items-center justify-center mb-4 transition-transform group-hover:scale-110">
+                <span className="text-2xl opacity-60">📦</span>
+              </div>
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Group Content</p>
+              <p className="text-[10px] text-gray-400/80 text-center">Combine and style elements as a single unit</p>
+            </div>
+          )}
+        </div>
       </div>
     </BaseBlock>
   );

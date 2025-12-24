@@ -21,11 +21,10 @@ export const SectionBlock: React.FC<SectionBlockProps> = ({
 }) => {
   // Extract style properties
   const {
-    backgroundColor = '#ffffff',
+    contentWidth = 'container', // Default to boxed
+    backgroundColor,
     padding = '2rem',
-    margin = '0',
-    minHeight = '100px',
-    width = '100%',
+    // margin, border, etc. are handled by BaseBlock now to avoid duplication
     backgroundImage,
     backgroundSize = 'cover',
     backgroundPosition = 'center',
@@ -34,28 +33,16 @@ export const SectionBlock: React.FC<SectionBlockProps> = ({
     backgroundOpacity = 1,
     overlayColor,
     overlayOpacity = 0,
-    border,
-    borderWidth,
-    borderStyle,
-    borderColor,
-    borderRadius,
-    boxShadow,
-    opacity,
   } = block.props;
 
   // 1. Container Style (Layout dimensions & basic appearance)
   const containerStyle: React.CSSProperties = {
     position: 'relative',
-    width,
-    minHeight,
-    margin,
-    border,
-    borderWidth,
-    borderStyle,
-    borderColor,
-    borderRadius,
-    boxShadow, // Box shadow applies to the outer container
-    opacity,   // Global opacity
+    width: '100%', // Inner container is always 100% of the section unless boxed
+    maxWidth: contentWidth === 'container' ? '1140px' : '100%',
+    marginLeft: contentWidth === 'container' ? 'auto' : undefined,
+    marginRight: contentWidth === 'container' ? 'auto' : undefined,
+    height: '100%', // Fills the section height (which is set by BaseBlock minHeight)
     overflow: 'hidden', // Ensures background/overlay doesn't retain out of border radius
     display: 'flex', // Better for content alignment
     flexDirection: 'column',

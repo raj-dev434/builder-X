@@ -34,22 +34,12 @@ export const ImageBlock: React.FC<ImageBlockProps> = ({
   const {
     src = '',
     alt = 'Image',
-    width = '100%',
-    height = 'auto',
     objectFit = 'cover',
     borderRadius = '0px',
-    border = 'none',
-    boxShadow = 'none',
-    opacity = 1,
-    filter = 'none',
-    maxWidth = '100%',
-    maxHeight = 'auto',
-    minWidth = 'auto',
-    minHeight = 'auto',
     aspectRatio,
     objectPosition = 'center',
-    margin = '0px',
-    padding = '0px',
+    linkUrl,
+    title,
   } = block.props;
 
   // Convert size values
@@ -60,32 +50,12 @@ export const ImageBlock: React.FC<ImageBlockProps> = ({
     return `${value}px`;
   };
 
-  const style: React.CSSProperties = {
-    // Dimensions
-    width: getSizeValue(width),
-    height: getSizeValue(height),
-    maxWidth: getSizeValue(maxWidth),
-    maxHeight: getSizeValue(maxHeight),
-    minWidth: getSizeValue(minWidth),
-    minHeight: getSizeValue(minHeight),
-    aspectRatio: aspectRatio,
-
-    // Image display
+  const internalImageStyle: React.CSSProperties = {
     objectFit: objectFit as any,
     objectPosition: objectPosition,
-
-    // Borders & Effects
-    border: border !== 'none' ? border : undefined,
-    borderRadius: getSizeValue(borderRadius),
-    boxShadow: boxShadow,
-    opacity: opacity,
-    filter: filter,
-
-    // Spacing
-    margin: margin,
-    padding: padding,
-
-    // Display
+    aspectRatio: aspectRatio,
+    width: '100%',
+    height: '100%',
     display: 'block',
   };
 
@@ -149,16 +119,48 @@ export const ImageBlock: React.FC<ImageBlockProps> = ({
     </div>
   );
 
+  // Get alignSelf from props to determine alignment behavior
+  const alignSelf = block.props.alignSelf;
+
+  // Calculate alignment styles using margin instead of alignSelf for better compatibility
+  const getAlignmentStyles = (): React.CSSProperties => {
+    if (!alignSelf || alignSelf === 'stretch') {
+      return { width: '100%' };
+    }
+
+    // Use margin auto for alignment
+    // If no explicit width is set, use a reasonable default (50%) to make alignment visible
+    const styles: React.CSSProperties = {
+      width: block.props.width || '50%',
+      maxWidth: block.props.maxWidth || '100%',
+      display: 'block'
+    };
+
+    if (alignSelf === 'flex-start') {
+      styles.marginRight = 'auto';
+      styles.marginLeft = '0';
+    } else if (alignSelf === 'center') {
+      styles.marginLeft = 'auto';
+      styles.marginRight = 'auto';
+    } else if (alignSelf === 'flex-end') {
+      styles.marginLeft = 'auto';
+      styles.marginRight = '0';
+    }
+
+    return styles;
+  };
+
   return (
     <BaseBlock
       block={block}
       isSelected={isSelected}
       onSelect={onSelect}
       onDelete={onDelete}
-      className="w-full"
+      className=""
     >
       <div
-        className="w-full relative"
+        className="relative"
+        style={getAlignmentStyles()}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -197,35 +199,53 @@ export const ImageBlock: React.FC<ImageBlockProps> = ({
                 </div>
               )}
 
-              {/* Actual Image */}
-              <img
-                src={src}
-                alt={alt}
-                style={style}
-                className="w-full h-auto"
-                draggable={false}
-                onError={(e) => {
-                  // Fallback to a default placeholder image
-                  e.currentTarget.src = "https://placehold.co/600x400?text=Image+Not+Found";
-                  
-                  let msg = 'Failed to load image';
-                  if (src.includes('pexels.com/photo') || src.includes('unsplash.com/photos')) {
-                    msg = 'Use direct image link, not page URL';
-                  }
-                  setUploadError(msg);
-                }}
-              />
+              {/* Actual Image (Wrapped in Link if exists) */}
+              {linkUrl ? (
+                <a
+                  href={linkUrl}
+                  target={block.props.target || "_blank"}
+                  rel="noopener noreferrer"
+                  onClick={(e) => {
+                    if (isSelected) e.preventDefault();
+                  }}
+                  className="block w-full h-full"
+                >
+                  <img
+                    src={src}
+                    alt={alt}
+                    title={title}
+                    style={internalImageStyle}
+                    draggable={false}
+                    onError={(e) => {
+                      e.currentTarget.src = "https://placehold.co/600x400?text=Image+Not+Found";
+                      setUploadError('Failed to load image');
+                    }}
+                  />
+                </a>
+              ) : (
+                <img
+                  src={src}
+                  alt={alt}
+                  title={title}
+                  style={internalImageStyle}
+                  draggable={false}
+                  onError={(e) => {
+                    e.currentTarget.src = "https://placehold.co/600x400?text=Image+Not+Found";
+                    setUploadError('Failed to load image');
+                  }}
+                />
+              )}
+
               {uploadError && src && !isUploading && (
-                 <div className="absolute inset-0 z-10 bg-gray-100 flex flex-col items-center justify-center text-gray-500">
-                    <span className="text-2xl mb-2">⚠️</span>
-                    <span className="text-sm font-medium text-red-500">{uploadError || 'Unable to load image'}</span>
-                    <span className="text-xs opacity-70 px-2 text-center break-all">{src.substring(0, 30)}...</span>
-                 </div>
+                <div className="absolute inset-0 z-10 bg-gray-100 flex flex-col items-center justify-center text-gray-500 pointer-events-none">
+                  <span className="text-2xl mb-2">⚠️</span>
+                  <span className="text-sm font-medium text-red-500">{uploadError || 'Unable to load image'}</span>
+                </div>
               )}
 
               {/* Hover Actions (when selected) */}
               {isSelected && !isDraggingOver && !isUploading && (
-                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 p-1 rounded backdrop-blur-sm">
+                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 p-1 rounded backdrop-blur-sm z-20">
                   <button
                     className="text-white text-xs px-2 py-1 hover:bg-white/20 rounded ml-1"
                     onClick={(e) => {
@@ -235,7 +255,6 @@ export const ImageBlock: React.FC<ImageBlockProps> = ({
                   >
                     Change Image
                   </button>
-
                 </div>
               )}
             </div>

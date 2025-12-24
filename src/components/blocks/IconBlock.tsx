@@ -14,129 +14,71 @@ export const IconBlock: React.FC<IconBlockProps> = ({
   block,
   isSelected,
   onSelect,
-  //onUpdate,
   onDelete
 }) => {
   const { 
     name = 'star',
-    size = '24px',
+    size = '48px',
+    view = 'default',
+    shape = 'circle',
     color = '#ffc107',
-    backgroundColor = 'transparent',
-    borderRadius = '50%',
-    padding = '8px',
-    margin = '0',
-    border = 'none',
-    hoverColor = color,
-    hoverBackgroundColor = 'rgba(255, 193, 7, 0.1)',
-    clickable = false,
-    url,
-    target = '_self',
-    fontSize = size
+    backgroundColor = '#ffffff',
+    rotation = 0,
+    textAlign = 'center'
   } = block.props;
 
-  const [isHovered, setIsHovered] = React.useState(false);
-
-  // Enhanced icon mapping with more icons
+  // Curated Emoji Mapping
   const getIcon = (iconName: string) => {
     const iconMap: Record<string, string> = {
-      // Basic
-      star: '⭐',
-      heart: '❤️',
-      like: '👍',
-      home: '🏠',
-      user: '👤',
-      settings: '⚙️',
-      search: '🔍',
-      menu: '☰',
-      close: '✕',
-      check: '✓',
-      plus: '➕',
-      minus: '➖',
-      arrow: '→',
-      phone: '📞',
-      email: '📧',
-      location: '📍',
-      calendar: '📅',
-      clock: '🕐',
-      info: 'ℹ️',
-      warning: '⚠️',
-      error: '❌',
-      success: '✅',
-      
-      // Social
-      facebook: '📘',
-      twitter: '🐦',
-      instagram: '📷',
-      linkedin: '💼',
-      youtube: '📺',
-      github: '🐙',
-      
-      // Actions
-      download: '📥',
-      upload: '📤',
-      share: '↗️',
-      edit: '✏️',
-      delete: '🗑️',
-      save: '💾',
-      print: '🖨️',
-      
-      // Media
-      camera: '📸',
-      video: '🎥',
-      music: '🎵',
-      mic: '🎤',
-      
-      // Weather
-      sun: '☀️',
-      cloud: '☁️',
-      rain: '🌧️',
-      snow: '❄️',
-      
-      // Objects
-      lock: '🔒',
-      unlock: '🔓',
-      key: '🔑',
-      bell: '🔔',
-      gift: '🎁',
-      bag: '👜'
+      star: '⭐', heart: '❤️', like: '👍', home: '🏠', user: '👤', settings: '⚙️', search: '🔍',
+      phone: '📞', email: '📧', location: '📍', calendar: '📅', clock: '🕐', info: 'ℹ️',
+      warning: '⚠️', error: '❌', success: '✅', facebook: '📘', twitter: '🐦', instagram: '📷',
+      linkedin: '💼', youtube: '📺', github: '🐙', download: '📥', upload: '📤', share: '↗️',
+      edit: '✏️', delete: '🗑️', save: '💾', camera: '📸', video: '🎥', sun: '☀️', cloud: '☁️',
+      lock: '🔒', bell: '🔔', gift: '🎁'
     };
     return iconMap[iconName] || '⭐';
   };
 
-  const iconStyle: React.CSSProperties = {
-    fontSize: fontSize,
-    color: isHovered && clickable ? hoverColor : color,
-    backgroundColor: isHovered && clickable ? hoverBackgroundColor : backgroundColor,
-    borderRadius,
-    padding,
-    margin,
-    border,
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: size,
-    height: size,
-    transition: 'all 0.2s ease',
-    cursor: clickable ? 'pointer' : 'default',
-    transform: isHovered && clickable ? 'scale(1.1)' : 'scale(1)',
-    boxShadow: isSelected ? '0 0 0 2px #3b82f6' : 'none'
-  };
+  const isStacked = view === 'stacked';
+  const isFramed = view === 'framed';
 
-  const iconElement = (
-    <div
-      style={iconStyle}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onClick={(e) => {
-        if (isSelected) {
-          e.stopPropagation();
-          onSelect();
-        }
-      }}
-    >
-      {getIcon(name)}
-    </div>
-  );
+  const getIconWrapperStyle = (): React.CSSProperties => {
+    let paddingValue = '0px';
+    let borderRadiusValue = '0px';
+    let borderValue = 'none';
+    let bgValue = 'transparent';
+    let colorValue = color;
+
+    if (isStacked) {
+      bgValue = color;
+      colorValue = backgroundColor;
+      paddingValue = '0.8em';
+    } else if (isFramed) {
+      bgValue = 'transparent';
+      colorValue = color;
+      borderValue = `3px solid ${color}`;
+      paddingValue = '0.8em';
+    }
+
+    if (shape === 'circle') borderRadiusValue = '50%';
+    if (shape === 'rounded') borderRadiusValue = '8px';
+
+    return {
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: bgValue,
+      color: colorValue,
+      padding: paddingValue,
+      borderRadius: borderRadiusValue,
+      border: borderValue,
+      transform: `rotate(${rotation}deg)`,
+      transition: 'all 0.3s ease',
+      fontSize: size,
+      lineHeight: 1,
+    };
+  };
 
   return (
     <BaseBlock
@@ -144,33 +86,19 @@ export const IconBlock: React.FC<IconBlockProps> = ({
       isSelected={isSelected}
       onSelect={onSelect}
       onDelete={onDelete}
-      className="inline-block"
+      className={`w-full flex ${textAlign === 'center' ? 'justify-center' : textAlign === 'right' ? 'justify-end' : 'justify-start'}`}
     >
-      {clickable && url ? (
-        <a
-          href={url}
-          target={target}
-          rel={target === '_blank' ? 'noopener noreferrer' : undefined}
-          onClick={(e) => {
-            if (isSelected) {
-              e.preventDefault();
-              onSelect();
-            }
-          }}
-          style={{ textDecoration: 'none' }}
-        >
-          {iconElement}
-        </a>
-      ) : (
-        iconElement
-      )}
-      
-      {/* Icon name label when selected */}
-      {isSelected && (
-        <div className="mt-2 text-xs text-center text-gray-600 bg-white/80 px-2 py-1 rounded">
-          {name}
+      <div className="flex flex-col items-center">
+        <div style={getIconWrapperStyle()}>
+          {getIcon(name)}
         </div>
-      )}
+        
+        {isSelected && (
+          <div className="mt-2 text-[10px] text-gray-500 bg-[#1a1d21] px-2 py-0.5 rounded border border-[#2d3237]">
+            {name}
+          </div>
+        )}
+      </div>
     </BaseBlock>
   );
 };

@@ -1,4 +1,9 @@
-import React, { useState, useId } from 'react';
+import React, { useState, useId, useEffect } from 'react';
+import { 
+  Search, X, Box, Layers, Star, Clock, 
+  Type, FileText, Zap, PlusCircle, ChevronDown, 
+  Layout as LayoutIcon
+} from 'lucide-react';
 import { BLOCK_TEMPLATES } from '../../schema/types';
 import { useCanvasStore } from '../../store/canvasStore';
 import { DraggableBlock } from '../canvas/DraggableBlock';
@@ -10,10 +15,23 @@ const COMPONENT_CATEGORIES: Record<string, string[]> = {
   'Favorites': [], // Dynamic content
   'Recent': [], // Dynamic content
   'Basic': ['section', 'divider', 'heading', 'text', 'image', 'link', 'link-box', 'image-box', 'map', 'icon', 'spacer'],
-  'Layout': ['row', 'column', '2-column', '3-column', '4-column', '5-column', 'container', 'group'],
+  'Layout': ['row', 'grid', 'column', '2-column', '3-column', '4-column', '5-column', 'container', 'group'],
   'Forms': ['form', 'input', 'textarea', 'select', 'checkbox', 'radio', 'label', 'button', 'survey'],
   'Invoice': ['invoice'],
+  //'Elementor': ['elementor-heading'],
   'Extra': ['navbar', 'card', 'badge', 'alert', 'progress', 'video', 'code', 'social-follow', 'countdown-timer', 'progress-bar', 'product', 'product-3-cols', 'product-5-cols', 'promo-code', 'price', 'testimonial'],
+};
+
+const CATEGORY_ICONS: Record<string, any> = {
+  'Favorites': Star,
+  'Recent': Clock,
+  'Basic': Box,
+  'Layout': LayoutIcon,
+  'Forms': Type,
+  'Invoice': FileText,
+  'Elementor': Zap,
+  'Extra': PlusCircle,
+  'Saved': Layers
 };
 
 interface SidebarProps {
@@ -29,7 +47,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
   const searchInputId = useId();
 
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
-    new Set(Object.keys(COMPONENT_CATEGORIES)) // All categories open by default
+    new Set(Object.keys(COMPONENT_CATEGORIES))
   );
   const [searchQuery, setSearchQuery] = useState<string>('');
 
@@ -37,55 +55,42 @@ export const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
 
   const findBlockInfo = (blocks: any[], id: string, parentId: string | null = null): { block: any, parentId: string | null, index: number } | null => {
     for (let i = 0; i < blocks.length; i++) {
-      if (blocks[i].id === id) {
-        return { block: blocks[i], parentId, index: i };
-      }
-      if (blocks[i].children) {
-        const found = findBlockInfo(blocks[i].children, id, blocks[i].id);
-        if (found) return found;
-      }
+        if (blocks[i].id === id) return { block: blocks[i], parentId, index: i };
+        if (blocks[i].children) {
+            const found = findBlockInfo(blocks[i].children, id, blocks[i].id);
+            if (found) return found;
+        }
     }
     return null;
   };
 
   const handleClick = (template: typeof BLOCK_TEMPLATES[0]) => {
-    // Add to recent
     addRecent(template);
-
     if (selectedBlockId) {
       const info = findBlockInfo(blocks, selectedBlockId);
       if (info) {
         const { block, parentId, index } = info;
-        // If selected is a container, add inside at the end
         if (containerTypes.includes(block.type)) {
-          const targetIndex = block.children ? block.children.length : 0;
-          addBlock(template.block, block.id, targetIndex);
+          addBlock(template.block, block.id, block.children ? block.children.length : 0);
         } else {
-          // Add as sibling after
           addBlock(template.block, parentId || undefined, index + 1);
         }
         return;
       }
     }
-    // Fallback: Add to end of root
     addBlock(template.block);
   };
 
   const getTemplatesByCategory = (category: string) => {
     let templates: typeof BLOCK_TEMPLATES = [];
-
-    if (category === 'Saved') {
-      templates = savedTemplates;
-    } else if (category === 'Recent') {
-      templates = recentTemplates;
-    } else if (category === 'Favorites') {
-      templates = BLOCK_TEMPLATES.filter(t => favoriteBlockIds.includes(t.id));
-    } else {
+    if (category === 'Saved') templates = savedTemplates;
+    else if (category === 'Recent') templates = recentTemplates;
+    else if (category === 'Favorites') templates = BLOCK_TEMPLATES.filter(t => favoriteBlockIds.includes(t.id));
+    else {
       const categoryIds = COMPONENT_CATEGORIES[category as keyof typeof COMPONENT_CATEGORIES] || [];
       templates = BLOCK_TEMPLATES.filter(template => categoryIds.includes(template.id));
     }
 
-    // Filter by search query if provided
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase().trim();
       templates = templates.filter(template =>
@@ -94,213 +99,132 @@ export const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
         template.block.type.toLowerCase().includes(query)
       );
     }
-
     return templates;
   };
 
   const toggleCategory = (category: string) => {
     setExpandedCategories(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(category)) {
-        newSet.delete(category);
-      } else {
-        newSet.add(category);
-      }
+      if (newSet.has(category)) newSet.delete(category);
+      else newSet.add(category);
       return newSet;
     });
   };
 
-  // Get all categories that have matching templates
   const getCategoriesWithResults = () => {
-    return Object.keys(COMPONENT_CATEGORIES).filter(category => {
-      const templates = getTemplatesByCategory(category);
-      return templates.length > 0;
-    });
+    return Object.keys(COMPONENT_CATEGORIES).filter(category => getTemplatesByCategory(category).length > 0);
   };
 
-  // Auto-open categories with search results when searching
-  React.useEffect(() => {
+  useEffect(() => {
     if (searchQuery.trim()) {
-      const categoriesWithResults = getCategoriesWithResults();
-      if (categoriesWithResults.length > 0) {
-        // Open all categories with results when searching
-        setExpandedCategories(new Set(categoriesWithResults));
-      }
+      const results = getCategoriesWithResults();
+      if (results.length > 0) setExpandedCategories(new Set(results));
     } else {
-      // Keep all categories open when not searching
       setExpandedCategories(new Set(Object.keys(COMPONENT_CATEGORIES)));
     }
   }, [searchQuery]);
 
   return (
-    <div className="h-full flex flex-col bg-gray-800" data-testid="js-sidebar" role="complementary" aria-label="Component Sidebar">
-      {/* Header with Blocks title and controls */}
-      <div className="p-4 border-b border-gray-700">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-medium text-gray-200" id="sidebar-title">Blocks</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-200 transition-colors"
-            aria-label="Close sidebar"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+    <div className="h-full flex flex-col bg-[#1e2227] border-r border-[#3e444b] overflow-hidden" data-testid="js-sidebar">
+      {/* Header */}
+      <div className="flex flex-col bg-[#1e2227] border-b border-[#3e444b] shadow-sm relative z-10">
+        <div className="flex items-center justify-between px-4 py-4">
+          <div className="flex items-center gap-3">
+             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 to-purple-400 flex items-center justify-center shadow-lg text-white ring-1 ring-purple-500/50">
+                <Box className="w-4 h-4" />
+             </div>
+             <div className="flex flex-col">
+               <span className="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-0.5">Components</span>
+               <h2 className="text-sm font-bold text-gray-100 leading-none">Elements</h2>
+             </div>
+          </div>
+          <button onClick={onClose} className="p-1.5 text-gray-500 hover:text-white hover:bg-white/5 rounded-md transition-all">
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-
-        {/* Search Input */}
-        <div className="relative">
-          <label htmlFor={searchInputId} className="sr-only">Search components</label>
-          <input
-            id={searchInputId}
-            type="text"
-            placeholder="Search..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-3 py-2 pr-8 bg-gray-700 border border-gray-600 rounded-md text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            role="searchbox"
-            aria-label="Search components"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-200 transition-colors"
-              title="Clear search"
-              aria-label="Clear search"
-              >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          )}
+        {/* Premium Search */}
+        <div className="px-4 pb-4">
+          <div className="relative group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-600 group-focus-within:text-purple-400 transition-colors" />
+            <input
+              id={searchInputId}
+              type="text"
+              placeholder="Search components..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-9 py-2 bg-[#15181b] hover:bg-[#1a1d21] text-gray-300 text-[11px] rounded-sm border border-[#2d3237] focus:border-purple-500/50 focus:bg-[#1a1d21] focus:ring-1 focus:ring-purple-500/10 outline-none transition-all placeholder:text-gray-700"
+            />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery('')} className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-600 hover:text-white">
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Components Accordion */}
-      <div className="flex-1 overflow-y-auto" role="list" aria-labelledby="sidebar-title">
+      {/* Accordion */}
+      <div className="flex-1 overflow-y-auto custom-scrollbar">
         {(() => {
           const categoriesWithResults = getCategoriesWithResults();
-
-          // Show "No results" message if searching and no results found
           if (searchQuery.trim() && categoriesWithResults.length === 0) {
             return (
-              <div className="flex items-center justify-center h-32 text-gray-400" role="status" aria-live="polite">
-                <div className="text-center">
-                  <svg className="w-8 h-8 mx-auto mb-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  <p className="text-sm">No blocks found</p>
-                  <p className="text-xs text-gray-500">Try a different search term</p>
-                </div>
+              <div className="flex flex-col items-center justify-center h-48 text-gray-500">
+                <Search className="w-8 h-8 mb-3 opacity-20" />
+                <p className="text-xs font-medium uppercase tracking-widest">No results found</p>
               </div>
             );
           }
 
-          // Show categories with results (filtered by search if applicable)
           const categoriesToShow = searchQuery.trim() ? categoriesWithResults : Object.keys(COMPONENT_CATEGORIES);
 
           return categoriesToShow.map((category) => {
             const isOpen = expandedCategories.has(category);
             const templates = getTemplatesByCategory(category);
-            const categoryId = `category-${category.toLowerCase().replace(/\s+/g, '-')}`;
-            const contentId = `content-${category.toLowerCase().replace(/\s+/g, '-')}`;
+            const Icon = CATEGORY_ICONS[category] || Box;
 
-            // Skip categories with no results when searching
-            if (searchQuery.trim() && templates.length === 0) {
-              if (category === 'Recent' || category === 'Favorites') return null;
-            }
-
-            // Hide dynamic categories if empty and not searching
-            if ((category === 'Recent' || category === 'Favorites') && templates.length === 0 && !searchQuery.trim()) {
-              return null;
-            }
+            if ((category === 'Recent' || category === 'Favorites') && templates.length === 0 && !searchQuery.trim()) return null;
 
             return (
-              <div key={category} className="border-b border-gray-700">
-                {/* Category Header */}
+              <div key={category} className="border-b border-[#1e2227] last:border-b-0">
                 <button
                   onClick={() => toggleCategory(category)}
-                  className={`w-full px-4 py-3 text-left flex items-center justify-between transition-colors ${isOpen ? 'bg-gray-700' : 'hover:bg-gray-700'
-                    }`}
-                  aria-expanded={isOpen}
-                  aria-controls={contentId}
-                  id={categoryId}
+                  className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-[#2d3237] transition-all group"
                 >
-                  <div className="flex items-center space-x-2">
-                    <span className={`text-sm font-medium ${isOpen ? 'text-white' : 'text-gray-300'
-                      }`}>{category}</span>
-                    {searchQuery.trim() && (
-                      <span className="text-xs text-gray-500 bg-gray-600 px-2 py-1 rounded">
-                        {templates.length}
-                      </span>
-                    )}
+                  <div className="flex items-center gap-2.5">
+                    <Icon className={`w-3.5 h-3.5 transition-colors ${isOpen ? 'text-purple-400' : 'text-gray-500 group-hover:text-gray-300'}`} />
+                    <span className={`text-[11px] font-bold uppercase tracking-wider transition-colors ${isOpen ? 'text-gray-200' : 'text-gray-400 group-hover:text-gray-200'}`}>{category}</span>
                   </div>
-                  <svg
-                    className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''
-                      }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
+                  <ChevronDown className={`w-3 h-3 text-gray-600 group-hover:text-gray-400 transition-transform duration-200 ${isOpen ? '' : '-rotate-90'}`} />
                 </button>
 
-                {/* Category Content */}
                 {isOpen && (
-                  <div 
-                    className="px-4 pb-4" 
-                    id={contentId} 
-                    role="region" 
-                    aria-labelledby={categoryId}
-                  >
-                    <div className="grid grid-cols-2 gap-2" role="list">
+                  <div className="px-4 pb-4 animate-in fade-in slide-in-from-top-1 duration-200">
+                    <div className="grid grid-cols-2 gap-2">
                       {templates.map((template) => {
                         const isFav = isFavorite(template.id);
                         return (
-                          <div key={template.id} className="relative group" role="listitem">
-                            <DraggableBlock
-                              template={template}
-                              onClick={() => handleClick(template)}
-                              categoryId={category}
+                          <div key={template.id} className="relative group/item">
+                            <DraggableBlock 
+                                template={template} 
+                                onClick={() => handleClick(template)} 
+                                categoryId={category} 
                             />
-                            
-                            {/* Favorite Button (Star) */}
-                            {/* Don't show for Saved templates as they are custom */}
                             {category !== 'Saved' && (
                               <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleFavorite(template.id);
-                                }}
-                                className={`absolute top-1 right-1 w-5 h-5 flex items-center justify-center transition-all ${
-                                  isFav 
-                                    ? 'text-yellow-400 opacity-100' 
-                                    : 'text-gray-400 opacity-0 group-hover:opacity-100 hover:text-yellow-200'
-                                }`}
-                                title={isFav ? "Remove from favorites" : "Add to favorites"}
-                                aria-label={isFav ? `Remove ${template.name} from favorites` : `Add ${template.name} to favorites`}
-                                aria-pressed={isFav}
+                                onClick={(e) => { e.stopPropagation(); toggleFavorite(template.id); }}
+                                className={`absolute top-1 right-1 w-5 h-5 flex items-center justify-center transition-all z-10 shrink-0 ${isFav ? 'text-yellow-400' : 'text-gray-600 opacity-0 group-hover/item:opacity-100 hover:text-yellow-400'}`}
                               >
-                                {isFav ? '★' : '☆'}
+                                <Star className={`w-2.5 h-2.5 ${isFav ? 'fill-current' : ''}`} />
                               </button>
                             )}
-  
-                            {/* Delete button for Saved Templates */}
                             {category === 'Saved' && (
                               <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  deleteTemplate(template.id);
-                                }}
-                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs"
-                                title="Delete template"
-                                aria-label={`Delete template ${template.name}`}
+                                onClick={(e) => { e.stopPropagation(); deleteTemplate(template.id); }}
+                                className="absolute top-1 right-1 w-4 h-4 bg-red-500/80 hover:bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover/item:opacity-100 transition-all text-[10px] z-10"
                               >
-                                ×
+                                <X className="w-2.5 h-2.5" />
                               </button>
                             )}
                           </div>
@@ -314,7 +238,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
           });
         })()}
       </div>
-
     </div>
   );
 };

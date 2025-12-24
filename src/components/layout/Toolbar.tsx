@@ -9,11 +9,19 @@ import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 interface ToolbarProps {
   onToggleComponents: () => void;
   componentsPanelOpen: boolean;
+  onToggleLayers?: () => void;
+  layersPanelOpen?: boolean;
+  onToggleHistory?: () => void;
+  historyPanelOpen?: boolean;
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({
   onToggleComponents,
-  componentsPanelOpen
+  componentsPanelOpen,
+  onToggleLayers,
+  layersPanelOpen,
+  onToggleHistory,
+  historyPanelOpen
 }) => {
   const {
     undo,
@@ -21,7 +29,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     clearCanvas,
     canUndo,
     canRedo,
-    //adding an extra method for preview,mobile ,desktop and tablet view
     viewDevice,
     isPreviewMode,
     isFullscreen,
@@ -159,15 +166,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         selectedIds.forEach(id => useCanvasStore.getState().deleteBlock(id));
       }
     },
-    {
-      key: 'Backspace',
-      action: () => {
-        const selectedIds = useCanvasStore.getState().selectedBlockIds;
-        if (selectedIds.length > 0) {
-          selectedIds.forEach(id => useCanvasStore.getState().deleteBlock(id));
-        }
-      }
-    },
+
     {
       key: 'd',
       ctrlKey: true,
@@ -182,7 +181,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   return (
     <>
       <div 
-        className="bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between" 
+        className="bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between relative z-[50]" 
         data-testid="grapejs-toolbar"
         role="toolbar" 
         aria-label="Editor Toolbar"
@@ -206,7 +205,41 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
-            <span className="text-sm font-medium">Add block</span>
+            {/* <span className="text-sm font-medium">Add block</span> */}
+          </button>
+          
+          {/* Layers Toggle Button */}
+           <button
+            onClick={onToggleLayers}
+            className={`px-3 py-2 rounded-md transition-colors flex items-center space-x-2 ${layersPanelOpen
+              ? 'bg-blue-100 text-blue-600'
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            title="Layers"
+            aria-label={layersPanelOpen ? "Close layers panel" : "Open layers panel"}
+            aria-expanded={layersPanelOpen}
+          >
+           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+            {/* <span className="text-sm font-medium">Layers</span> */}
+          </button>
+          
+           {/* History Toggle Button */}
+           <button
+            onClick={onToggleHistory}
+            className={`px-3 py-2 rounded-md transition-colors flex items-center space-x-2 ${historyPanelOpen
+              ? 'bg-blue-100 text-blue-600'
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            title="History"
+            aria-label={historyPanelOpen ? "Close history panel" : "Open history panel"}
+            aria-expanded={historyPanelOpen}
+          >
+           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {/* <span className="text-sm font-medium">History</span> */}
           </button>
         </div>
 
@@ -401,7 +434,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             {/* Settings Dropdown Menu */}
             {showSettingsMenu && (
               <div
-                className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50"
+                className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-[100]"
                 style={{
                   animation: 'slideIn 200ms ease-out'
                 }}

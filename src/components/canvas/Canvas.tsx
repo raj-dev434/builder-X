@@ -5,6 +5,7 @@ import { useCanvasStore } from '../../store/canvasStore';
 import { BlockRenderer } from './BlockRenderer';
 import { Block } from '../../schema/types';
 import { CanvasHighlighter } from './CanvasHighlighter';
+import { DropZone } from './DropZone';
 
 interface CanvasProps {
   isDragging?: boolean;
@@ -95,26 +96,32 @@ export const Canvas: React.FC<CanvasProps> = ({ isDragging = false, isPreviewMod
                 <p className="text-lg font-medium">Start building your page</p>
                 <p className="text-sm">Drag blocks from the sidebar to get started</p>
               </div>
+              {/* Always active full-size drop zone for empty state */}
+              <div className="absolute inset-0 z-10" />
             </div>
           ) : (
             <SortableContext
               items={allBlockIds}
               strategy={verticalListSortingStrategy}
             >
-              <div className="space-y-4">
-                {blocks.map((block) => (
-                  <BlockRenderer
-                    key={block.id}
-                    block={block}
-                    isSelected={selectedBlockIds.includes(block.id)}
-                    onSelect={selectBlock}
-                    onUpdate={updateBlock}
-                    onDelete={deleteBlock}
-                    depth={0}
-                    parentId={null}
-                    isPreviewMode={isPreviewMode}
-                  />
-                ))}
+              <div className="flex flex-col w-full h-full pb-24"> {/* Add padding bottom for easy dropping at end */}
+                  {/* Root Level Drop Zones */}
+                  {blocks.map((block, index) => (
+                    <React.Fragment key={block.id}>
+                        <DropZone parentId={null} index={index} />
+                        <BlockRenderer
+                            block={block}
+                            isSelected={selectedBlockIds.includes(block.id)}
+                            onSelect={selectBlock}
+                            onUpdate={updateBlock}
+                            onDelete={deleteBlock}
+                            depth={0}
+                            parentId={null}
+                            isPreviewMode={isPreviewMode}
+                        />
+                    </React.Fragment>
+                  ))}
+                  <DropZone parentId={null} index={blocks.length} show={true} />
               </div>
             </SortableContext>
           )}

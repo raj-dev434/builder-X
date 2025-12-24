@@ -1,6 +1,6 @@
 ﻿import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { Block, CanvasState } from "../schema/types";
+import { Block, CanvasState, HistoryItem } from "../schema/types";
 import { generateId } from "../utils/idGenerator";
 
 // Helper function to build block maps for O(1) lookups
@@ -44,6 +44,8 @@ export const getParentId = (
   return parentMap.get(id) || null;
 };
 
+// HistoryItem imported from schema/types
+
 export interface CanvasStore extends CanvasState {
   // Performance optimization: hashmaps for O(1) lookups
   blockMap: Map<string, Block>;
@@ -62,9 +64,13 @@ export interface CanvasStore extends CanvasState {
   selectBlock: (id: string | null, multi?: boolean) => void;
   moveBlock: (id: string, newParentId: string | null, index: number) => void;
 
+  // History State
+  history: HistoryItem[];
+
   undo: () => void;
   redo: () => void;
-  saveToHistory: () => void;
+  jumpToHistory: (index: number) => void;
+  saveToHistory: (action?: string) => void;
   clearHistory: () => void;
   canUndo: () => boolean;
   canRedo: () => boolean;
@@ -118,7 +124,7 @@ export const useCanvasStore = create<CanvasStore>()(
       parentMap: new Map(),
       savedTemplates: [],
       selectedBlockIds: [],
-      history: [[]],
+      history: [{ blocks: [], action: "Initial State", timestamp: Date.now() }],
       historyIndex: 0,
       isDragging: false,
       hoveredBlockId: null,
@@ -162,7 +168,7 @@ export const useCanvasStore = create<CanvasStore>()(
           isPreviewMode: !state.isPreviewMode,
         }));
         if (!get().isPreviewMode) {
-          get().saveToHistory();
+          get().saveToHistory("Toggle Preview");
         }
       },
 
@@ -185,7 +191,7 @@ export const useCanvasStore = create<CanvasStore>()(
       setBlocks: (blocks) => {
         const { blockMap, parentMap } = buildBlockMaps(blocks);
         set({ blocks, blockMap, parentMap });
-        get().saveToHistory();
+        get().saveToHistory("Set Blocks");
       },
 
       setDragging: (isDragging) => {
@@ -198,7 +204,9 @@ export const useCanvasStore = create<CanvasStore>()(
           blockMap: new Map(),
           parentMap: new Map(),
           selectedBlockIds: [],
-          history: [[]],
+          history: [
+            { blocks: [], action: "Clear Canvas", timestamp: Date.now() },
+          ],
           historyIndex: 0,
         });
       },
@@ -210,7 +218,13 @@ export const useCanvasStore = create<CanvasStore>()(
           blockMap,
           parentMap,
           selectedBlockIds: [],
-          history: [JSON.parse(JSON.stringify(blocks))],
+          history: [
+            {
+              blocks: JSON.parse(JSON.stringify(blocks)),
+              action: "Load Canvas",
+              timestamp: Date.now(),
+            },
+          ],
           historyIndex: 0,
         });
       },
@@ -273,7 +287,7 @@ export const useCanvasStore = create<CanvasStore>()(
               selectedBlockIds: newBlocks.map((b) => b.id),
             };
           });
-          get().saveToHistory();
+          get().saveToHistory(`Load Template: ${template.name}`);
         }
       },
 
@@ -357,7 +371,7 @@ export const useCanvasStore = create<CanvasStore>()(
             };
           });
         }
-        get().saveToHistory();
+        get().saveToHistory(`Add ${block.type}`);
       },
 
       updateBlock: (id, updates) => {
@@ -387,7 +401,7 @@ export const useCanvasStore = create<CanvasStore>()(
           const { blockMap, parentMap } = buildBlockMaps(newBlocks);
           return { blocks: newBlocks, blockMap, parentMap };
         });
-        get().saveToHistory();
+        get().saveToHistory(`Update ${block.type}`);
       },
 
       deleteBlock: (id) => {
@@ -415,7 +429,7 @@ export const useCanvasStore = create<CanvasStore>()(
           };
         });
 
-        get().saveToHistory();
+        get().saveToHistory("Delete Block");
       },
 
       selectBlock: (id: string | null, multi: boolean = false) => {
@@ -456,7 +470,7 @@ export const useCanvasStore = create<CanvasStore>()(
           newBlocks.splice(index, 0, blockToMove!);
           const { blockMap, parentMap } = buildBlockMaps(newBlocks);
           set({ blocks: newBlocks, blockMap, parentMap });
-          get().saveToHistory();
+          get().saveToHistory("Move Block");
           return;
         }
 
@@ -477,7 +491,7 @@ export const useCanvasStore = create<CanvasStore>()(
         const newBlocks = addToNewParent(blocksWithoutMoved);
         const { blockMap, parentMap } = buildBlockMaps(newBlocks);
         set({ blocks: newBlocks, blockMap, parentMap });
-        get().saveToHistory();
+        get().saveToHistory("Move Block");
       },
 
       duplicateBlock: (id) => {
@@ -533,7 +547,7 @@ export const useCanvasStore = create<CanvasStore>()(
               ? [...state.selectedBlockIds, newBlockId]
               : state.selectedBlockIds,
           }));
-          get().saveToHistory();
+          get().saveToHistory("Duplicate Block");
         }
       },
 
@@ -565,7 +579,7 @@ export const useCanvasStore = create<CanvasStore>()(
         if (newBlocks !== blocks) {
           const { blockMap, parentMap } = buildBlockMaps(newBlocks);
           set({ blocks: newBlocks, blockMap, parentMap });
-          get().saveToHistory();
+          get().saveToHistory("Move Block Up");
         }
       },
 
@@ -597,7 +611,7 @@ export const useCanvasStore = create<CanvasStore>()(
         if (newBlocks !== blocks) {
           const { blockMap, parentMap } = buildBlockMaps(newBlocks);
           set({ blocks: newBlocks, blockMap, parentMap });
-          get().saveToHistory();
+          get().saveToHistory("Move Block Down");
         }
       },
 
@@ -645,7 +659,7 @@ export const useCanvasStore = create<CanvasStore>()(
             parentMap,
             selectedBlockIds: [newBlock.id],
           });
-          get().saveToHistory();
+          get().saveToHistory("Paste Block");
           return;
         }
 
@@ -675,7 +689,7 @@ export const useCanvasStore = create<CanvasStore>()(
           parentMap,
           selectedBlockIds: [newBlock.id],
         });
-        get().saveToHistory();
+        get().saveToHistory("Paste Block");
       },
 
       // --- History ---
@@ -683,7 +697,8 @@ export const useCanvasStore = create<CanvasStore>()(
       undo: () => {
         const { history, historyIndex } = get();
         if (historyIndex > 0) {
-          const restoredBlocks = history[historyIndex - 1];
+          const restoredState = history[historyIndex - 1];
+          const restoredBlocks = restoredState.blocks;
           const { blockMap, parentMap } = buildBlockMaps(restoredBlocks);
           set({
             blocks: restoredBlocks,
@@ -697,7 +712,8 @@ export const useCanvasStore = create<CanvasStore>()(
       redo: () => {
         const { history, historyIndex } = get();
         if (historyIndex < history.length - 1) {
-          const restoredBlocks = history[historyIndex + 1];
+          const restoredState = history[historyIndex + 1];
+          const restoredBlocks = restoredState.blocks;
           const { blockMap, parentMap } = buildBlockMaps(restoredBlocks);
           set({
             blocks: restoredBlocks,
@@ -708,10 +724,29 @@ export const useCanvasStore = create<CanvasStore>()(
         }
       },
 
-      saveToHistory: () => {
+      jumpToHistory: (index: number) => {
+        const { history } = get();
+        if (index >= 0 && index < history.length) {
+          const restoredState = history[index];
+          const restoredBlocks = restoredState.blocks;
+          const { blockMap, parentMap } = buildBlockMaps(restoredBlocks);
+          set({
+            blocks: restoredBlocks,
+            blockMap,
+            parentMap,
+            historyIndex: index,
+          });
+        }
+      },
+
+      saveToHistory: (action = "Action") => {
         const { blocks, history, historyIndex, maxHistorySize } = get();
         const newHistory = history.slice(0, historyIndex + 1);
-        newHistory.push(JSON.parse(JSON.stringify(blocks)));
+        newHistory.push({
+          blocks: JSON.parse(JSON.stringify(blocks)),
+          action,
+          timestamp: Date.now(),
+        });
 
         if (newHistory.length > maxHistorySize) {
           const excess = newHistory.length - maxHistorySize;
@@ -727,7 +762,13 @@ export const useCanvasStore = create<CanvasStore>()(
       clearHistory: () => {
         const { blocks } = get();
         set({
-          history: [JSON.parse(JSON.stringify(blocks))],
+          history: [
+            {
+              blocks: JSON.parse(JSON.stringify(blocks)),
+              action: "Reset History",
+              timestamp: Date.now(),
+            },
+          ],
           historyIndex: 0,
         });
       },
@@ -764,7 +805,13 @@ export const useCanvasStore = create<CanvasStore>()(
             state.parentMap = parentMap;
 
             // Initial history state matches saved state
-            state.history = [JSON.parse(JSON.stringify(state.blocks))];
+            state.history = [
+              {
+                blocks: JSON.parse(JSON.stringify(state.blocks)),
+                action: "Session Restored",
+                timestamp: Date.now(),
+              },
+            ];
             state.historyIndex = 0;
           }
         }

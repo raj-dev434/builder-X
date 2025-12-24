@@ -188,7 +188,7 @@ export const TestimonialBlock: React.FC<{
   };
 
   const containerStyle: React.CSSProperties = {
-    backgroundColor,
+    backgroundColor: (block.props as any).backgroundType === 'gradient' ? 'transparent' : backgroundColor,
     color: textColor,
     padding: sizeStyles.container.padding,
     borderRadius,

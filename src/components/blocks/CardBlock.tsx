@@ -117,7 +117,7 @@ export const CardBlock: React.FC<CardBlockProps> = ({
           borderRadius: '8px',
           overflow: 'hidden',
           boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-          backgroundColor: '#ffffff'
+          // Background handled by BaseBlock styleProps
         }}
       >
         {imagePosition === 'top' && renderImage()}

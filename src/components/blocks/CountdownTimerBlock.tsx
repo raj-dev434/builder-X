@@ -1,57 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { BaseBlock } from './BaseBlock';
-import { Block } from '../../schema/types';
-
-export interface CountdownTimerBlockProps {
-  id: string;
-  type: 'countdown-timer';
-  props: {
-    targetDate?: string;
-    title?: string;
-    description?: string;
-    backgroundColor?: string;
-    textColor?: string;
-    accentColor?: string;
-    padding?: string;
-    borderRadius?: string;
-    border?: string;
-    textAlign?: 'left' | 'center' | 'right';
-    showDays?: boolean;
-    showHours?: boolean;
-    showMinutes?: boolean;
-    showSeconds?: boolean;
-    format?: 'compact' | 'detailed' | 'minimal';
-    fontSize?: string;
-    fontWeight?: string;
-    expiredMessage?: string;
-    expiredActionText?: string;
-    expiredActionUrl?: string;
-  };
-}
+import { Block, CountdownTimerBlock as CountdownTimerBlockType } from '../../schema/types';
 
 export const CountdownTimerBlock: React.FC<{
-  block: CountdownTimerBlockProps;
+  block: CountdownTimerBlockType;
   isSelected: boolean;
   onSelect: () => void;
   onUpdate: (updates: Partial<Block>) => void;
   onDelete: () => void;
 }> = ({ block, isSelected, onSelect, onUpdate, onDelete }) => {
   const { 
-    targetDate = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours from now
+    targetDate = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
     title = 'Limited Time Offer',
+    showTitle = true,
     description = 'Hurry up! This offer expires soon.',
-    backgroundColor = '#1f2937',
-    textColor = '#ffffff',
-    accentColor = '#ef4444',
-    padding = '30px',
-    borderRadius = '12px',
-    border = 'none',
-    textAlign = 'center',
+    showDescription = true,
     showDays = true,
     showHours = true,
     showMinutes = true,
     showSeconds = true,
-    format = 'detailed',
+    format = 'card',
+    accentColor = '#ef4444',
+    labelColor = 'inherit',
+    digitBgColor = 'rgba(0,0,0,0.1)',
+    digitTextColor = 'inherit',
     expiredMessage = 'This offer has expired',
     expiredActionText = 'View Other Offers',
     expiredActionUrl = '#'
@@ -92,95 +64,44 @@ export const CountdownTimerBlock: React.FC<{
     return () => clearInterval(timer);
   }, [targetDate]);
 
-  const containerStyle: React.CSSProperties = {
-    backgroundColor,
-    color: textColor,
-    padding,
-    borderRadius,
-    border,
-    textAlign,
-    width: '100%',
-    maxWidth: '500px',
-    margin: '0 auto',
-  };
-
-  const titleStyle: React.CSSProperties = {
-    fontSize: '24px',
-    fontWeight: '700',
-    margin: '0 0 10px 0',
-    color: textColor,
-  };
-
-  const descriptionStyle: React.CSSProperties = {
-    fontSize: '16px',
-    margin: '0 0 20px 0',
-    color: textColor,
-    opacity: 0.9,
-  };
-
-  const timerContainerStyle: React.CSSProperties = {
-    display: 'flex',
-    justifyContent: 'center',
-    gap: format === 'compact' ? '8px' : '16px',
-    marginBottom: '20px',
-    flexWrap: 'wrap',
-  };
-
-  const timeUnitStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    minWidth: format === 'compact' ? '60px' : '80px',
-  };
-
-  const timeValueStyle: React.CSSProperties = {
-    fontSize: format === 'compact' ? '24px' : '36px',
-    fontWeight: '700',
-    color: accentColor,
-    lineHeight: 1,
-    marginBottom: '4px',
-  };
-
-  const timeLabelStyle: React.CSSProperties = {
-    fontSize: format === 'compact' ? '12px' : '14px',
-    fontWeight: '500',
-    color: textColor,
-    opacity: 0.8,
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-  };
-
-  const expiredStyle: React.CSSProperties = {
-    fontSize: '20px',
-    fontWeight: '600',
-    color: accentColor,
-    marginBottom: '16px',
-  };
-
-  const actionButtonStyle: React.CSSProperties = {
-    backgroundColor: accentColor,
-    color: 'white',
-    padding: '12px 24px',
-    borderRadius: '6px',
-    border: 'none',
-    fontSize: '16px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    textDecoration: 'none',
-    display: 'inline-block',
-  };
-
   const renderTimeUnit = (value: number, label: string, show: boolean) => {
     if (!show) return null;
     
+    const formattedValue = value.toString().padStart(2, '0');
+
+    if (format === 'card') {
+      return (
+        <div className="flex flex-col items-center min-w-[70px]">
+          <div 
+            className="w-full aspect-square flex items-center justify-center rounded-lg mb-1.5 shadow-sm border border-black/5"
+            style={{ backgroundColor: digitBgColor, color: digitTextColor }}
+          >
+            <span className="text-3xl font-bold tabular-nums leading-none">{formattedValue}</span>
+          </div>
+          <span className="text-[10px] uppercase font-black tracking-widest opacity-60" style={{ color: labelColor }}>
+            {label}
+          </span>
+        </div>
+      );
+    }
+
+    if (format === 'simple') {
+      return (
+        <div className="flex flex-col items-center min-w-[60px]">
+          <span className="text-4xl font-black tabular-nums leading-none tracking-tighter" style={{ color: accentColor }}>
+            {formattedValue}
+          </span>
+          <span className="text-[9px] uppercase font-bold tracking-wider opacity-70 mt-1" style={{ color: labelColor }}>
+            {label}
+          </span>
+        </div>
+      );
+    }
+
     return (
-      <div style={timeUnitStyle}>
-        <div style={timeValueStyle}>
-          {value.toString().padStart(2, '0')}
-        </div>
-        <div style={timeLabelStyle}>
-          {label}
-        </div>
+      <div className="flex items-baseline space-x-1">
+        <span className="text-2xl font-bold tabular-nums" style={{ color: accentColor }}>{formattedValue}</span>
+        <span className="text-[10px] font-medium opacity-60 lowercase" style={{ color: labelColor }}>{label[0]}</span>
       </div>
     );
   };
@@ -192,19 +113,28 @@ export const CountdownTimerBlock: React.FC<{
       onSelect={onSelect}
       onUpdate={onUpdate}
       onDelete={onDelete}
-      className="w-full"
+      className="w-full relative overflow-hidden"
     >
-      <div style={containerStyle}>
-        <h3 style={titleStyle}>{title}</h3>
-        {description && <p style={descriptionStyle}>{description}</p>}
+      <div className="flex flex-col items-center text-center p-2">
+        {showTitle && title && (
+          <h3 className="text-2xl font-black tracking-tight mb-2 leading-tight">
+            {title}
+          </h3>
+        )}
+        {showDescription && description && (
+          <p className="text-sm opacity-80 mb-6 max-w-md">
+            {description}
+          </p>
+        )}
         
         {isExpired ? (
-          <div>
-            <div style={expiredStyle}>{expiredMessage}</div>
+          <div className="flex flex-col items-center py-4 px-6 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 backdrop-blur-sm animate-in fade-in zoom-in duration-500">
+            <div className="text-xl font-bold mb-4" style={{ color: accentColor }}>{expiredMessage}</div>
             {expiredActionText && (
               <a
                 href={expiredActionUrl}
-                style={actionButtonStyle}
+                className="inline-flex items-center justify-center px-6 py-3 rounded-full font-bold text-sm transition-all hover:scale-105 active:scale-95 shadow-lg shadow-black/10"
+                style={{ backgroundColor: accentColor, color: '#fff' }}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -213,20 +143,11 @@ export const CountdownTimerBlock: React.FC<{
             )}
           </div>
         ) : (
-          <div style={timerContainerStyle}>
+          <div className={`flex items-center justify-center ${format === 'minimal' ? 'space-x-4' : 'space-x-3 md:space-x-6'} animate-in fade-in slide-in-from-bottom-4 duration-700`}>
             {renderTimeUnit(timeLeft.days, 'Days', showDays)}
             {renderTimeUnit(timeLeft.hours, 'Hours', showHours)}
             {renderTimeUnit(timeLeft.minutes, 'Minutes', showMinutes)}
             {renderTimeUnit(timeLeft.seconds, 'Seconds', showSeconds)}
-          </div>
-        )}
-        
-        {format === 'minimal' && !isExpired && (
-          <div style={{ fontSize: '14px', opacity: 0.8 }}>
-            {timeLeft.days > 0 && `${timeLeft.days}d `}
-            {timeLeft.hours > 0 && `${timeLeft.hours}h `}
-            {timeLeft.minutes > 0 && `${timeLeft.minutes}m `}
-            {timeLeft.seconds > 0 && `${timeLeft.seconds}s`}
           </div>
         )}
       </div>

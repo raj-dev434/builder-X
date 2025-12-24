@@ -1,258 +1,121 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BaseBlock } from './BaseBlock';
-import { Block } from '../../schema/types';
-
-export interface PriceBlockProps {
-  id: string;
-  type: 'price';
-  props: {
-    title?: string;
-    description?: string;
-    price?: string;
-    originalPrice?: string;
-    currency?: string;
-    period?: string;
-    features?: string[];
-    buttonText?: string;
-    buttonUrl?: string;
-    buttonColor?: string;
-    backgroundColor?: string;
-    textColor?: string;
-    priceColor?: string;
-    originalPriceColor?: string;
-    accentColor?: string;
-    borderColor?: string;
-    popular?: boolean;
-    popularText?: string;
-    popularColor?: string;
-    layout?: 'vertical' | 'horizontal';
-    size?: 'small' | 'medium' | 'large';
-    showOriginalPrice?: boolean;
-    showFeatures?: boolean;
-    showButton?: boolean;
-    showPopular?: boolean;
-    padding?: string;
-    borderRadius?: string;
-    border?: string;
-    shadow?: string;
-  };
-}
+import { PriceBlock as PriceBlockType, Block } from '../../schema/types';
 
 export const PriceBlock: React.FC<{
-  block: PriceBlockProps;
+  block: PriceBlockType;
   isSelected: boolean;
   onSelect: () => void;
   onUpdate: (updates: Partial<Block>) => void;
   onDelete: () => void;
 }> = ({ block, isSelected, onSelect, onUpdate, onDelete }) => {
   const {
-    title = 'Basic Plan',
-    description = 'Perfect for getting started',
-    price = '29',
-    originalPrice = '49',
+    title = 'Pro Plan',
+    description = 'Advanced features for scaling teams.',
+    price = '49',
+    originalPrice = '99',
     currency = '$',
-    period = '/month',
-    features = ['Feature 1', 'Feature 2', 'Feature 3'],
-    buttonText = 'Get Started',
+    period = '/mo',
+    features = ['Priority Support', 'Custom Domains', 'Unlimited Storage', 'API Access'],
+    buttonText = 'Choose Plan',
     buttonUrl = '#',
-    buttonColor = '#3b82f6',
-    backgroundColor = '#ffffff',
-    textColor = '#1f2937',
-    priceColor = '#1f2937',
-    originalPriceColor = '#6b7280',
+    
+    // Style specifics
     accentColor = '#3b82f6',
-    popular = false,
-    popularText = 'Most Popular',
+    buttonColor = '#3b82f6',
+    buttonTextColor = '#ffffff',
+    popular = true,
+    popularText = 'MOST POPULAR',
     popularColor = '#ef4444',
+    
     layout = 'vertical',
-    size = 'medium',
     showOriginalPrice = true,
     showFeatures = true,
     showButton = true,
-    showPopular = true,
-    borderRadius = '12px',
-    border = '1px solid #e5e7eb',
-    shadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+    showPopular = true
   } = block.props;
 
+  const [isHovered, setIsHovered] = useState(false);
 
-  const getSizeStyles = () => {
-    switch (size) {
-      case 'small':
-        return {
-          container: { padding: '20px' },
-          title: { fontSize: '1.25rem' },
-          price: { fontSize: '2rem' },
-          description: { fontSize: '0.875rem' }
-        };
-      case 'large':
-        return {
-          container: { padding: '48px' },
-          title: { fontSize: '2rem' },
-          price: { fontSize: '4rem' },
-          description: { fontSize: '1.125rem' }
-        };
-      default: // medium
-        return {
-          container: { padding: '32px' },
-          title: { fontSize: '1.5rem' },
-          price: { fontSize: '3rem' },
-          description: { fontSize: '1rem' }
-        };
-    }
-  };
-
-  const sizeStyles = getSizeStyles();
-
-  const containerStyle: React.CSSProperties = {
-    backgroundColor,
-    color: textColor,
-    padding: sizeStyles.container.padding,
-    borderRadius,
-    border: popular ? `2px solid ${accentColor}` : border,
-    boxShadow: popular ? `0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)` : shadow,
-    display: 'flex',
-    flexDirection: layout === 'horizontal' ? 'row' : 'column',
-    alignItems: layout === 'horizontal' ? 'center' : 'stretch',
-    gap: '24px',
-    position: 'relative',
-    overflow: 'hidden',
-    transition: 'all 0.3s ease'
-  };
-
-  const popularStyle: React.CSSProperties = {
-    position: 'absolute',
-    top: '0',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    backgroundColor: popularColor,
-    color: '#ffffff',
-    padding: '8px 24px',
-    borderRadius: '0 0 8px 8px',
-    fontSize: '0.875rem',
-    fontWeight: '600',
-    zIndex: 1
-  };
-
-  const priceStyle: React.CSSProperties = {
-    color: priceColor,
-    fontSize: sizeStyles.price.fontSize,
-    fontWeight: 'bold',
-    display: 'flex',
-    alignItems: 'baseline',
-    gap: '8px',
-    marginBottom: '8px'
-  };
-
-  const originalPriceStyle: React.CSSProperties = {
-    color: originalPriceColor,
-    textDecoration: 'line-through',
-    fontSize: '1.5rem',
-    fontWeight: 'normal'
-  };
-
-  const buttonStyle: React.CSSProperties = {
-    backgroundColor: popular ? accentColor : buttonColor,
-    color: '#ffffff',
-    border: 'none',
-    padding: '12px 24px',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontSize: '1rem',
-    fontWeight: '600',
-    textDecoration: 'none',
-    display: 'inline-block',
-    textAlign: 'center',
-    transition: 'all 0.2s',
-    width: '100%'
-  };
-
-  const featureStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    padding: '4px 0',
-    fontSize: '0.875rem'
-  };
-
-  const checkIconStyle: React.CSSProperties = {
-    color: accentColor,
-    fontSize: '1rem',
-    fontWeight: 'bold'
-  };
+  const isHorizontal = layout === 'horizontal';
 
   return (
-    <BaseBlock block={block} isSelected={isSelected} onSelect={onSelect} onUpdate={onUpdate} onDelete={onDelete}>
-      <div
-        className={`builderx-price ${isSelected ? 'outline-dashed outline-2 outline-blue-500' : ''}`}
-        style={containerStyle}
-        onClick={onSelect}
-        data-testid="price-block"
+    <BaseBlock 
+      block={block} 
+      isSelected={isSelected} 
+      onSelect={onSelect} 
+      onUpdate={onUpdate} 
+      onDelete={onDelete}
+      className="group"
+    >
+      <div 
+        className={`relative flex ${isHorizontal ? 'flex-row' : 'flex-col'} w-full transition-all duration-300 ${popular ? 'ring-2' : ''} ${isHovered ? 'scale-[1.02] shadow-2xl' : 'scale-100 shadow-xl'}`}
+        style={{ outlineColor: popular ? accentColor : 'transparent', backgroundColor: 'transparent' }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
         {popular && showPopular && (
-          <div style={popularStyle}>
+          <div 
+            className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase shadow-xl z-20"
+            style={{ backgroundColor: popularColor, color: '#ffffff' }}
+          >
             {popularText}
           </div>
         )}
 
-        <div style={{ flex: 1 }}>
-          <h3 style={{ 
-            margin: 0, 
-            fontSize: sizeStyles.title.fontSize, 
-            fontWeight: '700', 
-            marginBottom: '8px',
-            color: popular ? accentColor : textColor
-          }}>
-            {title}
-          </h3>
-          
-          <p style={{ 
-            margin: 0, 
-            fontSize: sizeStyles.description.fontSize, 
-            opacity: 0.8, 
-            marginBottom: '24px' 
-          }}>
-            {description}
-          </p>
+        <div className={`p-8 flex-1 flex flex-col ${isHorizontal ? 'justify-between items-center' : ''}`}>
+          <div className={`${isHorizontal ? 'text-left' : 'text-center'} mb-6`}>
+            <h3 className="text-xl font-black uppercase tracking-tight mb-2" style={{ color: popular ? accentColor : 'inherit' }}>
+              {title}
+            </h3>
+            <p className="text-sm opacity-60 leading-relaxed max-w-[240px] mx-auto">
+              {description}
+            </p>
+          </div>
 
-          <div style={priceStyle}>
-            <span>{currency}{price}</span>
-            <span style={{ fontSize: '1rem', opacity: 0.7 }}>{period}</span>
-            {showOriginalPrice && originalPrice && (
-              <span style={originalPriceStyle}>
-                {currency}{originalPrice}
+          <div className={`${isHorizontal ? 'text-center px-8 border-x border-gray-100 dark:border-gray-800' : 'text-center mb-8'}`}>
+            <div className="flex items-baseline justify-center gap-1 mb-1">
+              <span className="text-[3.5rem] font-black leading-none tracking-tighter" style={{ color: block.props.priceColor || 'inherit' }}>
+                {currency}{price}
               </span>
+              <span className="text-lg font-bold opacity-40 uppercase">{period}</span>
+            </div>
+            
+            {showOriginalPrice && originalPrice && (
+              <div className="text-sm font-bold opacity-30 line-through italic">
+                {currency}{originalPrice}
+              </div>
             )}
           </div>
 
-          {showFeatures && features.length > 0 && (
-            <div style={{ marginTop: '24px' }}>
-              {features.map((feature, index) => (
-                <div key={index} style={featureStyle}>
-                  <span style={checkIconStyle}>✓</span>
-                  <span>{feature}</span>
-                </div>
-              ))}
+          <div className="flex-1">
+            {showFeatures && features && features.length > 0 && (
+              <ul className="space-y-3 mb-8">
+                {features.map((feature, i) => (
+                  <li key={i} className="flex items-center gap-3 text-sm font-medium">
+                    <svg className="w-4 h-4" style={{ color: accentColor }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span className="opacity-80">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {showButton && (
+            <div className="mt-auto w-full">
+              <a
+                href={buttonUrl}
+                className="inline-flex items-center justify-center w-full py-4 rounded-xl font-black text-sm transition-all hover:scale-[1.02] hover:shadow-xl active:scale-100 shadow-md"
+                style={{ backgroundColor: popular ? accentColor : buttonColor, color: buttonTextColor }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {buttonText}
+              </a>
             </div>
           )}
         </div>
-
-        {showButton && (
-          <a
-            href={buttonUrl}
-            style={buttonStyle}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.opacity = '0.9';
-              e.currentTarget.style.transform = 'translateY(-2px)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.opacity = '1';
-              e.currentTarget.style.transform = 'translateY(0)';
-            }}
-          >
-            {buttonText}
-          </a>
-        )}
       </div>
     </BaseBlock>
   );

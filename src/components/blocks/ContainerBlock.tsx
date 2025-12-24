@@ -2,8 +2,6 @@ import React from 'react';
 import { BaseBlock } from './BaseBlock';
 import { Block, ContainerBlock as ContainerBlockType } from '../../schema/types';
 
-// Removed local interface to avoid duplication and type mismatches
-
 export const ContainerBlock: React.FC<{
   block: ContainerBlockType;
   isSelected: boolean;
@@ -12,45 +10,6 @@ export const ContainerBlock: React.FC<{
   onDelete: () => void;
   children?: React.ReactNode;
 }> = ({ block, isSelected, onSelect, onUpdate, onDelete, children }) => {
-  const {
-    backgroundColor = 'transparent',
-    padding = '20px',
-    margin = '0',
-    borderRadius = '0px',
-    border = 'none',
-    boxShadow = 'none',
-    minHeight = 'auto',
-    maxWidth = '100%',
-    textAlign = 'left',
-    backgroundImage,
-    backgroundSize,
-    backgroundPosition,
-    backgroundRepeat,
-  } = block.props;
-
-  const containerStyle: React.CSSProperties = {
-    backgroundColor,
-    // Support both raw URLs (legacy) and valid CSS (gradients/url-wrapped)
-    backgroundImage: backgroundImage?.match(/^(url|linear-gradient|radial-gradient)/)
-      ? backgroundImage
-      : backgroundImage
-        ? `url('${backgroundImage}')`
-        : undefined,
-    backgroundSize: backgroundSize as any,
-    backgroundPosition: backgroundPosition as any,
-    backgroundRepeat: backgroundRepeat as any,
-    padding,
-    margin,
-    borderRadius,
-    border,
-    boxShadow,
-    minHeight,
-    maxWidth,
-    textAlign,
-    width: '100%',
-    display: 'block',
-  };
-
   return (
     <BaseBlock
       block={block}
@@ -58,22 +17,17 @@ export const ContainerBlock: React.FC<{
       onSelect={onSelect}
       onUpdate={onUpdate}
       onDelete={onDelete}
-      className="w-full"
+      className={`w-full group ${!children ? 'min-h-[120px]' : ''}`}
     >
-      <div
-        style={containerStyle}
-        className="w-full"
-        role="region"
-        aria-label="Content container"
-      >
-        {children || (
-          <div className="text-gray-400 text-center py-8">
-            <div className="text-2xl mb-2">📦</div>
-            <p>Container Block</p>
-            <p className="text-sm">Add content inside this container</p>
+      {children || (
+        <div className="flex flex-col items-center justify-center h-full min-h-[120px] border-2 border-dashed border-gray-300/20 rounded-lg bg-black/5 text-gray-400 p-8 transition-all hover:bg-black/10 hover:border-blue-500/30">
+          <div className="w-12 h-12 rounded-full bg-blue-500/5 flex items-center justify-center mb-4 transition-transform group-hover:scale-110">
+            <span className="text-2xl opacity-60">📦</span>
           </div>
-        )}
-      </div>
+          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Container</p>
+          <p className="text-[10px] text-gray-400/80">Drag and drop elements here</p>
+        </div>
+      )}
     </BaseBlock>
   );
 };
