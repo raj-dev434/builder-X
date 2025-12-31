@@ -21,9 +21,30 @@ export const ButtonBlock: React.FC<ButtonBlockProps> = ({
   children
 }) => {
   // Removed isPreviewMode as it is handled in useInlineEditing, and selection logic handles the rest.
+  // Icon Helper (Reused logic from IconBlock)
+  const getIcon = (iconName: string) => {
+    const iconMap: Record<string, string> = {
+      star: '⭐', heart: '❤️', like: '👍', home: '🏠', user: '👤', settings: '⚙️', search: '🔍',
+      phone: '📞', email: '📧', location: '📍', calendar: '📅', clock: '🕐', info: 'ℹ️',
+      warning: '⚠️', error: '❌', success: '✅', facebook: '📘', twitter: '🐦', instagram: '📷',
+      linkedin: '💼', youtube: '📺', github: '🐙', download: '📥', upload: '📤', share: '↗️',
+      edit: '✏️', delete: '🗑️', save: '💾', camera: '📸', video: '🎥', sun: '☀️', cloud: '☁️',
+      lock: '🔒', bell: '🔔', gift: '🎁', check: '✓', arrowRight: '→', arrowLeft: '←',
+      plus: '+', minus: '-', cart: '🛒'
+    };
+    // If not in map, just return the name if it's 1-2 chars (like emoji) or a default
+    if (iconMap[iconName]) return iconMap[iconName];
+    // If user typed an emoji directly, let it pass. If it's a long name, show ?
+    return iconName.length <= 2 ? iconName : '⭐';
+  };
+
   const {
     text = 'Button',
+    icon,
+    iconPosition = 'after',
+    iconSpacing = '8px',
     href,
+    linkType, // destructure needed for getHref
     variant = 'primary',
     size = 'medium',
     email,
@@ -69,7 +90,7 @@ export const ButtonBlock: React.FC<ButtonBlockProps> = ({
   const getSizeClasses = () => {
     // If custom padding is provided, we skip the size's padding classes
     if (block.props.padding || block.props.paddingTop || block.props.paddingBottom) {
-       return '';
+      return '';
     }
     switch (size) {
       case 'small':
@@ -83,9 +104,19 @@ export const ButtonBlock: React.FC<ButtonBlockProps> = ({
 
   // Determine the link destination
   const getHref = () => {
-    if (href) return href;
-    if (email) return `mailto:${email}`;
-    if (phone) return `tel:${phone}`;
+    const { linkType = 'url' } = block.props;
+
+    if (linkType === 'email' && email) return `mailto:${email}`;
+    if (linkType === 'phone' && phone) return `tel:${phone}`;
+    if (linkType === 'url' && href) return href;
+
+    // Fallback for legacy data where linkType might not be set
+    if (!block.props.linkType) {
+      if (href) return href;
+      if (email) return `mailto:${email}`;
+      if (phone) return `tel:${phone}`;
+    }
+
     return undefined;
   };
 
@@ -122,7 +153,14 @@ export const ButtonBlock: React.FC<ButtonBlockProps> = ({
           }}
           onDoubleClick={handleDoubleClick}
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center">
+            {/* Icon Before */}
+            {icon && iconPosition === 'before' && (
+              <span style={{ marginRight: iconSpacing, fontSize: '1.2em', lineHeight: 1 }}>
+                {getIcon(icon)}
+              </span>
+            )}
+
             <span
               ref={textRef}
               contentEditable={isEditing}
@@ -135,6 +173,13 @@ export const ButtonBlock: React.FC<ButtonBlockProps> = ({
               {text}
             </span>
             {children}
+
+            {/* Icon After */}
+            {icon && iconPosition !== 'before' && (
+              <span style={{ marginLeft: iconSpacing, fontSize: '1.2em', lineHeight: 1 }}>
+                {getIcon(icon)}
+              </span>
+            )}
           </div>
         </Component>
       </div>

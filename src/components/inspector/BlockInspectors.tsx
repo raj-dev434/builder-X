@@ -1908,6 +1908,50 @@ export const ImageBlockInspector: React.FC<{ block: Block; updateBlock: (id: str
     updateBlock(block.id, { props: { ...props, ...u } });
   };
 
+  const emojiIcons = [
+    { name: 'star', label: 'Star ⭐' },
+    { name: 'heart', label: 'Heart ❤️' },
+    { name: 'like', label: 'Like 👍' },
+    { name: 'home', label: 'Home 🏠' },
+    { name: 'user', label: 'User 👤' },
+    { name: 'settings', label: 'Settings ⚙️' },
+    { name: 'search', label: 'Search 🔍' },
+    { name: 'phone', label: 'Phone 📞' },
+    { name: 'email', label: 'Email 📧' },
+    { name: 'location', label: 'Location 📍' },
+    { name: 'calendar', label: 'Calendar 📅' },
+    { name: 'clock', label: 'Clock 🕐' },
+    { name: 'info', label: 'Info ℹ️' },
+    { name: 'warning', label: 'Warning ⚠️' },
+    { name: 'error', label: 'Error ❌' },
+    { name: 'success', label: 'Success ✅' },
+    { name: 'facebook', label: 'Facebook 📘' },
+    { name: 'twitter', label: 'Twitter 🐦' },
+    { name: 'instagram', label: 'Instagram 📷' },
+    { name: 'linkedin', label: 'LinkedIn 💼' },
+    { name: 'youtube', label: 'YouTube 📺' },
+    { name: 'github', label: 'GitHub 🐙' },
+    { name: 'download', label: 'Download 📥' },
+    { name: 'upload', label: 'Upload 📤' },
+    { name: 'share', label: 'Share ↗️' },
+    { name: 'edit', label: 'Edit ✏️' },
+    { name: 'delete', label: 'Delete 🗑️' },
+    { name: 'save', label: 'Save 💾' },
+    { name: 'camera', label: 'Camera 📸' },
+    { name: 'video', label: 'Video 🎥' },
+    { name: 'sun', label: 'Sun ☀️' },
+    { name: 'cloud', label: 'Cloud ☁️' },
+    { name: 'lock', label: 'Lock 🔒' },
+    { name: 'bell', label: 'Bell 🔔' },
+    { name: 'gift', label: 'Gift 🎁' },
+    { name: 'check', label: 'Check ✓' },
+    { name: 'arrowRight', label: 'Arrow Right →' },
+    { name: 'arrowLeft', label: 'Arrow Left ←' },
+    { name: 'plus', label: 'Plus +' },
+    { name: 'minus', label: 'Minus -' },
+    { name: 'cart', label: 'Cart 🛒' },
+  ];
+
   return (
     <div className="flex flex-col space-y-2">
       {activeTab === 'content' && (
@@ -1946,13 +1990,16 @@ export const ImageBlockInspector: React.FC<{ block: Block; updateBlock: (id: str
             </ControlGroup>
 
             <ControlGroup label="Icon">
-              <input
-                type="text"
+              <select
+                className={inputClasses}
                 value={props.icon || ''}
                 onChange={(e) => updateProp('icon', e.target.value)}
-                className={inputClasses}
-                placeholder="e.g. arrow-right"
-              />
+              >
+                <option value="">None</option>
+                {emojiIcons.map(icon => (
+                  <option key={icon.name} value={icon.name}>{icon.label}</option>
+                ))}
+              </select>
             </ControlGroup>
             <ControlGroup label="Icon Position">
               <select className={inputClasses} value={props.iconPosition || 'after'} onChange={(e) => updateProp('iconPosition', e.target.value)}>

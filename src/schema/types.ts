@@ -639,6 +639,9 @@ export interface ButtonBlock extends BaseBlock {
   props: {
     // Content
     text: string;
+    icon?: string;
+    iconPosition?: "before" | "after";
+    iconSpacing?: string;
     href?: string;
     email?: string;
     phone?: string;
