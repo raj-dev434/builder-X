@@ -38,7 +38,7 @@ export const Layout: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOverInfo, setDragOverInfo] = useState<DragOverInfo | null>(null);
-  
+
   // Resizable Sidebar State
   const [sidebarWidth, setSidebarWidth] = useState(320);
   const [isResizingSidebar, setIsResizingSidebar] = useState(false);
@@ -46,7 +46,7 @@ export const Layout: React.FC = () => {
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!isResizingSidebar) return;
-      
+
       const newWidth = e.clientX;
       if (newWidth >= 200 && newWidth <= 600) {
         setSidebarWidth(newWidth);
@@ -83,9 +83,9 @@ export const Layout: React.FC = () => {
         setLeftPanelMode('properties');
       }
     } else {
-       if (leftPanelMode === 'properties') {
+      if (leftPanelMode === 'properties') {
         setLeftPanelMode('blocks');
-       }
+      }
     }
   }, [selectedBlockId]);
 
@@ -164,8 +164,8 @@ export const Layout: React.FC = () => {
     // If over a DropZone, let the DropZone component handle the visual feedback (green line)
     // We can clear our generic drag indicator
     if (over.data.current?.type === 'DROP_ZONE') {
-       setDragOverInfo(null);
-       return;
+      setDragOverInfo(null);
+      return;
     }
 
     const overNode = over.data.current?.sortable?.node || document.getElementById(over.id.toString());
@@ -234,43 +234,43 @@ export const Layout: React.FC = () => {
     const { active, over } = event;
     if (!over) return;
     const data = active.data.current;
-    
+
     // Check if we dropped on a DropZone
     if (over.data.current?.type === 'DROP_ZONE') {
-        const { parentId, index: dropIndex } = over.data.current;
-        const blocks = useCanvasStore.getState().blocks;
-        const { moveBlock, addBlock } = useCanvasStore.getState();
+      const { parentId, index: dropIndex } = over.data.current;
+      const blocks = useCanvasStore.getState().blocks;
+      const { moveBlock, addBlock } = useCanvasStore.getState();
 
-        if (data?.type === 'template') {
-           // Adding new block from sidebar - straightforward insert
-           addBlock(data.template.block, parentId || undefined, dropIndex);
-        } else if (data?.type === 'block') {
-           // Moving existing block
-           // Check for self-drop (shouldn't happen with valid zones but safety first)
-           if (active.id === over.id) return;
+      if (data?.type === 'template') {
+        // Adding new block from sidebar - straightforward insert
+        addBlock(data.template.block, parentId || undefined, dropIndex);
+      } else if (data?.type === 'block') {
+        // Moving existing block
+        // Check for self-drop (shouldn't happen with valid zones but safety first)
+        if (active.id === over.id) return;
 
-           const activePos = findBlockPosition(blocks, active.id.toString());
-           if (activePos) {
-              let finalIndex = dropIndex;
-              
-              // CRITICAL FIX: Block Loss / Misplacement
-              // When moving a block DOWN within the SAME container:
-              // The removal of the block (at 'oldIndex') shifts all subsequent items up by 1.
-              // So a drop at 'newIndex' (which was calculated based on the list WITH the item)
-              // actually needs to target 'newIndex - 1'.
-              if (activePos.parentId === parentId && activePos.index < dropIndex) {
-                 finalIndex -= 1;
-              }
-              
-              // Prevent unnecessary moves (dropping exactly where it started)
-              if (activePos.parentId === parentId && activePos.index === finalIndex) {
-                  return;
-              }
+        const activePos = findBlockPosition(blocks, active.id.toString());
+        if (activePos) {
+          let finalIndex = dropIndex;
 
-              moveBlock(active.id.toString(), parentId, finalIndex);
-           }
+          // CRITICAL FIX: Block Loss / Misplacement
+          // When moving a block DOWN within the SAME container:
+          // The removal of the block (at 'oldIndex') shifts all subsequent items up by 1.
+          // So a drop at 'newIndex' (which was calculated based on the list WITH the item)
+          // actually needs to target 'newIndex - 1'.
+          if (activePos.parentId === parentId && activePos.index < dropIndex) {
+            finalIndex -= 1;
+          }
+
+          // Prevent unnecessary moves (dropping exactly where it started)
+          if (activePos.parentId === parentId && activePos.index === finalIndex) {
+            return;
+          }
+
+          moveBlock(active.id.toString(), parentId, finalIndex);
         }
-        return;
+      }
+      return;
     }
 
     // Fallback to legacy logic for dropping directly on blocks (nesting)
@@ -318,7 +318,7 @@ export const Layout: React.FC = () => {
     }
 
     // List of block types that can accept children (Containers)
-    const CONTAINER_TYPES = ['section', 'row', 'column', 'container', 'form', 'group', 'div', 'body'];
+    const CONTAINER_TYPES = ['section', 'row', 'column', 'container', 'form', 'group', 'div', 'body', 'grid'];
     const isContainer = targetBlock && CONTAINER_TYPES.includes(targetBlock.type);
 
     // EXECUTE DROP
@@ -340,10 +340,10 @@ export const Layout: React.FC = () => {
         // If dropping precisely on an edge of a block (not a DropZone, but the block itself via 'edgeDrop'),
         // we want to place it as a sibling.
         if (!isEdgeDrop && isContainer) {
-           // Nesting logic
-           if (active.id !== targetBlock.id) {
-             moveBlock(active.id.toString(), targetBlock.id, targetBlock.children ? targetBlock.children.length : 0);
-           }
+          // Nesting logic
+          if (active.id !== targetBlock.id) {
+            moveBlock(active.id.toString(), targetBlock.id, targetBlock.children ? targetBlock.children.length : 0);
+          }
         } else {
           // Sibling logic
           const parentId = overPos.parentId; // This defaults to the target's parent. 
@@ -381,8 +381,8 @@ export const Layout: React.FC = () => {
 
         <div className="flex-1 flex overflow-hidden">
           {!isPreviewMode && (
-              <div
-                className={`
+            <div
+              className={`
                   h-full 
                   transition-all duration-300 ease-in-out 
                   overflow-visible
@@ -400,17 +400,17 @@ export const Layout: React.FC = () => {
                   </div>
                 ) : leftPanelMode === 'layers' ? (
                   <div className="h-full bg-gray-800 border-r border-gray-700">
-                     <LayersPanel onClose={handleCloseSidebar} />
+                    <LayersPanel onClose={handleCloseSidebar} />
                   </div>
                 ) : leftPanelMode === 'history' ? (
-                   <HistoryPanel onClose={handleCloseSidebar} />
+                  <HistoryPanel onClose={handleCloseSidebar} />
                 ) : (
                   <div className="h-full">
                     <Inspector />
                   </div>
                 )}
               </div>
-              
+
               {/* Resizer Handle */}
               {isSidebarOpen && (
                 <div

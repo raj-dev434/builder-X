@@ -200,6 +200,68 @@ interface GroupProps {
   withoutSection?: boolean;
 }
 
+
+
+// ==========================================
+// NUMBER CONTROL COMPONENT
+// ==========================================
+
+export const NumberControl = memo(({
+  value,
+  onChange,
+  min = 1,
+  max = 12,
+  label = 'Count'
+}: {
+  value: number;
+  onChange: (val: number) => void;
+  min?: number;
+  max?: number;
+  label?: string;
+}) => {
+  const handleIncrement = () => {
+    if (value < max) onChange(value + 1);
+  };
+
+  const handleDecrement = () => {
+    if (value > min) onChange(value - 1);
+  };
+
+  return (
+    <div className="flex items-center bg-[#15181b] border border-[#2d3237] rounded-sm overflow-hidden group focus-within:border-blue-500/50 focus-within:ring-1 focus-within:ring-blue-500/10 transition-all w-full">
+      <button
+        onClick={handleDecrement}
+        className="px-2 py-1.5 bg-[#202328] hover:bg-[#2d3237] text-gray-400 hover:text-white border-r border-[#2d3237] transition-colors"
+        disabled={value <= min}
+      >
+        <Minus size={12} />
+      </button>
+
+      <input
+        type="number"
+        className="flex-1 bg-transparent text-center text-[11px] font-bold text-gray-200 outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+        value={value}
+        onChange={(e) => {
+          const val = parseInt(e.target.value) || min;
+          if (val >= min && val <= max) onChange(val);
+        }}
+        min={min}
+        max={max}
+      />
+
+      {label && <span className="text-[9px] text-gray-500 mr-2 uppercase">{label}</span>}
+
+      <button
+        onClick={handleIncrement}
+        className="px-2 py-1.5 bg-[#202328] hover:bg-[#2d3237] text-gray-400 hover:text-white border-l border-[#2d3237] transition-colors"
+        disabled={value >= max}
+      >
+        <Plus size={12} />
+      </button>
+    </div>
+  );
+});
+
 const LinkedUnitInput = ({
   label,
   values,
@@ -2857,23 +2919,53 @@ export const GridBlockInspector: React.FC<{ block: Block; updateBlock: (id: stri
         <>
           <PropertySection title="Grid Configuration" icon={Layers} defaultOpen={true}>
             <ControlGroup label="Columns">
-              <input
-                type="text"
-                className={inputClasses}
-                value={props.gridTemplateColumns || 'repeat(3, 1fr)'}
-                onChange={(e) => updateProp('gridTemplateColumns', e.target.value)}
-                placeholder="e.g. repeat(3, 1fr) or 1fr 2fr"
+              <NumberControl
+                value={(() => {
+                  const match = (props.gridTemplateColumns || '').match(/repeat\((\d+)/);
+                  return match ? parseInt(match[1]) : 3;
+                })()}
+                onChange={(val) => updateProp('gridTemplateColumns', `repeat(${val}, 1fr)`)}
+                min={1}
+                max={12}
+                label="Cols"
               />
             </ControlGroup>
+
             <ControlGroup label="Rows">
-              <input
-                type="text"
-                className={inputClasses}
-                value={props.gridTemplateRows || 'auto'}
-                onChange={(e) => updateProp('gridTemplateRows', e.target.value)}
-                placeholder="e.g. auto"
+              <NumberControl
+                value={(() => {
+                  const match = (props.gridTemplateRows || '').match(/repeat\((\d+)/);
+                  return match ? parseInt(match[1]) : 1;
+                })()}
+                onChange={(val) => updateProp('gridTemplateRows', `repeat(${val}, auto)`)}
+                min={1}
+                max={12}
+                label="Rows"
               />
             </ControlGroup>
+
+
+            <div className="mt-2 pt-2 border-t border-[#3e444b]">
+              <p className="text-[10px] text-gray-500 mb-2">Advanced: Raw CSS</p>
+              <ControlGroup label="Col Tpl">
+                <input
+                  type="text"
+                  className={inputClasses}
+                  value={props.gridTemplateColumns || ''}
+                  onChange={(e) => updateProp('gridTemplateColumns', e.target.value)}
+                  placeholder="repeat(3, 1fr)"
+                />
+              </ControlGroup>
+              <ControlGroup label="Row Tpl">
+                <input
+                  type="text"
+                  className={inputClasses}
+                  value={props.gridTemplateRows || ''}
+                  onChange={(e) => updateProp('gridTemplateRows', e.target.value)}
+                  placeholder="auto"
+                />
+              </ControlGroup>
+            </div>
           </PropertySection>
 
           <PropertySection title="Gaps" icon={Maximize2}>
@@ -2908,22 +3000,24 @@ export const GridBlockInspector: React.FC<{ block: Block; updateBlock: (id: stri
         </>
       )}
 
-      {activeTab === 'style' && (
-        <>
-          <PropertySection title="Appearance" icon={Palette} defaultOpen={true}>
-            <BackgroundControl props={props} onChange={updateProp} />
-          </PropertySection>
+      {
+        activeTab === 'style' && (
+          <>
+            <PropertySection title="Appearance" icon={Palette} defaultOpen={true}>
+              <BackgroundControl props={props} onChange={updateProp} />
+            </PropertySection>
 
-          <PropertySection title="Box Style" icon={Maximize2}>
-            <SpacingGroup block={block} onChange={updateProp} />
-            <BorderGroup block={block} onChange={updateProp} />
-            <EffectsGroup block={block} onChange={updateProp} />
-          </PropertySection>
-        </>
-      )}
+            <PropertySection title="Box Style" icon={Maximize2}>
+              <SpacingGroup block={block} onChange={updateProp} />
+              <BorderGroup block={block} onChange={updateProp} />
+              <EffectsGroup block={block} onChange={updateProp} />
+            </PropertySection>
+          </>
+        )
+      }
 
       {activeTab === 'advanced' && <AdvancedPanel block={block} onUpdate={(u) => updateBlock(block.id, u)} />}
-    </div>
+    </div >
   );
 };
 

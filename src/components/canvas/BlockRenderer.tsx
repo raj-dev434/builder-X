@@ -70,11 +70,12 @@ interface NestedBlockRendererProps {
   onDelete?: (id: string) => void;
   depth: number;
   parentId: string | null;
+  parentType?: string;
   isPreviewMode?: boolean;
 }
 
 // SortableContext is needed for the children to be sortable relative to each other
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
 import { DropZone } from './DropZone';
 
 const NestedBlockRenderer: React.FC<NestedBlockRendererProps> = ({
@@ -84,36 +85,49 @@ const NestedBlockRenderer: React.FC<NestedBlockRendererProps> = ({
   onDelete,
   depth,
   parentId,
+  parentType,
   isPreviewMode
 }) => {
   // Always render at least one DropZone for empty containers
   if (!children || children.length === 0) {
-     return <div className="py-2"><DropZone parentId={parentId} index={0} show={true} /></div>;
+    return <div className="py-2"><DropZone parentId={parentId} index={0} show={true} /></div>;
   }
 
-  const strategy = verticalListSortingStrategy;
+  // Determine if parent is a Grid to handle layout specificities
+  // We use parentType passed directly to avoid store lookup issues
+  const isGrid = parentType === 'grid';
+
+  // Use rectSortingStrategy to support both lists and grids
+  const strategy = rectSortingStrategy;
 
   return (
     <SortableContext items={children.map(c => c.id)} strategy={strategy}>
-      <div className="flex flex-col w-full">
-          {children.map((childBlock, index) => (
-            <React.Fragment key={childBlock.id}>
-                {/* Drop Zone Before Block */}
-                <DropZone parentId={parentId} index={index} />
-                
-                <BlockRenderer
-                block={childBlock}
-                onSelect={onSelect}
-                onUpdate={onUpdate}
-                onDelete={onDelete}
-                depth={depth + 1}
-                parentId={parentId}
-                isPreviewMode={isPreviewMode}
-                />
-            </React.Fragment>
-          ))}
-          {/* Final Drop Zone at the end */}
-          <DropZone parentId={parentId} index={children.length} />
+      {/* 
+        For Grid type, we use 'contents' to let the parent GridBlock control layout directly.
+        For others (column, etc), we use flex-col for standard stacking.
+      */}
+      <div className={isGrid ? "contents" : "flex flex-col w-full"}>
+        {children.map((childBlock, index) => (
+          <React.Fragment key={childBlock.id}>
+            {/* 
+                   DropZones break CSS Grid layouts because they count as grid items.
+                   We hide them in Grids, relying on standard Sortable reordering (swapping).
+                */}
+            {!isGrid && <DropZone parentId={parentId} index={index} />}
+
+            <BlockRenderer
+              block={childBlock}
+              onSelect={onSelect}
+              onUpdate={onUpdate}
+              onDelete={onDelete}
+              depth={depth + 1}
+              parentId={parentId}
+              isPreviewMode={isPreviewMode}
+            />
+          </React.Fragment>
+        ))}
+        {/* Final Drop Zone */}
+        {!isGrid && <DropZone parentId={parentId} index={children.length} />}
       </div>
     </SortableContext>
   );
@@ -174,6 +188,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = React.memo(({
           onDelete={onDelete}
           depth={depth}
           parentId={block.id}
+          parentType={block.type}
           isPreviewMode={isPreviewMode}
         />
       );
@@ -203,78 +218,78 @@ export const BlockRenderer: React.FC<BlockRendererProps> = React.memo(({
       case 'image':
         return <ImageBlock {...propsWithChildren} block={block as any} />;
       case 'button':
-          return <ButtonBlock {...propsWithChildren} block={block as any} />;
+        return <ButtonBlock {...propsWithChildren} block={block as any} />;
       case 'divider':
-          return <DividerBlock {...propsWithChildren} block={block as any} />;
+        return <DividerBlock {...propsWithChildren} block={block as any} />;
       case 'spacer':
-          return <SpacerBlock {...propsWithChildren} block={block as any} />;
+        return <SpacerBlock {...propsWithChildren} block={block as any} />;
       case 'container':
-          return <ContainerBlock {...propsWithChildren} block={block as any} />;
+        return <ContainerBlock {...propsWithChildren} block={block as any} />;
       case 'social-follow':
-          return <SocialFollowBlock {...propsWithChildren} block={block as any} />;
+        return <SocialFollowBlock {...propsWithChildren} block={block as any} />;
       case 'form':
-          return <FormBlock {...propsWithChildren} block={block as any} />;
+        return <FormBlock {...propsWithChildren} block={block as any} />;
       case 'video':
-          return <VideoBlock {...propsWithChildren} block={block as any} />;
+        return <VideoBlock {...propsWithChildren} block={block as any} />;
       case 'code':
-          return <CodeBlock {...propsWithChildren} block={block as any} />;
+        return <CodeBlock {...propsWithChildren} block={block as any} />;
       case 'group':
-          return <GroupBlock {...propsWithChildren} block={block as any} />;
+        return <GroupBlock {...propsWithChildren} block={block as any} />;
       case 'grid':
-          return <GridBlock {...propsWithChildren} block={block as any} />;
+        return <GridBlock {...propsWithChildren} block={block as any} />;
       case 'survey':
-          return <SurveyBlock {...propsWithChildren} block={block as any} />;
+        return <SurveyBlock {...propsWithChildren} block={block as any} />;
       case 'countdown-timer':
-          return <CountdownTimerBlock {...propsWithChildren} block={block as any} />;
+        return <CountdownTimerBlock {...propsWithChildren} block={block as any} />;
       case 'progress-bar':
-          return <ProgressBarBlock {...propsWithChildren} block={block as any} />;
+        return <ProgressBarBlock {...propsWithChildren} block={block as any} />;
       case 'product':
-          return <ProductBlock {...propsWithChildren} block={block as any} />;
+        return <ProductBlock {...propsWithChildren} block={block as any} />;
       case 'promo-code':
-          return <PromoCodeBlock {...propsWithChildren} block={block as any} />;
+        return <PromoCodeBlock {...propsWithChildren} block={block as any} />;
       case 'price':
-          return <PriceBlock {...propsWithChildren} block={block as any} />;
+        return <PriceBlock {...propsWithChildren} block={block as any} />;
       case 'testimonial':
-          return <TestimonialBlock {...propsWithChildren} block={block as any} />;
+        return <TestimonialBlock {...propsWithChildren} block={block as any} />;
       case 'heading':
-          return <HeadingBlock {...propsWithChildren} block={block as any} />;
+        return <HeadingBlock {...propsWithChildren} block={block as any} />;
       case 'link':
-          return <LinkBlock {...propsWithChildren} block={block as any} />;
+        return <LinkBlock {...propsWithChildren} block={block as any} />;
       case 'input':
-          return <InputBlock {...propsWithChildren} block={block as any} />;
+        return <InputBlock {...propsWithChildren} block={block as any} />;
       case 'card':
-          return <CardBlock {...propsWithChildren} block={block as any} />;
+        return <CardBlock {...propsWithChildren} block={block as any} />;
       case 'badge':
-          return <BadgeBlock {...propsWithChildren} block={block as any} />;
+        return <BadgeBlock {...propsWithChildren} block={block as any} />;
       case 'alert':
-          return <AlertBlock {...propsWithChildren} block={block as any} />;
+        return <AlertBlock {...propsWithChildren} block={block as any} />;
       case 'progress':
-          return <ProgressBlock {...propsWithChildren} block={block as any} />;
+        return <ProgressBlock {...propsWithChildren} block={block as any} />;
       case 'map':
-          return <MapBlock {...propsWithChildren} block={block as any} />;
+        return <MapBlock {...propsWithChildren} block={block as any} />;
       case 'icon':
-          return <IconBlock {...propsWithChildren} block={block as any} />;
+        return <IconBlock {...propsWithChildren} block={block as any} />;
       case 'textarea':
-          return <TextareaBlock {...propsWithChildren} block={block as any} />;
+        return <TextareaBlock {...propsWithChildren} block={block as any} />;
       case 'select':
-          return <SelectBlock {...propsWithChildren} block={block as any} />;
+        return <SelectBlock {...propsWithChildren} block={block as any} />;
       case 'checkbox':
-          return <CheckboxBlock {...propsWithChildren} block={block as any} />;
+        return <CheckboxBlock {...propsWithChildren} block={block as any} />;
       case 'radio':
-          return <RadioBlock {...propsWithChildren} block={block as any} />;
+        return <RadioBlock {...propsWithChildren} block={block as any} />;
       case 'label':
-          return <LabelBlock {...propsWithChildren} block={block as any} />;
+        return <LabelBlock {...propsWithChildren} block={block as any} />;
       case 'link-box':
-          return <LinkBoxBlock {...propsWithChildren} block={block as any} />;
+        return <LinkBoxBlock {...propsWithChildren} block={block as any} />;
       case 'image-box':
-          return <ImageBoxBlock {...propsWithChildren} block={block as any} />;
+        return <ImageBoxBlock {...propsWithChildren} block={block as any} />;
       case 'navbar':
-          return <NavbarBlock {...propsWithChildren} block={block as any} />;
+        return <NavbarBlock {...propsWithChildren} block={block as any} />;
       case 'invoice':
-          return <InvoiceBlock {...propsWithChildren} block={block as any} />;
+        return <InvoiceBlock {...propsWithChildren} block={block as any} />;
       case 'elementor-heading':
-          return <ElementorHeadingBlock {...propsWithChildren} block={block as any} />;
-      
+        return <ElementorHeadingBlock {...propsWithChildren} block={block as any} />;
+
       default:
         // Fallback for unknown blocks - try to render basic
         return <div className="p-4 border border-red-300 bg-red-50 text-red-500">Unknown Block Type: {block.type}</div>;
@@ -292,14 +307,14 @@ export const BlockRenderer: React.FC<BlockRendererProps> = React.memo(({
       {renderBlockComponent()}
     </SortableBlockWrapper>
   );
-// Custom comparison check to really avoid re-renders during drag if nothing changed
+  // Custom comparison check to really avoid re-renders during drag if nothing changed
 }, (prev, next) => {
-    return (
-        prev.block === next.block && // Reference check usually enough if store is immutable
-        prev.isSelected === next.isSelected &&
-        prev.depth === next.depth &&
-        prev.isPreviewMode === next.isPreviewMode
-    );
+  return (
+    prev.block === next.block && // Reference check usually enough if store is immutable
+    prev.isSelected === next.isSelected &&
+    prev.depth === next.depth &&
+    prev.isPreviewMode === next.isPreviewMode
+  );
 });
 
 // SortableWrapper Component
@@ -356,7 +371,7 @@ const SortableBlockWrapper: React.FC<{
 
   // Get user z-index
   const userZIndex = (block.props as any)?.zIndex;
-  
+
   // Combine styles
   const finalStyle: React.CSSProperties = {
     ...style, // Drag transform/transitions
