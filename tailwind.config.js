@@ -38,6 +38,21 @@ export default {
       spacing: {
         '18': '4.5rem',
         '88': '22rem',
+      },
+      keyframes: {
+        shake: {
+          '0%, 100%': { transform: 'translateX(0)' },
+          '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-4px)' },
+          '20%, 40%, 60%, 80%': { transform: 'translateX(4px)' },
+        },
+        wobble: {
+          '0%, 100%': { transform: 'rotate(-3deg)' },
+          '50%': { transform: 'rotate(3deg)' },
+        }
+      },
+      animation: {
+        shake: 'shake 0.8s cubic-bezier(0.36, 0.07, 0.19, 0.97) both',
+        wobble: 'wobble 1s ease-in-out infinite',
       }
     },
   },

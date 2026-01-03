@@ -1,6 +1,6 @@
 ﻿import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { Block, CanvasState, HistoryItem } from "../schema/types";
+import { Block, CanvasState, HistoryItem, PageSettings } from "../schema/types";
 import { generateId } from "../utils/idGenerator";
 
 // Helper function to build block maps for O(1) lookups
@@ -113,6 +113,8 @@ export interface CanvasStore extends CanvasState {
   savedBlocks: Block[]; // Added for manual persistence
   toggleAutoSave: () => void;
   saveProject: () => Promise<void>;
+  pageSettings: PageSettings;
+  updatePageSettings: (settings: Partial<PageSettings>) => void;
 }
 
 export const useCanvasStore = create<CanvasStore>()(
@@ -138,6 +140,16 @@ export const useCanvasStore = create<CanvasStore>()(
       lastSaved: null,
       isSaving: false,
       savedBlocks: [], // Init empty
+      pageSettings: {
+        backgroundColor: '#ffffff',
+        gridColor: 'rgba(0,0,0,0.1)',
+        showGrid: false,
+        backgroundType: 'solid',
+        gradientStart: '#ffffff',
+        gradientEnd: '#d1d5db',
+        gradientDirection: 'to bottom',
+        gradientType: 'linear',
+      },
 
       maxHistorySize: 50,
 
@@ -155,6 +167,30 @@ export const useCanvasStore = create<CanvasStore>()(
           lastSaved: Date.now(),
           savedBlocks: JSON.parse(JSON.stringify(state.blocks)),
         }));
+      },
+
+      updatePageSettings: (settings) => {
+        set((state) => {
+          const defaultSettings: PageSettings = {
+            backgroundColor: '#ffffff',
+            gridColor: 'rgba(0,0,0,0.1)',
+            showGrid: false,
+            backgroundType: 'solid',
+            gradientStart: '#ffffff',
+            gradientEnd: '#d1d5db',
+            gradientDirection: 'to bottom',
+            gradientType: 'linear',
+          };
+          // Merge: Defaults -> Existing State -> New Updates
+          return {
+            pageSettings: {
+              ...defaultSettings,
+              ...(state.pageSettings || {}),
+              ...settings
+            }
+          };
+        });
+        get().saveToHistory("Update Page Settings");
       },
 
       // --- View Actions ---
@@ -790,6 +826,7 @@ export const useCanvasStore = create<CanvasStore>()(
         viewDevice: state.viewDevice,
         savedTemplates: state.savedTemplates,
         maxHistorySize: state.maxHistorySize,
+        pageSettings: state.pageSettings, // Persist page settings (background, gradients, grid)
       }),
       onRehydrateStorage: () => (state) => {
         if (state) {
@@ -814,6 +851,24 @@ export const useCanvasStore = create<CanvasStore>()(
             ];
             state.historyIndex = 0;
           }
+
+          // CRITICAL FIX: Ensure pageSettings are properly restored with defaults
+          // If pageSettings don't exist or are incomplete, merge with defaults
+          const defaultPageSettings: PageSettings = {
+            backgroundColor: '#ffffff',
+            gridColor: 'rgba(0,0,0,0.1)',
+            showGrid: false,
+            backgroundType: 'solid',
+            gradientStart: '#ffffff',
+            gradientEnd: '#d1d5db',
+            gradientDirection: 'to bottom',
+            gradientType: 'linear',
+          };
+
+          state.pageSettings = {
+            ...defaultPageSettings,
+            ...(state.pageSettings || {})
+          };
         }
       },
     }

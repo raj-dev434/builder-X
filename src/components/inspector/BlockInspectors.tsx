@@ -1760,7 +1760,7 @@ const GenericInspector: React.FC<{
             <input type="text" className={inputClasses} value={props.buttonText || ''} onChange={(e) => updateProp('buttonText', e.target.value)} placeholder="Click here" />
           </ControlGroup>
           <ControlGroup label="Link URL">
-            <input type="text" className={inputClasses} value={props.href || props.url || props.link || ''} onChange={(e) => updateProp(props.href !== undefined ? 'href' : props.url !== undefined ? 'url' : 'link', e.target.value)} placeholder="https://..." />
+            <input type="text" className={inputClasses} value={(props.href || props.url || props.link) === '#' ? '' : (props.href || props.url || props.link || '')} onChange={(e) => updateProp(props.href !== undefined ? 'href' : props.url !== undefined ? 'url' : 'link', e.target.value)} placeholder="https://..." />
           </ControlGroup>
           <div className="pt-2 border-t border-[#3e444b] mt-2">
             <label className="text-[10px] text-gray-400 uppercase mb-2 block">Image Source</label>
@@ -1902,8 +1902,23 @@ export const ImageBlockInspector: React.FC<{ block: Block; updateBlock: (id: str
           </PropertySection>
 
           <PropertySection title="Link" icon={LinkIcon}>
+            {/* Added Helper Text and Test Link Button */}
+            <div className="px-1 mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded">
+              <p className="text-[10px] text-blue-200 mb-2">
+                Links are active in <span className="font-bold text-white">Preview Mode</span> only.
+              </p>
+              {props.linkUrl && props.linkUrl !== '#' && (
+                <button
+                  onClick={() => window.open(props.linkUrl, '_blank')}
+                  className="w-full py-1.5 px-3 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold uppercase tracking-wider rounded transition-colors flex items-center justify-center gap-1.5"
+                >
+                  Verify Link ↗
+                </button>
+              )}
+            </div>
+
             <ControlGroup label="URL">
-              <input type="text" className={inputClasses} value={props.linkUrl || ''} onChange={(e) => updateProp('linkUrl', e.target.value)} placeholder="https://..." />
+              <input type="text" className={inputClasses} value={props.linkUrl === '#' ? '' : (props.linkUrl || '')} onChange={(e) => updateProp('linkUrl', e.target.value)} placeholder="https://..." />
             </ControlGroup>
             <ControlGroup label="Target">
               <select className={inputClasses} value={props.target || '_self'} onChange={(e) => updateProp('target', e.target.value)}>
@@ -2093,7 +2108,7 @@ export const ImageBlockInspector: React.FC<{ block: Block; updateBlock: (id: str
               </ControlGroup>
             ) : (
               <ControlGroup label="URL">
-                <input type="text" className={inputClasses} value={props.href || ''} onChange={(e) => updateProp('href', e.target.value)} placeholder="https://..." />
+                <input type="text" className={inputClasses} value={props.href === '#' ? '' : (props.href || '')} onChange={(e) => updateProp('href', e.target.value)} placeholder="https://..." />
               </ControlGroup>
             )}
 
@@ -3625,6 +3640,17 @@ export const LinkBlockInspector: React.FC<{ block: Block; updateBlock: (id: stri
         <>
           <PropertySection title="Link Settings" icon={LinkIcon} defaultOpen={true}>
             <div className="space-y-4">
+              <div className="bg-blue-500/10 border border-blue-500/20 rounded p-3 text-xs text-blue-300">
+                <p className="mb-2">Links are active in <strong>Preview Mode</strong> only.</p>
+                {props.url && props.url !== '#' && (
+                  <button
+                    onClick={() => window.open(props.url, '_blank')}
+                    className="flex items-center gap-1 text-blue-400 hover:text-white font-bold uppercase text-[10px] transition-colors"
+                  >
+                    Test Link ↗
+                  </button>
+                )}
+              </div>
               <ControlGroup label="Text">
                 <input
                   type="text"
@@ -3638,7 +3664,7 @@ export const LinkBlockInspector: React.FC<{ block: Block; updateBlock: (id: stri
                 <input
                   type="text"
                   className={inputClasses}
-                  value={props.url || '#'}
+                  value={props.url === '#' ? '' : (props.url || '')}
                   onChange={(e) => updateProp('url', e.target.value)}
                   placeholder="https://example.com"
                 />
@@ -4161,6 +4187,22 @@ export const PromoCodeBlockInspector: React.FC<{ block: Block; updateBlock: (id:
               <span className="text-[10px] uppercase font-bold text-gray-400">Enable Copy Button</span>
               <input type="checkbox" checked={props.showCopyButton !== false} onChange={(e) => updateProp('showCopyButton', e.target.checked)} className="rounded" />
             </div>
+
+            <div className="mt-4 pt-4 border-t border-[#3e444b]"></div>
+
+            <ControlGroup label="Effect">
+              <select
+                className={inputClasses}
+                value={props.animation || 'none'}
+                onChange={(e) => updateProp('animation', e.target.value)}
+              >
+                <option value="none">None</option>
+                <option value="pulse">Pulse</option>
+                <option value="bounce">Bounce</option>
+                <option value="shake">Shake</option>
+                <option value="wobble">Wobble</option>
+              </select>
+            </ControlGroup>
           </PropertySection>
         </>
       )}

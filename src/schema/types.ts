@@ -1189,7 +1189,8 @@ export interface PromoCodeBlock extends BaseBlock {
     showCopyButton?: boolean;
     showValidUntil?: boolean;
     showDiscount?: boolean;
-    animation?: "none" | "pulse" | "bounce" | "shake";
+    shadow?: string;
+    animation?: "none" | "pulse" | "bounce" | "shake" | "wobble";
   } & BaseStyleProps;
 }
 
@@ -3072,3 +3073,27 @@ export const BLOCK_TEMPLATES: BlockTemplate[] = [
     },
   },
 ];
+
+export interface PageSettings {
+  backgroundColor?: string;
+  backgroundImage?: string;
+  backgroundSize?: string;
+  backgroundPosition?: string;
+  backgroundRepeat?: string;
+  backgroundAttachment?: string;
+  customCSS?: string;
+  fontFamily?: string;
+  gridColor?: string;
+  showGrid?: boolean;
+  backgroundType?: 'solid' | 'gradient';
+  gradientStart?: string;
+  gradientEnd?: string;
+  gradientDirection?: string; // e.g. "to right", "45deg"
+  gradientType?: 'linear' | 'radial';
+}
+
+// Extend CanvasState to include global settings
+// Note: We are re-declaring it or you might need to find where it is originally defined if it's not here.
+// Checking file indicates BaseBlock etc are here, but CanvasState might be elsewhere or inferred??
+// Wait, I see `CanvasState` used in `canvasStore.ts`. Let's search if `CanvasState` is in `types.ts`.
+

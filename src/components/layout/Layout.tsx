@@ -12,6 +12,7 @@ import { PreviewControlBar } from './PreviewBar';
 import { GlobalStyles } from './GlobalStyles';
 import { AssetManager } from '../assets/AssetManager';
 
+import { PageSettingsInspector } from '../inspector/PageSettingsInspector';
 import { LayersPanel } from './LayersPanel';
 import { HistoryPanel } from './HistoryPanel';
 
@@ -34,7 +35,7 @@ export const Layout: React.FC = () => {
 
   const [activeTemplate, setActiveTemplate] = useState<BlockTemplate | null>(null);
   const [activeBlock, setActiveBlock] = useState<Block | null>(null);
-  const [leftPanelMode, setLeftPanelMode] = useState<'blocks' | 'properties' | 'layers' | 'history'>('blocks');
+  const [leftPanelMode, setLeftPanelMode] = useState<'blocks' | 'properties' | 'layers' | 'history' | 'settings'>('blocks');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOverInfo, setDragOverInfo] = useState<DragOverInfo | null>(null);
@@ -81,10 +82,7 @@ export const Layout: React.FC = () => {
     if (selectedBlockId) {
       if (leftPanelMode !== 'layers' && leftPanelMode !== 'history') {
         setLeftPanelMode('properties');
-      }
-    } else {
-      if (leftPanelMode === 'properties') {
-        setLeftPanelMode('blocks');
+        if (!isSidebarOpen) setIsSidebarOpen(true);
       }
     }
   }, [selectedBlockId]);
@@ -120,6 +118,13 @@ export const Layout: React.FC = () => {
     } else {
       setLeftPanelMode('history');
     }
+  };
+
+  const handleOpenSettings = () => {
+    if (!isSidebarOpen) {
+      setIsSidebarOpen(true);
+    }
+    setLeftPanelMode('settings');
   };
 
   const handleCloseSidebar = () => {
@@ -373,6 +378,7 @@ export const Layout: React.FC = () => {
             onToggleComponents={handleToggleBlocks}
             onToggleLayers={handleToggleLayers}
             onToggleHistory={handleToggleHistory}
+            onOpenPageSettings={handleOpenSettings}
             componentsPanelOpen={isSidebarOpen && leftPanelMode === 'blocks'}
             layersPanelOpen={isSidebarOpen && leftPanelMode === 'layers'}
             historyPanelOpen={isSidebarOpen && leftPanelMode === 'history'}
@@ -404,6 +410,10 @@ export const Layout: React.FC = () => {
                   </div>
                 ) : leftPanelMode === 'history' ? (
                   <HistoryPanel onClose={handleCloseSidebar} />
+                ) : leftPanelMode === 'settings' ? (
+                  <div className="h-full">
+                    <PageSettingsInspector />
+                  </div>
                 ) : (
                   <div className="h-full">
                     <Inspector />

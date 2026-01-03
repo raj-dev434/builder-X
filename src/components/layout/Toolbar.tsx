@@ -13,6 +13,7 @@ interface ToolbarProps {
   layersPanelOpen?: boolean;
   onToggleHistory?: () => void;
   historyPanelOpen?: boolean;
+  onOpenPageSettings?: () => void;
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({
@@ -21,7 +22,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onToggleLayers,
   layersPanelOpen,
   onToggleHistory,
-  historyPanelOpen
+  historyPanelOpen,
+  onOpenPageSettings
 }) => {
   const {
     undo,
@@ -180,10 +182,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
   return (
     <>
-      <div 
-        className="bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between relative z-[50]" 
+      <div
+        className="bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between relative z-[50]"
         data-testid="grapejs-toolbar"
-        role="toolbar" 
+        role="toolbar"
         aria-label="Editor Toolbar"
       >
         {/* Left Section - Logo and Blocks Panel Toggle */}
@@ -207,9 +209,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             </svg>
             {/* <span className="text-sm font-medium">Add block</span> */}
           </button>
-          
+
           {/* Layers Toggle Button */}
-           <button
+          <button
             onClick={onToggleLayers}
             className={`px-3 py-2 rounded-md transition-colors flex items-center space-x-2 ${layersPanelOpen
               ? 'bg-blue-100 text-blue-600'
@@ -219,14 +221,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             aria-label={layersPanelOpen ? "Close layers panel" : "Open layers panel"}
             aria-expanded={layersPanelOpen}
           >
-           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
             {/* <span className="text-sm font-medium">Layers</span> */}
           </button>
-          
-           {/* History Toggle Button */}
-           <button
+
+          {/* History Toggle Button */}
+          <button
             onClick={onToggleHistory}
             className={`px-3 py-2 rounded-md transition-colors flex items-center space-x-2 ${historyPanelOpen
               ? 'bg-blue-100 text-blue-600'
@@ -236,7 +238,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             aria-label={historyPanelOpen ? "Close history panel" : "Open history panel"}
             aria-expanded={historyPanelOpen}
           >
-           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             {/* <span className="text-sm font-medium">History</span> */}
@@ -249,11 +251,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           <button
             onClick={() => saveProject()}
             disabled={isSaving}
-            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all flex items-center gap-2 ${
-              isSaving 
-                ? 'bg-gray-100 text-gray-500 cursor-wait' 
-                : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow'
-            }`}
+            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all flex items-center gap-2 ${isSaving
+              ? 'bg-gray-100 text-gray-500 cursor-wait'
+              : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow'
+              }`}
             title="Save Project"
             aria-label="Save Project"
           >
@@ -454,9 +455,26 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                   }
                 `}</style>
 
+                {/* Page Settings */}
+                <button
+                  onClick={() => {
+                    if (onOpenPageSettings) onOpenPageSettings();
+                    setShowSettingsMenu(false);
+                  }}
+                  className="w-full px-4 py-3 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all duration-150 flex items-center space-x-3 group"
+                  role="menuitem"
+                >
+                  <div className="w-5 h-5 flex items-center justify-center">
+                    <span className="text-lg group-hover:scale-110 transition-transform">⚙️</span>
+                  </div>
+                  <span className="flex-1">Page Settings</span>
+                </button>
+
+                <div className="border-t border-gray-200 my-1" role="separator"></div>
+
                 {/* Auto Save Toggle */}
-                <div 
-                  className="px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors" 
+                <div
+                  className="px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
                   role="menuitem"
                 >
                   <div className="flex flex-col">
@@ -465,18 +483,16 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                   </div>
                   <button
                     onClick={toggleAutoSave}
-                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-         autoSave ? 'bg-blue-600' : 'bg-gray-200'
-                    }`}
+                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${autoSave ? 'bg-blue-600' : 'bg-gray-200'
+                      }`}
                     role="switch"
                     aria-checked={autoSave}
                     aria-labelledby="autosave-label"
                   >
                     <span
                       aria-hidden="true"
-                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-         autoSave ? 'translate-x-5' : 'translate-x-0'
-                      }`}
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${autoSave ? 'translate-x-5' : 'translate-x-0'
+                        }`}
                     />
                   </button>
                 </div>

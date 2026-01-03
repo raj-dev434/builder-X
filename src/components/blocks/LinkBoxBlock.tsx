@@ -81,8 +81,8 @@ export const LinkBoxBlock: React.FC<LinkBoxBlockProps> = ({
           }
         }}
         onClick={(e) => {
-          // Allow link to work normally in preview mode
-          if (!isPreviewMode && isSelected) {
+          // Allow link to work normally only in preview mode
+          if (!isPreviewMode) {
             e.preventDefault();
           }
         }}

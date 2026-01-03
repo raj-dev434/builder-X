@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useCanvasStore } from '../../store/canvasStore';
 import { Block } from '../../schema/types';
-import { 
-  Edit2, 
-  Palette, 
-  Settings, 
+import {
+  Edit2,
+  Palette,
+  Settings,
   RotateCcw
 } from 'lucide-react';
 
@@ -59,10 +59,10 @@ import {
   ElementorHeadingInspector
 } from './BlockInspectors';
 
-import { 
-  RowBlockInspector, 
-  ColumnBlockInspector, 
-  TextBlockInspector 
+import {
+  RowBlockInspector,
+  ColumnBlockInspector,
+  TextBlockInspector
 } from './StandardInspectors';
 
 export const Inspector: React.FC = () => {
@@ -113,28 +113,28 @@ export const Inspector: React.FC = () => {
       <div className="flex flex-col bg-[#262a2e] border-b border-[#3e444b] shadow-sm relative z-10">
         <div className="flex items-center justify-between px-4 py-3 bg-[#1e2227]">
           <div className="flex items-center gap-3">
-             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center shadow-lg text-white font-bold ring-1 ring-blue-500/50">
-                <Edit2 className="w-4 h-4" />
-             </div>
-             <div className="flex flex-col">
-               <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-0.5">Editing</span>
-               <h2 className="text-sm font-bold text-gray-100 leading-none">
-                 {getBlockTitle(selectedBlock.type)}
-               </h2>
-             </div>
+            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center shadow-lg text-white font-bold ring-1 ring-blue-500/50">
+              <Edit2 className="w-4 h-4" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-0.5">Editing</span>
+              <h2 className="text-sm font-bold text-gray-100 leading-none">
+                {getBlockTitle(selectedBlock.type)}
+              </h2>
+            </div>
           </div>
           <div className="flex items-center gap-1">
-             <button 
-                onClick={() => {
-                   if (confirm('Are you sure you want to reset this block to defaults?')) {
-                      updateBlock(selectedBlock.id, { props: {} });
-                   }
-                }}
-                className="w-8 h-8 flex items-center justify-center rounded-md text-gray-400 hover:text-white hover:bg-[#32373d] transition-all"
-                title="Reset to Default"
-             >
-                <RotateCcw className="w-4 h-4" />
-             </button>
+            <button
+              onClick={() => {
+                if (confirm('Are you sure you want to reset this block to defaults?')) {
+                  updateBlock(selectedBlock.id, { props: {} });
+                }
+              }}
+              className="w-8 h-8 flex items-center justify-center rounded-md text-gray-400 hover:text-white hover:bg-[#32373d] transition-all"
+              title="Reset to Default"
+            >
+              <RotateCcw className="w-4 h-4" />
+            </button>
           </div>
         </div>
 
@@ -144,23 +144,22 @@ export const Inspector: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex flex-col items-center justify-center py-3 relative group transition-colors ${
-                activeTab === tab.id
-                  ? 'text-white bg-[#262a2e] rounded-t-md'
-                  : 'text-gray-500 hover:text-gray-300 hover:bg-[#262a2e]/50 rounded-t-lg'
-              }`}
+              className={`flex-1 flex flex-col items-center justify-center py-3 relative group transition-colors ${activeTab === tab.id
+                ? 'text-white bg-[#262a2e] rounded-t-md'
+                : 'text-gray-500 hover:text-gray-300 hover:bg-[#262a2e]/50 rounded-t-lg'
+                }`}
             >
               <div className={`flex items-center gap-2 ${activeTab === tab.id ? 'transform -translate-y-0.5' : ''} transition-transform`}>
-                 {React.cloneElement(tab.icon as any, { 
-                    className: `w-3.5 h-3.5 ${activeTab === tab.id ? 'text-blue-400' : 'text-gray-500 group-hover:text-gray-400'}` 
-                 })}
-                 <span className={`text-[10px] font-bold uppercase tracking-wider ${activeTab === tab.id ? 'text-gray-200' : 'text-gray-500 group-hover:text-gray-400'}`}>
-                    {tab.label}
-                 </span>
+                {React.cloneElement(tab.icon as any, {
+                  className: `w-3.5 h-3.5 ${activeTab === tab.id ? 'text-blue-400' : 'text-gray-500 group-hover:text-gray-400'}`
+                })}
+                <span className={`text-[10px] font-bold uppercase tracking-wider ${activeTab === tab.id ? 'text-gray-200' : 'text-gray-500 group-hover:text-gray-400'}`}>
+                  {tab.label}
+                </span>
               </div>
               {/* Active Indicator Line */}
               {activeTab === tab.id && (
-                 <div className="absolute top-0 left-0 right-0 h-[2px] bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)] rounded-t-full" />
+                <div className="absolute top-0 left-0 right-0 h-[2px] bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)] rounded-t-full" />
               )}
             </button>
           ))}
@@ -171,7 +170,7 @@ export const Inspector: React.FC = () => {
         {/* For modular blocks, delegate entirely to the inspector */}
         {isModular && (
           <div className="p-0">
-             {renderPropertyFields(selectedBlock, updateBlock, activeTab as any)}
+            {renderPropertyFields(selectedBlock, updateBlock, activeTab as any)}
           </div>
         )}
 
@@ -180,7 +179,7 @@ export const Inspector: React.FC = () => {
           <>
             {activeTab === 'content' && (
               <div className="p-0">
-                 {renderPropertyFields(selectedBlock, updateBlock, 'content')}
+                {renderPropertyFields(selectedBlock, updateBlock, 'content')}
               </div>
             )}
 
@@ -212,7 +211,7 @@ function findBlockById(blocks: Block[], id: string): Block | null {
 }
 
 function renderPropertyFields(
-  block: Block, 
+  block: Block,
   updateBlock: (id: string, updates: Partial<Block>) => void,
   activeTab: 'content' | 'style' | 'advanced'
 ) {

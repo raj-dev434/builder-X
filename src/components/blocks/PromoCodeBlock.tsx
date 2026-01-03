@@ -26,7 +26,7 @@ export interface PromoCodeBlockProps {
     padding?: string;
     borderRadius?: string;
     shadow?: string;
-    animation?: 'none' | 'pulse' | 'bounce' | 'shake';
+    animation?: 'none' | 'pulse' | 'bounce' | 'shake' | 'wobble';
   };
 }
 
@@ -81,7 +81,9 @@ export const PromoCodeBlock: React.FC<{
       case 'bounce':
         return 'animate-bounce';
       case 'shake':
-        return 'animate-pulse';
+        return 'animate-shake';
+      case 'wobble':
+        return 'animate-wobble';
       default:
         return '';
     }
@@ -161,7 +163,7 @@ export const PromoCodeBlock: React.FC<{
           <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '700', marginBottom: '8px' }}>
             {title}
           </h3>
-          
+
           <p style={{ margin: 0, fontSize: '0.875rem', opacity: 0.8, marginBottom: '16px' }}>
             {description}
           </p>

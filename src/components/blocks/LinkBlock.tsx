@@ -124,20 +124,20 @@ export const LinkBlock: React.FC<LinkBlockProps> = ({
 
   // Wrapper handles positioning and margins
   const wrapperStyle: React.CSSProperties = {
-     margin,
-     // We don't want to double-apply padding/bg if they are meant for the link "button" look
-     // BaseBlock handles layout/positioning mainly.
+    margin,
+    // We don't want to double-apply padding/bg if they are meant for the link "button" look
+    // BaseBlock handles layout/positioning mainly.
   };
-  
+
   // Animation Class
   const getAnimationClass = () => {
-      if (!hoverAnimation || hoverAnimation === 'none') return '';
-      switch (hoverAnimation) {
-          case 'grow': return 'hover:scale-105';
-          case 'fade': return 'hover:opacity-75';
-          case 'underline': return 'hover:underline'; // simple fallback, typically slide underline needs custom css
-          default: return '';
-      }
+    if (!hoverAnimation || hoverAnimation === 'none') return '';
+    switch (hoverAnimation) {
+      case 'grow': return 'hover:scale-105';
+      case 'fade': return 'hover:opacity-75';
+      case 'underline': return 'hover:underline'; // simple fallback, typically slide underline needs custom css
+      default: return '';
+    }
   };
 
   return (
@@ -163,7 +163,8 @@ export const LinkBlock: React.FC<LinkBlockProps> = ({
         className={`transition-all duration-300 ${getAnimationClass()}`}
         style={linkStyle}
         onClick={(e) => {
-          if (!isPreviewMode && (isSelected || isEditing)) {
+          // Always prevent default in editor mode to avoid accidental navigation
+          if (!isPreviewMode) {
             e.preventDefault();
           }
         }}

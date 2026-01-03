@@ -2,6 +2,7 @@ import React from 'react';
 import { ButtonBlock as ButtonBlockType } from '../../schema/types';
 import { BaseBlock } from './BaseBlock';
 import { useInlineEditing } from '../../hooks/useInlineEditing';
+import { useCanvasStore } from '../../store/canvasStore';
 
 interface ButtonBlockProps {
   block: ButtonBlockType;
@@ -20,7 +21,8 @@ export const ButtonBlock: React.FC<ButtonBlockProps> = ({
   onDelete,
   children
 }) => {
-  // Removed isPreviewMode as it is handled in useInlineEditing, and selection logic handles the rest.
+  const { isPreviewMode } = useCanvasStore();
+
   // Icon Helper (Reused logic from IconBlock)
   const getIcon = (iconName: string) => {
     const iconMap: Record<string, string> = {
@@ -149,7 +151,7 @@ export const ButtonBlock: React.FC<ButtonBlockProps> = ({
           `}
           style={finalStyle}
           onClick={(e) => {
-            if (isSelected) e.preventDefault(); // Prevent link navigation when selected
+            if (!isPreviewMode) e.preventDefault(); // Prevent link navigation when not in preview
           }}
           onDoubleClick={handleDoubleClick}
         >

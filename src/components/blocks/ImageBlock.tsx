@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ImageBlock as ImageBlockType } from '../../schema/types';
 import { BaseBlock } from './BaseBlock';
 import { useAssetStore } from '../../store/assetStore';
+import { useCanvasStore } from '../../store/canvasStore';
 
 interface ImageBlockProps {
   block: ImageBlockType;
@@ -22,6 +23,7 @@ export const ImageBlock: React.FC<ImageBlockProps> = ({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const openAssetModal = useAssetStore((state) => state.openModal);
+  const { isPreviewMode } = useCanvasStore();
 
   // Reset uploading state when src changes (e.g. from inspector or new upload)
   React.useEffect(() => {
@@ -206,7 +208,7 @@ export const ImageBlock: React.FC<ImageBlockProps> = ({
                   target={block.props.target || "_blank"}
                   rel="noopener noreferrer"
                   onClick={(e) => {
-                    if (isSelected) e.preventDefault();
+                    if (!isPreviewMode) e.preventDefault();
                   }}
                   className="block w-full h-full"
                 >
