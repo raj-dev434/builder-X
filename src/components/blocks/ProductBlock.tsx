@@ -10,12 +10,18 @@ export const ProductBlock: React.FC<{
   onDelete: () => void;
 }> = ({ block, isSelected, onSelect, onUpdate, onDelete }) => {
   const {
-    title = 'Premium Product',
-    description = 'Experience the best quality with our latest collection.',
-    price = '99.99',
-    originalPrice = '149.99',
+    source = 'manual',
+    apiUrl,
+    apiDataPath,
+    apiMapping,
+
+    // Default values used as fallbacks or initial state
+    title: initialTitle = 'Premium Product',
+    description: initialDescription = 'Experience the best quality with our latest collection.',
+    price: initialPrice = '99.99',
+    originalPrice: initialOriginalPrice = '149.99',
     currency = '$',
-    imageUrl = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=300&h=200',
+    imageUrl: initialImageUrl = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=300&h=200',
     imageAlt = 'Product Image',
     buttonText = 'Add to Cart',
     buttonUrl = '#',
@@ -27,7 +33,7 @@ export const ProductBlock: React.FC<{
     rating = 4.8,
     reviewCount = 120,
     badge = 'BESTSELLER',
-    
+
     // Styling
     priceColor = '#10b981',
     originalPriceColor = '#9ca3af',
@@ -38,6 +44,53 @@ export const ProductBlock: React.FC<{
   } = block.props;
 
   const [isHovered, setIsHovered] = useState(false);
+
+  // API State
+  const [apiData, setApiData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (source === 'api' && apiUrl) {
+      setLoading(true);
+      setError(null);
+      fetch(apiUrl)
+        .then(res => res.json())
+        .then(data => {
+          let targetData = data;
+          // Traverse data path if provided (e.g. "data.products")
+          if (apiDataPath) {
+            const pathParts = apiDataPath.split('.');
+            for (const part of pathParts) {
+              targetData = targetData?.[part];
+            }
+          }
+
+          // If array, take first item for now (simple product block)
+          if (Array.isArray(targetData)) {
+            setApiData(targetData[0]);
+          } else {
+            setApiData(targetData);
+          }
+          setLoading(false);
+        })
+        .catch(err => {
+          console.error("Failed to fetch product data", err);
+          setError("Failed to load product data");
+          setLoading(false);
+        });
+    } else {
+      setApiData(null);
+    }
+  }, [source, apiUrl, apiDataPath]);
+
+  // Determine final values (Map API data or use manual props)
+  const title = (source === 'api' && apiData) ? (apiData[apiMapping?.title || 'title'] || initialTitle) : initialTitle;
+  const description = (source === 'api' && apiData) ? (apiData[apiMapping?.description || 'description'] || initialDescription) : initialDescription;
+  const price = (source === 'api' && apiData) ? (apiData[apiMapping?.price || 'price'] || initialPrice) : initialPrice;
+  const imageUrl = (source === 'api' && apiData) ? (apiData[apiMapping?.image || 'image'] || apiData[apiMapping?.image || 'thumbnail'] || initialImageUrl) : initialImageUrl;
+  const originalPrice = initialOriginalPrice; // Usually API might not have this, allow fallback or mapping if needed
+
 
   const renderStars = (rating: number) => {
     return (
@@ -52,26 +105,46 @@ export const ProductBlock: React.FC<{
 
   const isHorizontal = layout === 'horizontal';
 
+  if (loading) {
+    return (
+      <BaseBlock block={block} isSelected={isSelected} onSelect={onSelect} onUpdate={onUpdate} onDelete={onDelete}>
+        <div className="flex items-center justify-center p-8 bg-gray-50/10 rounded animate-pulse">
+          <span className="text-sm font-medium text-gray-400">Loading product data...</span>
+        </div>
+      </BaseBlock>
+    );
+  }
+
+  if (error) {
+    return (
+      <BaseBlock block={block} isSelected={isSelected} onSelect={onSelect} onUpdate={onUpdate} onDelete={onDelete}>
+        <div className="flex items-center justify-center p-8 bg-red-500/10 rounded border border-red-500/20">
+          <span className="text-sm font-bold text-red-500">{error}</span>
+        </div>
+      </BaseBlock>
+    );
+  }
+
   return (
-    <BaseBlock 
-      block={block} 
-      isSelected={isSelected} 
-      onSelect={onSelect} 
-      onUpdate={onUpdate} 
+    <BaseBlock
+      block={block}
+      isSelected={isSelected}
+      onSelect={onSelect}
+      onUpdate={onUpdate}
       onDelete={onDelete}
       className="group"
     >
-      <div 
+      <div
         className={`flex ${isHorizontal ? 'flex-row' : 'flex-col'} w-full overflow-hidden transition-all duration-300`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         {/* Image Section */}
-        <div 
+        <div
           className={`relative overflow-hidden ${isHorizontal ? 'w-1/3 min-w-[120px]' : 'w-full aspect-[4/3]'}`}
         >
           {badge && (
-            <div 
+            <div
               className="absolute top-3 right-3 px-2 py-1 rounded text-[10px] font-black uppercase tracking-tighter z-10 shadow-lg"
               style={{ backgroundColor: badgeBgColor, color: badgeTextColor }}
             >

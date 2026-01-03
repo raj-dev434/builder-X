@@ -1,7 +1,7 @@
 import React from 'react';
 import { useCanvasStore } from '../../store/canvasStore';
 import { PropertySection, ControlGroup, inputClasses } from './BlockInspectors';
-import { Palette, Type, Layout, Grid } from 'lucide-react';
+import { Palette, Type, Layout, Grid, RotateCcw } from 'lucide-react';
 
 export const PageSettingsInspector: React.FC = () => {
     const { pageSettings, updatePageSettings } = useCanvasStore();
@@ -53,21 +53,31 @@ export const PageSettingsInspector: React.FC = () => {
 
                     {(!pageSettings?.backgroundType || pageSettings.backgroundType === 'solid') && (
                         <ControlGroup label="Color">
-                            <div className="flex gap-2 items-center">
-                                <div className="w-8 h-8 rounded border border-gray-600 overflow-hidden relative shadow-sm">
+                            <div className="flex flex-col gap-2 w-full">
+                                <div className="flex gap-2 items-center">
+                                    <div className="w-8 h-8 rounded border border-gray-600 overflow-hidden relative shadow-sm shrink-0">
+                                        <input
+                                            type="color"
+                                            value={pageSettings?.backgroundColor || '#ffffff'}
+                                            onChange={(e) => handleChange('backgroundColor', e.target.value)}
+                                            className="absolute inset-0 w-[150%] h-[150%] -top-[25%] -left-[25%] cursor-pointer p-0 border-none m-0"
+                                        />
+                                    </div>
                                     <input
-                                        type="color"
+                                        type="text"
+                                        className={inputClasses}
                                         value={pageSettings?.backgroundColor || '#ffffff'}
                                         onChange={(e) => handleChange('backgroundColor', e.target.value)}
-                                        className="absolute inset-0 w-[150%] h-[150%] -top-[25%] -left-[25%] cursor-pointer p-0 border-none m-0"
+                                        placeholder="#ffffff"
                                     />
+                                    <button
+                                        onClick={() => handleChange('backgroundColor', '#ffffff')}
+                                        className="p-1.5 hover:bg-[#2d3237] rounded text-gray-400 hover:text-white transition-colors"
+                                        title="Reset to White"
+                                    >
+                                        <RotateCcw className="w-3.5 h-3.5" />
+                                    </button>
                                 </div>
-                                <input
-                                    type="text"
-                                    className={inputClasses}
-                                    value={pageSettings?.backgroundColor || '#ffffff'}
-                                    onChange={(e) => handleChange('backgroundColor', e.target.value)}
-                                />
                             </div>
                         </ControlGroup>
                     )}

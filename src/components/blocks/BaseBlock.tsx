@@ -157,7 +157,39 @@ export const BaseBlock: React.FC<BaseBlockProps> = ({
   if (styleProps.isolation) cssProperties.isolation = styleProps.isolation as any;
 
   // Background - Handle both solid and gradient
-  if (styleProps.backgroundType === 'gradient') {
+  if (styleProps.usePageBackground) {
+    // === USE PAGE SETTINGS ===
+    const { pageSettings } = useCanvasStore.getState(); // Access current state directly
+
+    if (pageSettings.backgroundType === 'gradient') {
+      const color1 = pageSettings.gradientStart || '#ffffff';
+      const color2 = pageSettings.gradientEnd || '#d1d5db';
+      const angle = pageSettings.gradientDirection === 'to bottom' ? 180 :
+        pageSettings.gradientDirection === 'to top' ? 0 :
+          pageSettings.gradientDirection === 'to right' ? 90 :
+            pageSettings.gradientDirection === 'to left' ? 270 :
+              parseInt(pageSettings.gradientDirection?.replace('deg', '') || '180');
+
+      const gradientType = pageSettings.gradientType || 'linear';
+
+      if (gradientType === 'linear') {
+        cssProperties.backgroundImage = `linear-gradient(${angle}deg, ${color1} 0%, ${color2} 100%)`;
+      } else {
+        cssProperties.backgroundImage = `radial-gradient(circle, ${color1} 0%, ${color2} 100%)`;
+      }
+    } else {
+      // Solid background from page settings
+      cssProperties.backgroundColor = pageSettings.backgroundColor || '#ffffff';
+      // Also inherit image if present on page
+      if (pageSettings.backgroundImage) {
+        cssProperties.backgroundImage = `url(${pageSettings.backgroundImage})`;
+        cssProperties.backgroundSize = pageSettings.backgroundSize || 'cover';
+        cssProperties.backgroundPosition = pageSettings.backgroundPosition || 'center';
+        cssProperties.backgroundRepeat = pageSettings.backgroundRepeat || 'no-repeat';
+      }
+    }
+  } else if (styleProps.backgroundType === 'gradient') {
+    // === LOCAL GRADIENT ===
     // Generate gradient CSS
     const color1 = styleProps.gradientColor1 || '#667eea';
     const color2 = styleProps.gradientColor2 || '#764ba2';
@@ -170,16 +202,19 @@ export const BaseBlock: React.FC<BaseBlockProps> = ({
       cssProperties.backgroundImage = `radial-gradient(circle, ${color1} 0%, ${color2} 100%)`;
     }
   } else {
+    // === LOCAL SOLID ===
     // Solid background color
     if (styleProps.backgroundColor) cssProperties.backgroundColor = styleProps.backgroundColor;
   }
 
-  // Additional background properties
-  if (styleProps.backgroundImage && styleProps.backgroundType !== 'gradient') {
-    cssProperties.backgroundImage = styleProps.backgroundImage;
+  // Additional background properties (Only if NOT using page background)
+  if (!styleProps.usePageBackground) {
+    if (styleProps.backgroundImage && styleProps.backgroundType !== 'gradient') {
+      cssProperties.backgroundImage = styleProps.backgroundImage;
+    }
+    if (styleProps.backgroundSize) cssProperties.backgroundSize = styleProps.backgroundSize;
+    if (styleProps.backgroundPosition) cssProperties.backgroundPosition = styleProps.backgroundPosition;
   }
-  if (styleProps.backgroundSize) cssProperties.backgroundSize = styleProps.backgroundSize;
-  if (styleProps.backgroundPosition) cssProperties.backgroundPosition = styleProps.backgroundPosition;
 
   // Effects
   if (styleProps.boxShadow) cssProperties.boxShadow = styleProps.boxShadow;
@@ -296,7 +331,7 @@ export const BaseBlock: React.FC<BaseBlockProps> = ({
       )}
       <Tag
         ref={blockRef}
-        id={styleProps.customId || styleProps.customID || block.id}
+        id={styleProps.htmlId || styleProps.customId || styleProps.customID || block.id}
         data-block-type={block.type}
         data-locked={styleProps.isLocked}
         className={combinedClassName}

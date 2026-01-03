@@ -12,6 +12,7 @@ export interface BaseBlock {
 export interface BaseStyleProps {
   // HTML Tag
   tag?: string;
+  htmlId?: string;
 
   // Typography
   fontSize?: string;
@@ -52,6 +53,7 @@ export interface BaseStyleProps {
 
   // Background Type
   backgroundType?: "classic" | "gradient";
+  usePageBackground?: boolean;
 
   // Gradient
   gradientType?: "linear" | "radial";
@@ -903,6 +905,30 @@ export interface GroupBlock extends BaseBlock {
     showTitle?: boolean;
     showDescription?: boolean;
     textAlign?: "left" | "center" | "right";
+
+    // Title Typography
+    titleFontFamily?: string;
+    titleFontSize?: string;
+    titleFontWeight?: string;
+    titleColor?: string;
+    titleTextAlign?: "left" | "center" | "right" | "justify";
+    titleLineHeight?: string;
+    titleLetterSpacing?: string;
+    titleTextTransform?: "none" | "uppercase" | "lowercase" | "capitalize";
+    titleTextDecoration?: "none" | "underline" | "overline" | "line-through";
+    titleFontStyle?: "normal" | "italic" | "oblique";
+
+    // Description Typography
+    descriptionFontFamily?: string;
+    descriptionFontSize?: string;
+    descriptionFontWeight?: string;
+    descriptionColor?: string;
+    descriptionTextAlign?: "left" | "center" | "right" | "justify";
+    descriptionLineHeight?: string;
+    descriptionLetterSpacing?: string;
+    descriptionTextTransform?: "none" | "uppercase" | "lowercase" | "capitalize";
+    descriptionTextDecoration?: "none" | "underline" | "overline" | "line-through";
+    descriptionFontStyle?: "normal" | "italic" | "oblique";
   } & BaseStyleProps;
 }
 
@@ -1141,6 +1167,19 @@ export interface TableBlock extends BaseBlock {
 export interface ProductBlock extends BaseBlock {
   type: "product";
   props: {
+    // API Integration
+    source?: 'manual' | 'api';
+    apiUrl?: string;
+    apiDataPath?: string;
+    apiMapping?: {
+      title?: string;
+      price?: string;
+      image?: string;
+      description?: string;
+      currency?: string;
+      originalPrice?: string;
+    };
+
     title?: string;
     description?: string;
     price?: string;

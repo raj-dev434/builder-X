@@ -1,6 +1,7 @@
 import React, { useState, memo } from 'react';
 import { Block } from '../../schema/types';
 import { useAssetStore } from '../../store/assetStore';
+import { useCanvasStore } from '../../store/canvasStore';
 
 import {
   Layout, Type, AlignLeft, AlignCenter, AlignRight, AlignJustify, Palette,
@@ -455,10 +456,10 @@ export const DimensionsGroup: React.FC<GroupProps> = ({ block, onChange }) => {
   );
 };
 
-export const TypographyGroup: React.FC<GroupProps> = ({ block, onChange }) => {
+export const TypographyGroup: React.FC<GroupProps & { title?: string }> = ({ block, onChange, title = "Typography" }) => {
   const { props } = block;
   return (
-    <PropertySection title="Typography" icon={Type}>
+    <PropertySection title={title} icon={Type}>
       <ControlGroup label="Family">
         <select
           value={props.fontFamily || 'inherit'}
@@ -652,145 +653,168 @@ export const BackgroundControl = ({ props, onChange }: { props: any, onChange: (
 
   return (
     <div className="space-y-3">
-      <div className="flex gap-1 bg-[#1a1d21] p-1 rounded border border-[#3e444b]">
-        <button
-          onClick={() => onChange('backgroundType', 'solid')}
-          className={`flex-1 py-1 text-[10px] font-medium uppercase tracking-wide rounded ${!isGradient ? 'bg-[#3b82f6] text-white' : 'text-gray-400 hover:text-white'}`}
-        >
-          Classic
-        </button>
-        <button
-          onClick={() => onChange('backgroundType', 'gradient')}
-          className={`flex-1 py-1 text-[10px] font-medium uppercase tracking-wide rounded ${isGradient ? 'bg-[#3b82f6] text-white' : 'text-gray-400 hover:text-white'}`}
-        >
-          Gradient
-        </button>
+      {/* Use Page Background Toggle */}
+      <div className="flex items-center justify-between px-2 py-2 bg-[#1a1d21] rounded border border-[#3e444b]">
+        <span className="text-[10px] font-bold text-gray-300 uppercase tracking-wider">Use Page Background</span>
+        <label className="relative inline-flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            className="sr-only peer"
+            checked={props.usePageBackground || false}
+            onChange={(e) => onChange('usePageBackground', e.target.checked)}
+          />
+          <div className="w-8 h-4 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-blue-600"></div>
+        </label>
       </div>
 
-      {!isGradient ? (
-        <div className="space-y-3">
-          <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <label className="text-[10px] text-gray-400 uppercase">Color</label>
-              <button
-                onClick={() => onChange('backgroundColor', '#ffffff')}
-                className="p-1 hover:bg-[#2d3237] rounded transition-colors text-gray-400 hover:text-white"
-                title="Reset to White"
-              >
-                <RotateCcw className="w-3 h-3" />
-              </button>
-            </div>
-            <div className="flex gap-2">
-              <input type="color" value={props.backgroundColor || '#transparent'} onChange={(e) => onChange('backgroundColor', e.target.value)} className="w-8 h-8 rounded border border-[#3e444b] bg-transparent cursor-pointer p-0" />
-              <input type="text" value={props.backgroundColor || 'transparent'} onChange={(e) => onChange('backgroundColor', e.target.value)} className={inputClasses} />
-            </div>
-          </div>
-
-          <div className="space-y-2 border-t border-[#3e444b]/50 pt-2">
-            <div className="flex items-center justify-between">
-              <label className="text-[10px] text-gray-400 uppercase flex items-center gap-1"><ImageIcon className="w-3 h-3" /> Image</label>
-              {props.backgroundImage && <button onClick={() => onChange('backgroundImage', '')} className="text-[10px] text-red-400 hover:text-red-300">Remove</button>}
-            </div>
-
-            <div className="flex gap-2">
-              <input type="text" value={props.backgroundImage ? props.backgroundImage.replace('url(', '').replace(')', '') : ''} readOnly placeholder="No image selected" className={`${inputClasses} opacity-50 cursor-not-allowed`} />
-              <button onClick={() => openAssetModal((url) => onChange('backgroundImage', `url(${url})`))} className="px-3 py-1.5 bg-[#2d3237] hover:bg-[#3e444b] text-[10px] font-bold uppercase rounded border border-[#3e444b] shrink-0 transition-colors">Choose</button>
-            </div>
-
-            {props.backgroundImage && (
-              <div className="grid grid-cols-2 gap-2 mt-2 animate-in fade-in slide-in-from-top-1 duration-200">
-                <div>
-                  <label className="text-[10px] text-gray-400 uppercase mb-1 block">Position</label>
-                  <select value={props.backgroundPosition || 'center'} onChange={(e) => onChange('backgroundPosition', e.target.value)} className={inputClasses}>
-                    <option value="center">Center</option>
-                    <option value="top">Top</option>
-                    <option value="bottom">Bottom</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-[10px] text-gray-400 uppercase mb-1 block">Size</label>
-                  <select value={props.backgroundSize || 'cover'} onChange={(e) => onChange('backgroundSize', e.target.value)} className={inputClasses}>
-                    <option value="cover">Cover</option>
-                    <option value="contain">Contain</option>
-                    <option value="auto">Auto</option>
-                  </select>
-                </div>
-              </div>
-            )}
-          </div>
+      {props.usePageBackground ? (
+        <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded text-center">
+          <p className="text-[10px] text-blue-300">Using standard page background settings.</p>
         </div>
       ) : (
-        <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
-          <div className="grid grid-cols-2 gap-2">
-            <div className="col-span-2 grid grid-cols-2 gap-2 mb-2">
-              <div>
-                <label className="text-[10px] text-gray-400 uppercase mb-1 block">Type</label>
-                <select
-                  value={props.gradientType || 'linear'}
-                  onChange={(e) => onChange('gradientType', e.target.value)}
-                  className="w-full bg-[#1a1d21] border border-[#3e444b] rounded text-xs text-gray-200 h-6 px-1"
-                >
-                  <option value="linear">Linear</option>
-                  <option value="radial">Radial</option>
-                </select>
+        <>
+
+          <div className="flex gap-1 bg-[#1a1d21] p-1 rounded border border-[#3e444b]">
+            <button
+              onClick={() => onChange('backgroundType', 'solid')}
+              className={`flex-1 py-1 text-[10px] font-medium uppercase tracking-wide rounded ${!isGradient ? 'bg-[#3b82f6] text-white' : 'text-gray-400 hover:text-white'}`}
+            >
+              Classic
+            </button>
+            <button
+              onClick={() => onChange('backgroundType', 'gradient')}
+              className={`flex-1 py-1 text-[10px] font-medium uppercase tracking-wide rounded ${isGradient ? 'bg-[#3b82f6] text-white' : 'text-gray-400 hover:text-white'}`}
+            >
+              Gradient
+            </button>
+          </div>
+
+          {!isGradient ? (
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] text-gray-400 uppercase">Color</label>
+                  <button
+                    onClick={() => onChange('backgroundColor', '#ffffff')}
+                    className="p-1 hover:bg-[#2d3237] rounded transition-colors text-gray-400 hover:text-white"
+                    title="Reset to White"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                  </button>
+                </div>
+                <div className="flex gap-2">
+                  <input type="color" value={props.backgroundColor || '#transparent'} onChange={(e) => onChange('backgroundColor', e.target.value)} className="w-8 h-8 rounded border border-[#3e444b] bg-transparent cursor-pointer p-0" />
+                  <input type="text" value={props.backgroundColor || 'transparent'} onChange={(e) => onChange('backgroundColor', e.target.value)} className={inputClasses} />
+                </div>
               </div>
-              {(props.gradientType === 'linear' || !props.gradientType) && (
-                <div className="col-span-2">
-                  <label className="text-[10px] text-gray-400 uppercase mb-1 block">Angle</label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="range"
-                      min="0"
-                      max="360"
-                      value={props.gradientAngle || 90}
-                      onChange={(e) => onChange('gradientAngle', parseFloat(e.target.value))}
-                      className="flex-1 h-1.5 bg-[#1a1d21] rounded-lg appearance-none cursor-pointer accent-blue-500"
-                    />
-                    <div className="flex items-center gap-0.5 bg-[#1a1d21] border border-[#3e444b] rounded px-1 h-6 min-w-[3.5rem]">
-                      <input
-                        type="number"
-                        value={props.gradientAngle || 90}
-                        onChange={(e) => onChange('gradientAngle', parseFloat(e.target.value))}
-                        className="w-full bg-transparent border-0 p-0 text-xs text-right text-gray-200 focus:ring-0"
-                      />
-                      <span className="text-[10px] text-gray-500">°</span>
+
+              <div className="space-y-2 border-t border-[#3e444b]/50 pt-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] text-gray-400 uppercase flex items-center gap-1"><ImageIcon className="w-3 h-3" /> Image</label>
+                  {props.backgroundImage && <button onClick={() => onChange('backgroundImage', '')} className="text-[10px] text-red-400 hover:text-red-300">Remove</button>}
+                </div>
+
+                <div className="flex gap-2">
+                  <input type="text" value={props.backgroundImage ? props.backgroundImage.replace('url(', '').replace(')', '') : ''} readOnly placeholder="No image selected" className={`${inputClasses} opacity-50 cursor-not-allowed`} />
+                  <button onClick={() => openAssetModal((url) => onChange('backgroundImage', `url(${url})`))} className="px-3 py-1.5 bg-[#2d3237] hover:bg-[#3e444b] text-[10px] font-bold uppercase rounded border border-[#3e444b] shrink-0 transition-colors">Choose</button>
+                </div>
+
+                {props.backgroundImage && (
+                  <div className="grid grid-cols-2 gap-2 mt-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                    <div>
+                      <label className="text-[10px] text-gray-400 uppercase mb-1 block">Position</label>
+                      <select value={props.backgroundPosition || 'center'} onChange={(e) => onChange('backgroundPosition', e.target.value)} className={inputClasses}>
+                        <option value="center">Center</option>
+                        <option value="top">Top</option>
+                        <option value="bottom">Bottom</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-gray-400 uppercase mb-1 block">Size</label>
+                      <select value={props.backgroundSize || 'cover'} onChange={(e) => onChange('backgroundSize', e.target.value)} className={inputClasses}>
+                        <option value="cover">Cover</option>
+                        <option value="contain">Contain</option>
+                        <option value="auto">Auto</option>
+                      </select>
                     </div>
                   </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="grid grid-cols-2 gap-2">
+                <div className="col-span-2 grid grid-cols-2 gap-2 mb-2">
+                  <div>
+                    <label className="text-[10px] text-gray-400 uppercase mb-1 block">Type</label>
+                    <select
+                      value={props.gradientType || 'linear'}
+                      onChange={(e) => onChange('gradientType', e.target.value)}
+                      className="w-full bg-[#1a1d21] border border-[#3e444b] rounded text-xs text-gray-200 h-6 px-1"
+                    >
+                      <option value="linear">Linear</option>
+                      <option value="radial">Radial</option>
+                    </select>
+                  </div>
+                  {(props.gradientType === 'linear' || !props.gradientType) && (
+                    <div className="col-span-2">
+                      <label className="text-[10px] text-gray-400 uppercase mb-1 block">Angle</label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="range"
+                          min="0"
+                          max="360"
+                          value={props.gradientAngle || 90}
+                          onChange={(e) => onChange('gradientAngle', parseFloat(e.target.value))}
+                          className="flex-1 h-1.5 bg-[#1a1d21] rounded-lg appearance-none cursor-pointer accent-blue-500"
+                        />
+                        <div className="flex items-center gap-0.5 bg-[#1a1d21] border border-[#3e444b] rounded px-1 h-6 min-w-[3.5rem]">
+                          <input
+                            type="number"
+                            value={props.gradientAngle || 90}
+                            onChange={(e) => onChange('gradientAngle', parseFloat(e.target.value))}
+                            className="w-full bg-transparent border-0 p-0 text-xs text-right text-gray-200 focus:ring-0"
+                          />
+                          <span className="text-[10px] text-gray-500">°</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            <div>
-              <label className="text-[10px] text-gray-400 uppercase mb-1 block">Start Color</label>
-              <div className="flex gap-1">
-                <input type="color" value={props.gradientColor1 || '#667eea'} onChange={(e) => onChange('gradientColor1', e.target.value)} className="w-6 h-6 rounded cursor-pointer bg-transparent border-0 p-0" />
-                <input type="text" value={props.gradientColor1 || '#667eea'} onChange={(e) => onChange('gradientColor1', e.target.value)} className="flex-1 bg-[#1a1d21] border border-[#3e444b] rounded text-xs text-gray-200 h-6 px-1" />
+                <div>
+                  <label className="text-[10px] text-gray-400 uppercase mb-1 block">Start Color</label>
+                  <div className="flex gap-1">
+                    <input type="color" value={props.gradientColor1 || '#667eea'} onChange={(e) => onChange('gradientColor1', e.target.value)} className="w-6 h-6 rounded cursor-pointer bg-transparent border-0 p-0" />
+                    <input type="text" value={props.gradientColor1 || '#667eea'} onChange={(e) => onChange('gradientColor1', e.target.value)} className="flex-1 bg-[#1a1d21] border border-[#3e444b] rounded text-xs text-gray-200 h-6 px-1" />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] text-gray-400 uppercase mb-1 block">End Color</label>
+                  <div className="flex gap-1">
+                    <input type="color" value={props.gradientColor2 || '#764ba2'} onChange={(e) => onChange('gradientColor2', e.target.value)} className="w-6 h-6 rounded cursor-pointer bg-transparent border-0 p-0" />
+                    <input type="text" value={props.gradientColor2 || '#764ba2'} onChange={(e) => onChange('gradientColor2', e.target.value)} className="flex-1 bg-[#1a1d21] border border-[#3e444b] rounded text-xs text-gray-200 h-6 px-1" />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[10px] text-gray-400 uppercase mb-1.5 block">Presets</label>
+                <div className="grid grid-cols-5 gap-1.5">
+                  {presets.map((preset) => (
+                    <button
+                      key={preset.name}
+                      onClick={() => onChange({ gradientColor1: preset.colors[0], gradientColor2: preset.colors[1], backgroundType: 'gradient' })}
+                      className="w-full h-6 rounded-sm border border-[#3e444b] hover:border-blue-500 transition-all shadow-sm"
+                      style={{ background: `linear-gradient(135deg, ${preset.colors[0]}, ${preset.colors[1]})` }}
+                      title={preset.name}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
-            <div>
-              <label className="text-[10px] text-gray-400 uppercase mb-1 block">End Color</label>
-              <div className="flex gap-1">
-                <input type="color" value={props.gradientColor2 || '#764ba2'} onChange={(e) => onChange('gradientColor2', e.target.value)} className="w-6 h-6 rounded cursor-pointer bg-transparent border-0 p-0" />
-                <input type="text" value={props.gradientColor2 || '#764ba2'} onChange={(e) => onChange('gradientColor2', e.target.value)} className="flex-1 bg-[#1a1d21] border border-[#3e444b] rounded text-xs text-gray-200 h-6 px-1" />
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <label className="text-[10px] text-gray-400 uppercase mb-1.5 block">Presets</label>
-            <div className="grid grid-cols-5 gap-1.5">
-              {presets.map((preset) => (
-                <button
-                  key={preset.name}
-                  onClick={() => onChange({ gradientColor1: preset.colors[0], gradientColor2: preset.colors[1], backgroundType: 'gradient' })}
-                  className="w-full h-6 rounded-sm border border-[#3e444b] hover:border-blue-500 transition-all shadow-sm"
-                  style={{ background: `linear-gradient(135deg, ${preset.colors[0]}, ${preset.colors[1]})` }}
-                  title={preset.name}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
+          )}
+        </>
       )}
     </div>
   );
@@ -1361,6 +1385,14 @@ export const AdvancedPanel: React.FC<{ block: Block; onUpdate: (updates: Partial
           <div className="px-4 py-4 space-y-0 pb-6">
             <SpacingGroup block={block} onChange={handleStyleChange} withoutSection={true} />
             <div className="pt-4 space-y-4">
+              <ControlGroup label="Block ID">
+                <input
+                  className={inputClasses}
+                  value={userProps.htmlId || ''}
+                  onChange={(e) => handleStyleChange("htmlId", e.target.value)}
+                  placeholder="e.g. contact-section"
+                />
+              </ControlGroup>
               <div className="flex items-center gap-4 border-t border-[#3e444b] pt-4">
                 <div className="w-1/3"><span className="text-[11px] font-medium text-gray-300 uppercase">Width</span></div>
                 <div className="flex-1">
@@ -2842,6 +2874,7 @@ export const FlexBlockInspector: React.FC<{ block: Block; updateBlock: (id: stri
             <DimensionsGroup block={block} onChange={updateProp} />
           </PropertySection>
           <PropertySection title="Appearance" icon={Palette} defaultOpen={true}>
+            <TypographyGroup block={block} onChange={updateProp} />
             <BackgroundControl props={props} onChange={updateProp} />
             <SpacingGroup block={block} onChange={updateProp} />
             <BorderGroup block={block} onChange={updateProp} />
@@ -3036,6 +3069,34 @@ export const GridBlockInspector: React.FC<{ block: Block; updateBlock: (id: stri
   );
 };
 
+const ScopedTypographyGroup = ({ block, prefix, onChange, title }: { block: any, prefix: string, onChange: any, title: string }) => {
+  const props = block.props;
+
+  // Create a proxy block that maps prefixed props to standard props (e.g. titleFontSize -> fontSize)
+  const proxyProps = {
+    fontFamily: props[`${prefix}FontFamily`],
+    fontSize: props[`${prefix}FontSize`],
+    fontWeight: props[`${prefix}FontWeight`],
+    color: props[`${prefix}Color`],
+    textAlign: props[`${prefix}TextAlign`],
+    lineHeight: props[`${prefix}LineHeight`],
+    letterSpacing: props[`${prefix}LetterSpacing`],
+    textTransform: props[`${prefix}TextTransform`],
+    textDecoration: props[`${prefix}TextDecoration`],
+    fontStyle: props[`${prefix}FontStyle`],
+  };
+
+  const proxyBlock = { ...block, props: proxyProps };
+
+  const handleChange = (key: string, value: any) => {
+    // Map standard prop back to prefixed prop (e.g. fontSize -> titleFontSize)
+    const prefixedKey = `${prefix}${key.charAt(0).toUpperCase() + key.slice(1)}`;
+    onChange(prefixedKey, value);
+  };
+
+  return <TypographyGroup block={proxyBlock} onChange={handleChange} title={title} />;
+};
+
 export const GroupBlockInspector: React.FC<{ block: Block; updateBlock: (id: string, updates: Partial<Block>) => void; activeTab: 'content' | 'style' | 'advanced'; }> = ({ block, updateBlock, activeTab }) => {
   const props = block.props as any;
   const updateProp = (k: string, v: any) => updateBlock(block.id, { props: { ...props, [k]: v } });
@@ -3087,6 +3148,13 @@ export const GroupBlockInspector: React.FC<{ block: Block; updateBlock: (id: str
 
       {activeTab === 'style' && (
         <>
+          {props.showTitle && (
+            <ScopedTypographyGroup block={block} prefix="title" onChange={updateProp} title="Title Typography" />
+          )}
+          {props.showDescription && (
+            <ScopedTypographyGroup block={block} prefix="description" onChange={updateProp} title="Description Typography" />
+          )}
+
           <PropertySection title="Appearance" icon={Palette} defaultOpen={true}>
             <BackgroundControl props={props} onChange={updateProp} />
           </PropertySection>
@@ -4026,56 +4094,111 @@ export const ProductBlockInspector: React.FC<{ block: Block; updateBlock: (id: s
     <div className="flex flex-col space-y-2">
       {activeTab === 'content' && (
         <>
-          <PropertySection title="Basic Info" icon={Type} defaultOpen={true}>
-            <div className="space-y-4">
-              <ControlGroup label="Title">
-                <input type="text" className={inputClasses} value={props.title || ''} onChange={(e) => updateProp('title', e.target.value)} />
-              </ControlGroup>
-              <ControlGroup label="Description">
-                <textarea className={`${inputClasses} min-h-[60px] resize-none`} value={props.description || ''} onChange={(e) => updateProp('description', e.target.value)} />
-              </ControlGroup>
-            </div>
+          <PropertySection title="Source" icon={Link2} defaultOpen={true}>
+            <ControlGroup label="Type">
+              <select className={inputClasses} value={props.source || 'manual'} onChange={(e) => updateProp('source', e.target.value)}>
+                <option value="manual">Manual Input</option>
+                <option value="api">External API</option>
+              </select>
+            </ControlGroup>
+            {props.source === 'api' && (
+              <div className="space-y-3 mt-4 pt-4 border-t border-[#3e444b]">
+                <div className="bg-blue-500/10 border border-blue-500/20 rounded p-2 mb-2">
+                  <p className="text-[10px] text-blue-200">
+                    Fetch product data from an external JSON API. The block will display the first item found.
+                  </p>
+                </div>
+                <ControlGroup label="API URL">
+                  <input type="text" className={inputClasses} value={props.apiUrl || ''} onChange={(e) => updateProp('apiUrl', e.target.value)} placeholder="https://dummyjson.com/products/1" />
+                </ControlGroup>
+                <ControlGroup label="Data Key">
+                  <input type="text" className={inputClasses} value={props.apiDataPath || ''} onChange={(e) => updateProp('apiDataPath', e.target.value)} placeholder="Leave empty if root is object" />
+                </ControlGroup>
+
+                <div className="pt-2 space-y-2">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase">Field Key Mapping</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <label className="text-[10px] text-gray-500">Title</label>
+                      <input type="text" className={inputClasses} value={props.apiMapping?.title || ''} onChange={(e) => updateProp('apiMapping', { ...props.apiMapping, title: e.target.value })} placeholder="e.g. title" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] text-gray-500">Price</label>
+                      <input type="text" className={inputClasses} value={props.apiMapping?.price || ''} onChange={(e) => updateProp('apiMapping', { ...props.apiMapping, price: e.target.value })} placeholder="e.g. price" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] text-gray-500">Image</label>
+                      <input type="text" className={inputClasses} value={props.apiMapping?.image || ''} onChange={(e) => updateProp('apiMapping', { ...props.apiMapping, image: e.target.value })} placeholder="e.g. thumbnail" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] text-gray-500">Desc</label>
+                      <input type="text" className={inputClasses} value={props.apiMapping?.description || ''} onChange={(e) => updateProp('apiMapping', { ...props.apiMapping, description: e.target.value })} placeholder="e.g. description" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </PropertySection>
 
-          <PropertySection title="Pricing" icon={Palette}>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-2">
-                <ControlGroup label="Price">
-                  <input type="text" className={inputClasses} value={props.price || ''} onChange={(e) => updateProp('price', e.target.value)} />
-                </ControlGroup>
-                <ControlGroup label="Curr">
-                  <input type="text" className={inputClasses} value={props.currency || '$'} onChange={(e) => updateProp('currency', e.target.value)} />
-                </ControlGroup>
-              </div>
-              <ControlGroup label="Compare at">
-                <input type="text" className={inputClasses} value={props.originalPrice || ''} onChange={(e) => updateProp('originalPrice', e.target.value)} />
-              </ControlGroup>
-              <div className="flex items-center justify-between px-1">
-                <span className="text-[10px] uppercase font-bold text-gray-400">Show Compare</span>
-                <input type="checkbox" checked={props.showOriginalPrice !== false} onChange={(e) => updateProp('showOriginalPrice', e.target.checked)} className="rounded" />
-              </div>
-            </div>
-          </PropertySection>
+          {props.source !== 'api' && (
+            <>
+              <PropertySection title="Basic Info" icon={Type} defaultOpen={true}>
+                <div className="space-y-4">
+                  <ControlGroup label="Title">
+                    <input type="text" className={inputClasses} value={props.title || ''} onChange={(e) => updateProp('title', e.target.value)} />
+                  </ControlGroup>
+                  <ControlGroup label="Description">
+                    <textarea className={`${inputClasses} min-h-[60px] resize-none`} value={props.description || ''} onChange={(e) => updateProp('description', e.target.value)} />
+                  </ControlGroup>
+                </div>
+              </PropertySection>
+            </>
+          )}
 
-          <PropertySection title="Media & Layout" icon={LayoutIcon}>
-            <div className="space-y-4">
-              <ControlGroup label="Image URL">
-                <input type="text" className={inputClasses} value={props.imageUrl || ''} onChange={(e) => updateProp('imageUrl', e.target.value)} />
-              </ControlGroup>
-              <ControlGroup label="Layout">
-                <select className={inputClasses} value={props.layout || 'vertical'} onChange={(e) => updateProp('layout', e.target.value)}>
-                  <option value="vertical">Vertical Card</option>
-                  <option value="horizontal">Horizontal Row</option>
-                </select>
-              </ControlGroup>
-              <ControlGroup label="Badge">
-                <input type="text" className={inputClasses} value={props.badge || ''} onChange={(e) => updateProp('badge', e.target.value)} placeholder="e.g. NEW" />
-              </ControlGroup>
-              <ControlGroup label="Discount Tag">
-                <input type="text" className={inputClasses} value={props.discount || ''} onChange={(e) => updateProp('discount', e.target.value)} placeholder="e.g. 20% OFF" />
-              </ControlGroup>
-            </div>
-          </PropertySection>
+
+          {props.source !== 'api' && (
+            <>
+              <PropertySection title="Pricing" icon={Palette}>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-2">
+                    <ControlGroup label="Price">
+                      <input type="text" className={inputClasses} value={props.price || ''} onChange={(e) => updateProp('price', e.target.value)} />
+                    </ControlGroup>
+                    <ControlGroup label="Curr">
+                      <input type="text" className={inputClasses} value={props.currency || '$'} onChange={(e) => updateProp('currency', e.target.value)} />
+                    </ControlGroup>
+                  </div>
+                  <ControlGroup label="Compare at">
+                    <input type="text" className={inputClasses} value={props.originalPrice || ''} onChange={(e) => updateProp('originalPrice', e.target.value)} />
+                  </ControlGroup>
+                  <div className="flex items-center justify-between px-1">
+                    <span className="text-[10px] uppercase font-bold text-gray-400">Show Compare</span>
+                    <input type="checkbox" checked={props.showOriginalPrice !== false} onChange={(e) => updateProp('showOriginalPrice', e.target.checked)} className="rounded" />
+                  </div>
+                </div>
+              </PropertySection>
+
+              <PropertySection title="Media & Layout" icon={LayoutIcon}>
+                <div className="space-y-4">
+                  <ControlGroup label="Image URL">
+                    <input type="text" className={inputClasses} value={props.imageUrl || ''} onChange={(e) => updateProp('imageUrl', e.target.value)} />
+                  </ControlGroup>
+                  <ControlGroup label="Layout">
+                    <select className={inputClasses} value={props.layout || 'vertical'} onChange={(e) => updateProp('layout', e.target.value)}>
+                      <option value="vertical">Vertical Card</option>
+                      <option value="horizontal">Horizontal Row</option>
+                    </select>
+                  </ControlGroup>
+                  <ControlGroup label="Badge">
+                    <input type="text" className={inputClasses} value={props.badge || ''} onChange={(e) => updateProp('badge', e.target.value)} placeholder="e.g. NEW" />
+                  </ControlGroup>
+                  <ControlGroup label="Discount Tag">
+                    <input type="text" className={inputClasses} value={props.discount || ''} onChange={(e) => updateProp('discount', e.target.value)} placeholder="e.g. 20% OFF" />
+                  </ControlGroup>
+                </div>
+              </PropertySection>
+            </>
+          )}
 
           <PropertySection title="Action Button" icon={MousePointer2}>
             <div className="space-y-4">
@@ -4515,6 +4638,23 @@ export const NavbarBlockInspector: React.FC<{ block: Block; updateBlock: (id: st
     }
   };
   const openAssetModal = useAssetStore((state) => state.openModal);
+  const blocks = useCanvasStore((state) => state.blocks);
+
+  // Helper to find all blocks with htmlId
+  const getAnchorTargets = (blocks: Block[]): { id: string; htmlId: string; type: string }[] => {
+    let targets: { id: string; htmlId: string; type: string }[] = [];
+    blocks.forEach((b) => {
+      if (b.props.htmlId) {
+        targets.push({ id: b.id, htmlId: b.props.htmlId, type: b.type });
+      }
+      if (b.children) {
+        targets = [...targets, ...getAnchorTargets(b.children)];
+      }
+    });
+    return targets;
+  };
+
+  const anchorTargets = getAnchorTargets(blocks);
 
   const handleLinkChange = (index: number, key: string, value: any) => {
     const newLinks = [...(props.links || [])];
@@ -4538,6 +4678,7 @@ export const NavbarBlockInspector: React.FC<{ block: Block; updateBlock: (id: st
             <ControlGroup label="Brand Text">
               <input type="text" className={inputClasses} value={props.brand || ''} onChange={(e) => updateProp('brand', e.target.value)} />
             </ControlGroup>
+            {/* ... brand image ... */}
             <div className="bg-[#1a1d21] p-3 rounded border border-[#3e444b] text-center mt-2">
               {props.brandImage ? (
                 <div className="relative group/logo inline-block">
@@ -4575,13 +4716,24 @@ export const NavbarBlockInspector: React.FC<{ block: Block; updateBlock: (id: st
                       <Trash2 size={14} />
                     </button>
                   </div>
-                  <input
-                    type="text"
-                    className={inputClasses}
-                    value={link.url || ''}
-                    onChange={(e) => handleLinkChange(index, 'url', e.target.value)}
-                    placeholder="https://"
-                  />
+
+                  <div className="relative">
+                    <input
+                      type="text"
+                      className={inputClasses}
+                      value={link.url || ''}
+                      onChange={(e) => handleLinkChange(index, 'url', e.target.value)}
+                      placeholder="https:// or #section-id"
+                      list={`anchors-${index}`}
+                    />
+                    <datalist id={`anchors-${index}`}>
+                      {anchorTargets.map((target) => (
+                        <option key={target.id} value={`#${target.htmlId}`}>
+                          Scroll to: {target.type} (#{target.htmlId})
+                        </option>
+                      ))}
+                    </datalist>
+                  </div>
                   <div className="flex items-center gap-4">
                     <label className="flex items-center gap-1.5 text-[10px] text-gray-400 cursor-pointer">
                       <input type="checkbox" checked={!!link.newTab} onChange={(e) => handleLinkChange(index, 'newTab', e.target.checked)} className="rounded bg-[#2d3237]" />

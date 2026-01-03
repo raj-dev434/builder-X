@@ -10,7 +10,7 @@ export const GroupBlock: React.FC<{
   onDelete: () => void;
   children?: React.ReactNode;
 }> = ({ block, isSelected, onSelect, onUpdate, onDelete, children }) => {
-  const { 
+  const {
     title = 'Group',
     description = '',
     showTitle = true,
@@ -30,14 +30,46 @@ export const GroupBlock: React.FC<{
         {(showTitle || showDescription) && (
           <div className="mb-4 border-b border-gray-100/10 pb-3">
             {showTitle && title && (
-              <h3 className="text-lg font-semibold tracking-tight text-gray-800 dark:text-gray-100">{title}</h3>
+              <h3
+                className="text-lg font-semibold tracking-tight"
+                style={{
+                  fontFamily: block.props.titleFontFamily,
+                  fontSize: block.props.titleFontSize,
+                  fontWeight: block.props.titleFontWeight,
+                  color: block.props.titleColor,
+                  textAlign: block.props.titleTextAlign as any,
+                  lineHeight: block.props.titleLineHeight,
+                  letterSpacing: block.props.titleLetterSpacing,
+                  textTransform: block.props.titleTextTransform as any,
+                  textDecoration: block.props.titleTextDecoration as any,
+                  fontStyle: block.props.titleFontStyle as any,
+                }}
+              >
+                {title}
+              </h3>
             )}
             {showDescription && description && (
-              <p className="text-xs text-gray-500 mt-1 font-medium opacity-70">{description}</p>
+              <p
+                className="text-xs mt-1 font-medium opacity-70"
+                style={{
+                  fontFamily: block.props.descriptionFontFamily,
+                  fontSize: block.props.descriptionFontSize,
+                  fontWeight: block.props.descriptionFontWeight,
+                  color: block.props.descriptionColor,
+                  textAlign: block.props.descriptionTextAlign as any,
+                  lineHeight: block.props.descriptionLineHeight,
+                  letterSpacing: block.props.descriptionLetterSpacing,
+                  textTransform: block.props.descriptionTextTransform as any,
+                  textDecoration: block.props.descriptionTextDecoration as any,
+                  fontStyle: block.props.descriptionFontStyle as any,
+                }}
+              >
+                {description}
+              </p>
             )}
           </div>
         )}
-        
+
         <div className="w-full">
           {children || (
             <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-300/20 rounded-lg bg-black/5 text-gray-400 min-h-[120px] transition-all hover:bg-black/10 hover:border-blue-500/30">
