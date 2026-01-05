@@ -2,6 +2,10 @@ import React from 'react';
 import { BaseBlock } from './BaseBlock';
 import { Block, FormBlock as FormBlockType } from '../../schema/types';
 
+import { DEFAULT_FORM_FIELDS } from './formConstants';
+
+// export const DEFAULT_FORM_FIELDS = ... (Removed)
+
 export const FormBlock: React.FC<{
   block: FormBlockType;
   isSelected: boolean;
@@ -11,15 +15,12 @@ export const FormBlock: React.FC<{
 }> = ({ block, isSelected, onSelect, onUpdate, onDelete }) => {
   const [formData, setFormData] = React.useState<Record<string, string | string[]>>({});
   const [formErrors, setFormErrors] = React.useState<Record<string, string>>({});
-  
+
   const {
     title = 'Contact Us',
     description = 'Get in touch with us',
-    fields = [
-      { id: 'name', type: 'text', label: 'Name', placeholder: 'Enter your name', required: true },
-      { id: 'email', type: 'email', label: 'Email', placeholder: 'Enter your email', required: true },
-      { id: 'message', type: 'textarea', label: 'Message', placeholder: 'Enter your message', required: false }
-    ],
+    submitAction = 'email',
+    fields = DEFAULT_FORM_FIELDS,
     submitText = 'Submit',
     inputTextColor = 'inherit',
     inputBgColor = 'white',
@@ -58,7 +59,7 @@ export const FormBlock: React.FC<{
   };
 
   const handleInputChange = (id: string, value: string | string[]) => {
-    if (isSelected) return;
+    // if (isSelected) return; // Allow typing while selected
     setFormData(prev => ({ ...prev, [id]: value }));
     if (formErrors[id]) {
       setFormErrors(prev => {
@@ -71,22 +72,54 @@ export const FormBlock: React.FC<{
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (isSelected) {
+    // Allow submission testing while selected
+    /* if (isSelected) {
       onSelect();
       return;
-    }
+    } */
     // Simple validation logic (simplified for brevity but functional)
     const newErrors: Record<string, string> = {};
     fields.forEach(f => {
       if (f.required && !formData[f.id]) newErrors[f.id] = 'Required';
     });
-    
+
     if (Object.keys(newErrors).length > 0) {
       setFormErrors(newErrors);
       return;
     }
-    
-    alert('Form submitted! (Demo only)');
+
+    // --- Submission Handling ---
+    // Use scoped variables (submitAction has default)
+    // Note: emailTo comes from props destructuring at top as well?
+    // Let's check if emailTo is destructured at top. No it wasn't in original.
+    // I need to destructure emailTo and successMessage at top if I want to use them consistently, or just read from props here.
+    // But for submitAction I MUST use the one with default.
+    const { emailTo, successMessage } = block.props;
+
+    if (submitAction === 'email') {
+      if (!emailTo) {
+        alert('Configuration Missing: Please set a "To Email" address in the Block Settings.');
+        return;
+      }
+
+      // Construct body
+      const subject = encodeURIComponent(`New form submission: ${title}`);
+      const body = encodeURIComponent(
+        Object.entries(formData)
+          .map(([key, val]) => `${key}: ${val}`)
+          .join('\n')
+      );
+
+      // Check for Gmail preference
+      if (block.props.useGmail) {
+        const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${emailTo}&su=${subject}&body=${body}`;
+        window.open(gmailUrl, '_blank');
+      } else {
+        window.location.href = `mailto:${emailTo}?subject=${subject}&body=${body}`;
+      }
+    } else {
+      alert(successMessage || 'Form submitted! (Demo only)');
+    }
   };
 
   return (
@@ -101,15 +134,15 @@ export const FormBlock: React.FC<{
       <div className="w-full flex flex-col">
         {(showTitle || showDescription) && (
           <div className="mb-6">
-            {showTitle && <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-1">{title}</h3>}
-            {showDescription && <p className="text-sm text-gray-500 dark:text-gray-400 opacity-80">{description}</p>}
+            {showTitle && <h3 className="text-xl font-bold mb-1">{title}</h3>}
+            {showDescription && <p className="text-sm opacity-80">{description}</p>}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
           {fields.map((field) => (
             <div key={field.id} className="flex flex-col space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 flex items-center">
+              <label className="text-xs font-bold uppercase tracking-wider flex items-center opacity-80">
                 {field.label}
                 {field.required && <span className="text-red-500 ml-1">*</span>}
               </label>
@@ -121,7 +154,7 @@ export const FormBlock: React.FC<{
                   placeholder={field.placeholder}
                   value={formData[field.id] as string || ''}
                   onChange={(e) => handleInputChange(field.id, e.target.value)}
-                  disabled={isSelected}
+
                   className="focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
                 />
               ) : field.type === 'select' ? (
@@ -129,11 +162,11 @@ export const FormBlock: React.FC<{
                   style={inputStyle}
                   value={formData[field.id] as string || ''}
                   onChange={(e) => handleInputChange(field.id, e.target.value)}
-                  disabled={isSelected}
+
                   className="focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none appearance-none bg-no-repeat bg-[right_0.75rem_center] bg-[length:1em_1em]"
                 >
                   <option value="">{field.placeholder || 'Select...'}</option>
-                  {field.options?.map((opt, i) => <option key={i} value={opt}>{opt}</option>)}
+                  {(field as any).options?.map((opt: string, i: number) => <option key={i} value={opt}>{opt}</option>)}
                 </select>
               ) : (
                 <input
@@ -142,19 +175,19 @@ export const FormBlock: React.FC<{
                   placeholder={field.placeholder}
                   value={formData[field.id] as string || ''}
                   onChange={(e) => handleInputChange(field.id, e.target.value)}
-                  disabled={isSelected}
+
                   className="focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
                 />
               )}
-              
+
               {formErrors[field.id] && (
                 <span className="text-[10px] font-bold text-red-500 uppercase tracking-tight">{formErrors[field.id]}</span>
               )}
             </div>
           ))}
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             style={buttonStyle}
             className="hover:brightness-110 active:scale-[0.98] transition-all duration-200 shadow-sm"
           >

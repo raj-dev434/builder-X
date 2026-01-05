@@ -12,6 +12,7 @@ import {
   CheckSquare, List, Settings, X, MousePointer2 as Pointer,
   Plus, Calendar, Lock, Trash2, RotateCcw, Code
 } from 'lucide-react';
+import { DEFAULT_FORM_FIELDS } from '../blocks/formConstants';
 
 // ==========================================
 // SHARED UTILITIES & COMPONENTS
@@ -3426,7 +3427,7 @@ export const FormBlockInspector: React.FC<{ block: Block; updateBlock: (id: stri
 
           <PropertySection title="Form Fields" icon={Layers}>
             <div className="space-y-2">
-              {(props.fields || []).map((field: any, index: number) => (
+              {(props.fields || DEFAULT_FORM_FIELDS).map((field: any, index: number) => (
                 <div key={index} className="p-3 bg-[#1a1d21] rounded border border-[#3e444b] space-y-2 transition-all hover:border-[#4e555e]">
                   <div className="flex justify-between items-center bg-[#2a2e34] -m-3 p-2 mb-1 rounded-t border-b border-[#3e444b]">
                     <span className="text-[10px] uppercase font-bold text-blue-400">{field.type} Field</span>
@@ -3482,6 +3483,22 @@ export const FormBlockInspector: React.FC<{ block: Block; updateBlock: (id: stri
                 <option value="GET">GET</option>
               </select>
             </ControlGroup>
+            {(props.submitAction === 'email' || !props.submitAction) && (
+              <>
+                <ControlGroup label="Email To">
+                  <input type="email" className={inputClasses} value={props.emailTo || ''} onChange={(e) => updateProp('emailTo', e.target.value)} placeholder="you@example.com" />
+                </ControlGroup>
+                <div className="flex items-center justify-between px-1 py-1">
+                  <label className="text-xs text-gray-400">Use Gmail Web</label>
+                  <input
+                    type="checkbox"
+                    checked={props.useGmail || false}
+                    onChange={(e) => updateProp('useGmail', e.target.checked)}
+                    className="accent-blue-500 bg-[#1a1d21] border-[#3e444b] rounded"
+                  />
+                </div>
+              </>
+            )}
             {props.submitAction === 'webhook' && (
               <ControlGroup label="Webhook URL">
                 <input type="text" className={inputClasses} value={props.webhookUrl || ''} onChange={(e) => updateProp('webhookUrl', e.target.value)} placeholder="https://..." />
@@ -3504,6 +3521,10 @@ export const FormBlockInspector: React.FC<{ block: Block; updateBlock: (id: stri
 
       {activeTab === 'style' && (
         <>
+          <PropertySection title="General Text" icon={Type} defaultOpen={true}>
+            <TypographyGroup block={block} onChange={updateProp} />
+          </PropertySection>
+
           <PropertySection title="Fields Style" icon={Type} defaultOpen={true}>
             <ControlGroup label="Text Color">
               <div className="flex gap-2">
@@ -4137,6 +4158,112 @@ export const ProductBlockInspector: React.FC<{ block: Block; updateBlock: (id: s
                   </div>
                 </div>
               </div>
+            )}
+
+            {props.source === 'api' && (
+              <PropertySection title="Advanced Settings" icon={LayoutIcon} defaultOpen={false}>
+                <div className="space-y-4">
+                  <ControlGroup label="Layout Type">
+                    <select
+                      className={inputClasses}
+                      value={(() => {
+                        if (props.enableScroll && props.scrollDirection === 'horizontal') return 'carousel';
+                        if (props.enableScroll && props.scrollDirection === 'vertical') return 'list';
+                        return props.displayMode === 'single' ? 'single' : 'grid';
+                      })()}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === 'single') {
+                          updateBlock(block.id, { props: { ...props, displayMode: 'single', enableScroll: false } });
+                        } else if (val === 'grid') {
+                          updateBlock(block.id, { props: { ...props, displayMode: 'grid', enableScroll: false } });
+                        } else if (val === 'carousel') {
+                          updateBlock(block.id, { props: { ...props, displayMode: 'grid', enableScroll: true, scrollDirection: 'horizontal' } });
+                        } else if (val === 'list') {
+                          updateBlock(block.id, { props: { ...props, displayMode: 'grid', enableScroll: true, scrollDirection: 'vertical', gridColumns: 1 } });
+                        }
+                      }}
+                    >
+                      <option value="grid">Grid (Responsive)</option>
+                      <option value="single">Single Item</option>
+                      <option value="carousel">Carousel (Scroll Horizontal)</option>
+                      <option value="list">List (Scroll Vertical)</option>
+                    </select>
+                  </ControlGroup>
+
+                  {/* Dynamic Settings based on Layout Type */}
+                  {props.displayMode === 'grid' && (
+                    <>
+                      <ControlGroup label="Items Limit">
+                        <input
+                          type="number"
+                          min="1"
+                          max="50"
+                          className={inputClasses}
+                          value={props.itemsLimit === undefined ? '' : props.itemsLimit}
+                          placeholder="6"
+                          onChange={(e) => {
+                            const val = parseInt(e.target.value);
+                            if (isNaN(val)) updateProp('itemsLimit', undefined);
+                            else updateProp('itemsLimit', val);
+                          }}
+                        />
+                      </ControlGroup>
+
+                      <ControlGroup label="Card Layout">
+                        <select className={inputClasses} value={props.layout || 'vertical'} onChange={(e) => updateProp('layout', e.target.value)}>
+                          <option value="vertical">Vertical (Standard)</option>
+                          <option value="horizontal">Horizontal (Side-by-Side)</option>
+                        </select>
+                      </ControlGroup>
+
+                      {/* Grid Specific */}
+                      {!props.enableScroll && (
+                        <div className="space-y-3 pt-2">
+                          <ControlGroup label={`Columns (${props.gridColumns || 3})`}>
+                            <input
+                              type="range" min="1" max="6" step="1"
+                              className="w-full h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                              value={props.gridColumns || 3}
+                              onChange={(e) => updateProp('gridColumns', parseInt(e.target.value))}
+                            />
+                          </ControlGroup>
+                          <ControlGroup label="Gap">
+                            <UnitControl value={props.gap || '1rem'} onChange={(v) => updateProp('gap', v)} />
+                          </ControlGroup>
+                        </div>
+                      )}
+
+                      {/* Carousel Specific */}
+                      {props.enableScroll && props.scrollDirection === 'horizontal' && (
+                        <div className="space-y-3 pt-2">
+                          <ControlGroup label="Card Width">
+                            <UnitControl value={props.cardWidth || '300px'} onChange={(v) => updateProp('cardWidth', v)} placeholder="300px" />
+                          </ControlGroup>
+                          <ControlGroup label="Gap">
+                            <UnitControl value={props.gap || '1rem'} onChange={(v) => updateProp('gap', v)} />
+                          </ControlGroup>
+                        </div>
+                      )}
+
+                      {/* List Specific */}
+                      {props.enableScroll && props.scrollDirection === 'vertical' && (
+                        <div className="space-y-3 pt-2">
+                          <ControlGroup label="Max Height">
+                            <UnitControl value={props.containerHeight || '400px'} onChange={(v) => updateProp('containerHeight', v)} />
+                          </ControlGroup>
+                          <ControlGroup label="Gap">
+                            <UnitControl value={props.gap || '1rem'} onChange={(v) => updateProp('gap', v)} />
+                          </ControlGroup>
+                          <ControlGroup label="Card Width">
+                            <UnitControl value={props.cardWidth || '100%'} onChange={(v) => updateProp('cardWidth', v)} placeholder="100%" />
+                          </ControlGroup>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </PropertySection>
             )}
           </PropertySection>
 

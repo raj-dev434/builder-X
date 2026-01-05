@@ -1,7 +1,7 @@
 import React from 'react';
 import { useCanvasStore } from '../../store/canvasStore';
 import { PropertySection, ControlGroup, inputClasses } from './BlockInspectors';
-import { Palette, Type, Layout, Grid, RotateCcw } from 'lucide-react';
+import { Palette, Layout, RotateCcw } from 'lucide-react';
 
 export const PageSettingsInspector: React.FC = () => {
     const { pageSettings, updatePageSettings } = useCanvasStore();
@@ -111,42 +111,28 @@ export const PageSettingsInspector: React.FC = () => {
                             </ControlGroup>
 
                             <ControlGroup label="Start Color">
-                                <div className="flex gap-2 items-center">
-                                    <div className="w-8 h-8 rounded border border-gray-600 overflow-hidden relative shadow-sm">
-                                        <input
-                                            type="color"
-                                            value={pageSettings?.gradientStart || '#ffffff'}
-                                            onChange={(e) => handleChange('gradientStart', e.target.value)}
-                                            className="absolute inset-0 w-[150%] h-[150%] -top-[25%] -left-[25%] cursor-pointer p-0 border-none m-0"
-                                        />
-                                    </div>
-                                    <input
-                                        type="text"
-                                        className={inputClasses}
-                                        value={pageSettings?.gradientStart || '#ffffff'}
-                                        onChange={(e) => handleChange('gradientStart', e.target.value)}
-                                    />
-                                </div>
+                                <BufferedColorInput
+                                    value={pageSettings?.gradientStart || '#ffffff'}
+                                    onChange={(val) => handleChange('gradientStart', val)}
+                                />
                             </ControlGroup>
 
                             <ControlGroup label="End Color">
-                                <div className="flex gap-2 items-center">
-                                    <div className="w-8 h-8 rounded border border-gray-600 overflow-hidden relative shadow-sm">
-                                        <input
-                                            type="color"
-                                            value={pageSettings?.gradientEnd || '#d1d5db'}
-                                            onChange={(e) => handleChange('gradientEnd', e.target.value)}
-                                            className="absolute inset-0 w-[150%] h-[150%] -top-[25%] -left-[25%] cursor-pointer p-0 border-none m-0"
-                                        />
-                                    </div>
-                                    <input
-                                        type="text"
-                                        className={inputClasses}
-                                        value={pageSettings?.gradientEnd || '#d1d5db'}
-                                        onChange={(e) => handleChange('gradientEnd', e.target.value)}
-                                    />
-                                </div>
+                                <BufferedColorInput
+                                    value={pageSettings?.gradientEnd || '#d1d5db'}
+                                    onChange={(val) => handleChange('gradientEnd', val)}
+                                />
                             </ControlGroup>
+
+                            <div className="px-4 mb-4">
+                                <button
+                                    onClick={() => updatePageSettings({ gradientStart: '#ffffff', gradientEnd: '#ffffff' })}
+                                    className="w-full py-1.5 flex items-center justify-center gap-2 text-xs font-medium text-gray-400 hover:text-white bg-[#2d3237] hover:bg-[#3e444b] rounded transition-colors border border-transparent hover:border-gray-600"
+                                >
+                                    <RotateCcw className="w-3 h-3" />
+                                    <span>Reset Gradient to White</span>
+                                </button>
+                            </div>
                         </>
                     )}
 
@@ -216,7 +202,7 @@ export const PageSettingsInspector: React.FC = () => {
                     )}
                 </PropertySection>
 
-                <PropertySection title="Global Typography" icon={Type} defaultOpen={false}>
+                {/* <PropertySection title="Global Typography" icon={Type} defaultOpen={false}>
                     <ControlGroup label="Font Family">
                         <select
                             className={inputClasses}
@@ -269,8 +255,60 @@ export const PageSettingsInspector: React.FC = () => {
                             </div>
                         </ControlGroup>
                     )}
-                </PropertySection>
+                </PropertySection> */}
             </div>
         </div >
+    );
+};
+
+const BufferedColorInput: React.FC<{ value: string; onChange: (val: string) => void }> = ({ value, onChange }) => {
+    const [localValue, setLocalValue] = React.useState(value);
+
+    React.useEffect(() => {
+        setLocalValue(value);
+    }, [value]);
+
+    const handleApply = () => {
+        onChange(localValue);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            handleApply();
+        }
+    };
+
+    return (
+        <div className="flex flex-col gap-2 w-full">
+            <div className="flex gap-2 items-center">
+                <div className="w-8 h-8 rounded border border-gray-600 overflow-hidden relative shadow-sm shrink-0">
+                    <input
+                        type="color"
+                        value={localValue}
+                        onChange={(e) => {
+                            setLocalValue(e.target.value);
+                            onChange(e.target.value);
+                        }}
+                        className="absolute inset-0 w-[150%] h-[150%] -top-[25%] -left-[25%] cursor-pointer p-0 border-none m-0"
+                    />
+                </div>
+                <div className="flex-1 flex gap-1">
+                    <input
+                        type="text"
+                        className={`${inputClasses} flex-1 min-w-0`}
+                        value={localValue}
+                        onChange={(e) => setLocalValue(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        placeholder="#000000"
+                    />
+                    <button
+                        onClick={handleApply}
+                        className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-[10px] uppercase font-bold rounded transition-colors"
+                    >
+                        Apply
+                    </button>
+                </div>
+            </div>
+        </div>
     );
 };

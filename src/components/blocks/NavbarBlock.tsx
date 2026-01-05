@@ -112,7 +112,7 @@ export const NavbarBlock: React.FC<NavbarBlockProps> = ({
               }
             }}
             onClick={(e) => {
-              if (isSelected || !isPreviewMode) {
+              if (!isPreviewMode) {
                 e.preventDefault();
               }
             }}
@@ -148,7 +148,7 @@ export const NavbarBlock: React.FC<NavbarBlockProps> = ({
                 suppressContentEditableWarning
                 onBlur={(e) => handleLinkChange(index, e.currentTarget.textContent || '')}
                 onClick={(e) => {
-                  if (isSelected || !isPreviewMode) {
+                  if (!isPreviewMode) {
                     e.preventDefault();
                   }
                 }}
@@ -215,7 +215,7 @@ export const NavbarBlock: React.FC<NavbarBlockProps> = ({
                 suppressContentEditableWarning
                 onBlur={(e) => handleLinkChange(index, e.currentTarget.textContent || '')}
                 onClick={(e) => {
-                  if (isSelected || !isPreviewMode) {
+                  if (!isPreviewMode) {
                     e.preventDefault();
                   }
                 }}

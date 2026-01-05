@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { BaseBlock } from './BaseBlock';
 import { ProductBlock as ProductBlockType, Block } from '../../schema/types';
+import { useCanvasStore } from '../../store/canvasStore';
 
 export const ProductBlock: React.FC<{
   block: ProductBlockType;
@@ -14,6 +15,17 @@ export const ProductBlock: React.FC<{
     apiUrl,
     apiDataPath,
     apiMapping,
+
+    // Layout
+    displayMode = 'single',
+    itemsLimit = 6,
+    gap = '1rem',
+
+    // Sizing & Scroll
+    cardWidth = '300px',
+    enableScroll = false,
+    scrollDirection = 'horizontal',
+    containerHeight = '400px',
 
     // Default values used as fallbacks or initial state
     title: initialTitle = 'Premium Product',
@@ -43,7 +55,8 @@ export const ProductBlock: React.FC<{
     buttonTextColor = '#ffffff'
   } = block.props;
 
-  const [isHovered, setIsHovered] = useState(false);
+  const viewDevice = useCanvasStore((state) => state.viewDevice);
+  const [hoveredIndex, setHoveredIndex] = useState<number>(-1);
 
   // API State
   const [apiData, setApiData] = useState<any>(null);
@@ -58,39 +71,24 @@ export const ProductBlock: React.FC<{
         .then(res => res.json())
         .then(data => {
           let targetData = data;
-          // Traverse data path if provided (e.g. "data.products")
           if (apiDataPath) {
             const pathParts = apiDataPath.split('.');
             for (const part of pathParts) {
               targetData = targetData?.[part];
             }
           }
-
-          // If array, take first item for now (simple product block)
-          if (Array.isArray(targetData)) {
-            setApiData(targetData[0]);
-          } else {
-            setApiData(targetData);
-          }
+          setApiData(targetData);
           setLoading(false);
         })
         .catch(err => {
           console.error("Failed to fetch product data", err);
-          setError("Failed to load product data");
+          setError("Failed to load data");
           setLoading(false);
         });
     } else {
       setApiData(null);
     }
   }, [source, apiUrl, apiDataPath]);
-
-  // Determine final values (Map API data or use manual props)
-  const title = (source === 'api' && apiData) ? (apiData[apiMapping?.title || 'title'] || initialTitle) : initialTitle;
-  const description = (source === 'api' && apiData) ? (apiData[apiMapping?.description || 'description'] || initialDescription) : initialDescription;
-  const price = (source === 'api' && apiData) ? (apiData[apiMapping?.price || 'price'] || initialPrice) : initialPrice;
-  const imageUrl = (source === 'api' && apiData) ? (apiData[apiMapping?.image || 'image'] || apiData[apiMapping?.image || 'thumbnail'] || initialImageUrl) : initialImageUrl;
-  const originalPrice = initialOriginalPrice; // Usually API might not have this, allow fallback or mapping if needed
-
 
   const renderStars = (rating: number) => {
     return (
@@ -103,46 +101,27 @@ export const ProductBlock: React.FC<{
     );
   };
 
-  const isHorizontal = layout === 'horizontal';
+  // Helper to render a single Product Card
+  const renderCard = (data: any = null, index: number = 0) => {
+    const isApi = source === 'api' && data;
 
-  if (loading) {
+    const currentTitle = isApi ? (data[apiMapping?.title || 'title'] || initialTitle) : initialTitle;
+    const currentDesc = isApi ? (data[apiMapping?.description || 'description'] || initialDescription) : initialDescription;
+    const currentPrice = isApi ? (data[apiMapping?.price || 'price'] || initialPrice) : initialPrice;
+    const currentImage = isApi ? (data[apiMapping?.image || 'image'] || data[apiMapping?.image || 'thumbnail'] || initialImageUrl) : initialImageUrl;
+    const originalPrice = initialOriginalPrice;
+
+    const isCardHovered = hoveredIndex === index;
+
     return (
-      <BaseBlock block={block} isSelected={isSelected} onSelect={onSelect} onUpdate={onUpdate} onDelete={onDelete}>
-        <div className="flex items-center justify-center p-8 bg-gray-50/10 rounded animate-pulse">
-          <span className="text-sm font-medium text-gray-400">Loading product data...</span>
-        </div>
-      </BaseBlock>
-    );
-  }
-
-  if (error) {
-    return (
-      <BaseBlock block={block} isSelected={isSelected} onSelect={onSelect} onUpdate={onUpdate} onDelete={onDelete}>
-        <div className="flex items-center justify-center p-8 bg-red-500/10 rounded border border-red-500/20">
-          <span className="text-sm font-bold text-red-500">{error}</span>
-        </div>
-      </BaseBlock>
-    );
-  }
-
-  return (
-    <BaseBlock
-      block={block}
-      isSelected={isSelected}
-      onSelect={onSelect}
-      onUpdate={onUpdate}
-      onDelete={onDelete}
-      className="group"
-    >
       <div
-        className={`flex ${isHorizontal ? 'flex-row' : 'flex-col'} w-full overflow-hidden transition-all duration-300`}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        key={index}
+        className="product-card flex overflow-hidden transition-all duration-300 bg-transparent relative group/card"
+        onMouseEnter={() => setHoveredIndex(index)}
+        onMouseLeave={() => setHoveredIndex(-1)}
       >
         {/* Image Section */}
-        <div
-          className={`relative overflow-hidden ${isHorizontal ? 'w-1/3 min-w-[120px]' : 'w-full aspect-[4/3]'}`}
-        >
+        <div className="product-card-image relative overflow-hidden rounded-md">
           {badge && (
             <div
               className="absolute top-3 right-3 px-2 py-1 rounded text-[10px] font-black uppercase tracking-tighter z-10 shadow-lg"
@@ -151,15 +130,15 @@ export const ProductBlock: React.FC<{
               {badge}
             </div>
           )}
-          {discount && isHovered && (
+          {discount && isCardHovered && (
             <div className="absolute top-3 left-3 px-2 py-1 rounded bg-emerald-500 text-white text-[10px] font-bold z-10 animate-in fade-in slide-in-from-left-2">
               {discount}
             </div>
           )}
           <img
-            src={imageUrl}
-            alt={imageAlt}
-            className={`w-full h-full object-cover transition-transform duration-700 ${isHovered ? 'scale-110' : 'scale-100'}`}
+            src={currentImage}
+            alt={imageAlt || currentTitle}
+            className={`w-full h-full object-cover transition-transform duration-700 ${isCardHovered ? 'scale-110' : 'scale-100'}`}
             onError={(e) => {
               (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x300?text=Product';
             }}
@@ -167,24 +146,24 @@ export const ProductBlock: React.FC<{
         </div>
 
         {/* Content Section */}
-        <div className={`flex-1 flex flex-col p-4 ${isHorizontal ? 'justify-center' : ''}`}>
+        <div className="product-card-content flex-1 flex flex-col p-4">
           <div className="mb-2">
-            <h3 className="text-lg font-black leading-tight tracking-tight group-hover:text-blue-500 transition-colors">
-              {title}
+            <h3 className="text-lg font-black leading-tight tracking-tight group-hover/card:text-blue-500 transition-colors">
+              {currentTitle}
             </h3>
             {rating > 0 && renderStars(rating)}
           </div>
 
-          {showDescription && description && (
+          {showDescription && currentDesc && (
             <p className="text-sm opacity-60 line-clamp-2 mb-4 leading-relaxed">
-              {description}
+              {currentDesc}
             </p>
           )}
 
           <div className="mt-auto">
             <div className="flex items-baseline gap-2 mb-4">
               <span className="text-2xl font-black" style={{ color: priceColor }}>
-                {currency}{price}
+                {currency}{currentPrice}
               </span>
               {showOriginalPrice && originalPrice && (
                 <span className="text-sm line-through opacity-40 italic" style={{ color: originalPriceColor }}>
@@ -206,7 +185,265 @@ export const ProductBlock: React.FC<{
           </div>
         </div>
       </div>
+    );
+  };
+
+  if (loading) {
+    return (
+      <BaseBlock block={block} isSelected={isSelected} onSelect={onSelect} onUpdate={onUpdate} onDelete={onDelete}>
+        <div className="flex items-center justify-center p-8 bg-gray-50/10 rounded animate-pulse">
+          <span className="text-sm font-medium text-gray-400">Loading product data...</span>
+        </div>
+      </BaseBlock>
+    );
+  }
+
+  if (error) {
+    return (
+      <BaseBlock block={block} isSelected={isSelected} onSelect={onSelect} onUpdate={onUpdate} onDelete={onDelete}>
+        <div className="flex items-center justify-center p-8 bg-red-500/10 rounded border border-red-500/20">
+          <span className="text-sm font-bold text-red-500">{error}</span>
+        </div>
+      </BaseBlock>
+    );
+  }
+
+  // --- GRID LOOP RENDERING ---
+  if (source === 'api' && displayMode === 'grid' && Array.isArray(apiData)) {
+    const items = apiData.slice(0, itemsLimit || 6);
+    const gridClassName = `product-grid-${block.id}`;
+
+    // Simple, clean CSS based on layout type
+    let cssRules = '';
+
+    // Editor View Helpers
+    const isMobile = viewDevice === 'mobile';
+    const isTablet = viewDevice === 'tablet';
+
+    if (enableScroll && scrollDirection === 'horizontal') {
+      // CAROUSEL MODE - Horizontal Scrolling
+      cssRules = `
+        .${gridClassName} {
+          display: flex;
+          flex-direction: row;
+          overflow-x: auto;
+          gap: ${gap || '1rem'};
+          padding-bottom: 1rem;
+          /* Firefox Scrollbar */
+          scrollbar-width: thin;
+          scrollbar-color: #888 #f1f1f1;
+        }
+        
+        .${gridClassName} .product-card {
+          width: ${cardWidth || '300px'};
+          min-width: ${cardWidth || '300px'};
+          flex-shrink: 0;
+          flex-direction: ${layout === 'horizontal' ? 'row' : 'column'};
+        }
+        
+        ${layout === 'horizontal' ? `
+          .${gridClassName} .product-card-image {
+            width: 40%;
+            min-width: 120px;
+            aspect-ratio: auto;
+          }
+          .${gridClassName} .product-card-content {
+            width: 60%;
+          }
+        ` : `
+          .${gridClassName} .product-card-image {
+            width: 100%;
+            aspect-ratio: 4/3;
+          }
+        `}
+        
+        /* Mobile Override (Editor or Browser) */
+        ${isMobile ? `
+          .${gridClassName} .product-card {
+            width: 90vw !important;
+            min-width: 90vw !important;
+            flex-direction: row !important;
+          }
+        ` : `
+          @media (max-width: 767px) {
+            .${gridClassName} .product-card {
+              width: 90vw !important;
+              min-width: 90vw !important;
+              flex-direction: row !important;
+            }
+          }
+        `}
+        
+        /* Webkit Scrollbar */
+        .${gridClassName}::-webkit-scrollbar {
+          height: 10px; /* Force visible height */
+        }
+        .${gridClassName}::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 5px;
+        }
+        .${gridClassName}::-webkit-scrollbar-thumb {
+          background: #888;
+          border-radius: 5px;
+          border: 2px solid #f1f1f1;
+        }
+        .${gridClassName}::-webkit-scrollbar-thumb:hover {
+          background: #555;
+        }
+      `;
+    } else if (enableScroll && scrollDirection === 'vertical') {
+      // VERTICAL LIST MODE - Vertical Scrolling
+      cssRules = `
+        .${gridClassName} {
+          display: grid;
+          grid-template-columns: 1fr;
+          overflow-y: auto;
+          max-height: ${containerHeight || '400px'};
+          gap: ${gap || '1rem'};
+        }
+        
+        .${gridClassName} .product-card {
+          flex-direction: ${layout === 'horizontal' ? 'row' : 'column'};
+        }
+        
+        ${layout === 'horizontal' ? `
+          .${gridClassName} .product-card-image {
+            width: 40%;
+            min-width: 120px;
+            aspect-ratio: auto;
+          }
+        ` : `
+          .${gridClassName} .product-card-image {
+            width: 100%;
+            aspect-ratio: 4/3;
+          }
+        `}
+        
+        .${gridClassName}::-webkit-scrollbar {
+          width: 8px;
+        }
+        .${gridClassName}::-webkit-scrollbar-track {
+          background: #f1f1f1;
+        }
+        .${gridClassName}::-webkit-scrollbar-thumb {
+          background: #888;
+          border-radius: 4px;
+        }
+      `;
+    } else {
+      // STANDARD GRID MODE - Simple Responsive (3/2/1 columns)
+
+      const baseStyles = `
+        /* Base: Mobile First - 1 column */
+        .${gridClassName} {
+          display: grid !important;
+          grid-template-columns: 1fr !important;
+          gap: ${gap || '1rem'};
+        }
+        
+        .${gridClassName} .product-card {
+          flex-direction: ${layout === 'horizontal' ? 'row' : 'column'};
+        }
+        
+        ${layout === 'horizontal' ? `
+          .${gridClassName} .product-card-image {
+            width: 40%;
+            min-width: 120px;
+            aspect-ratio: auto;
+          }
+        ` : `
+          .${gridClassName} .product-card-image {
+            width: 100%;
+            aspect-ratio: 4/3;
+          }
+        `}
+      `;
+
+      // Responsive Rules
+      let responsiveRules = '';
+
+      if (isMobile) {
+        // Force Mobile View
+        responsiveRules = `
+            .${gridClassName} { grid-template-columns: 1fr !important; }
+            .${gridClassName} .product-card { flex-direction: row !important; }
+            
+            /* Sizing overrides */
+            .${gridClassName} .product-card-image { 
+              width: 40% !important; 
+              min-width: 120px !important; 
+              aspect-ratio: auto !important; 
+            }
+          `;
+      } else if (isTablet) {
+        // Force Tablet View
+        responsiveRules = `
+            .${gridClassName} { grid-template-columns: repeat(2, 1fr) !important; }
+            .${gridClassName} .product-card { flex-direction: column !important; }
+            .${gridClassName} .product-card-image { width: 100% !important; aspect-ratio: 4/3 !important; }
+          `;
+      } else {
+        // Desktop / Standard Browser Behavior
+        responsiveRules = `
+            /* Tablet */
+            @media (min-width: 768px) and (max-width: 1023px) {
+              .${gridClassName} {
+                grid-template-columns: repeat(2, 1fr) !important;
+              }
+              .${gridClassName} .product-card {
+                flex-direction: column;
+              }
+              .${gridClassName} .product-card-image {
+                width: 100%;
+                aspect-ratio: 4/3;
+              }
+            }
+            
+            /* Desktop */
+            @media (min-width: 1024px) {
+              .${gridClassName} {
+                grid-template-columns: repeat(3, 1fr) !important;
+              }
+            }
+          `;
+      }
+
+      cssRules = baseStyles + responsiveRules;
+    }
+
+    return (
+      <>
+        <style>{cssRules}</style>
+        <BaseBlock
+          block={block}
+          isSelected={isSelected}
+          onSelect={onSelect}
+          onUpdate={onUpdate}
+          onDelete={onDelete}
+          className={gridClassName}
+        >
+          {items.map((item: any, index: number) => renderCard(item, index))}
+        </BaseBlock>
+      </>
+    );
+  }
+
+  // --- SINGLE RENDERING (Default/Manual/Fallback) ---
+  let singleData = null;
+  if (source === 'api') {
+    singleData = Array.isArray(apiData) ? apiData[0] : apiData;
+  }
+
+  return (
+    <BaseBlock
+      block={block}
+      isSelected={isSelected}
+      onSelect={onSelect}
+      onUpdate={onUpdate}
+      onDelete={onDelete}
+      className="group"
+    >
+      {renderCard(singleData, 0)}
     </BaseBlock>
   );
 };
-

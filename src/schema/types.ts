@@ -960,43 +960,47 @@ export interface SocialFollowBlock extends BaseBlock {
   } & BaseStyleProps;
 }
 
+export interface FormField {
+  id: string;
+  type:
+  | "text"
+  | "email"
+  | "tel"
+  | "textarea"
+  | "select"
+  | "checkbox"
+  | "radio";
+  label: string;
+  placeholder?: string;
+  required?: boolean;
+  options?: string[];
+  validation?: {
+    minLength?: number;
+    maxLength?: number;
+    pattern?: string;
+    errorMessage?: string;
+  };
+}
+
 export interface FormBlock extends BaseBlock {
   type: "form";
   props: {
     title?: string;
     description?: string;
-    fields?: Array<{
-      id: string;
-      type:
-      | "text"
-      | "email"
-      | "tel"
-      | "textarea"
-      | "select"
-      | "checkbox"
-      | "radio";
-      label: string;
-      placeholder?: string;
-      required?: boolean;
-      options?: string[];
-      validation?: {
-        minLength?: number;
-        maxLength?: number;
-        pattern?: string;
-        errorMessage?: string;
-      };
-    }>;
+    fields?: FormField[];
     submitText?: string;
     showTitle?: boolean;
     showDescription?: boolean;
 
     // Submission
-    submitAction?: string;
-    submitMethod?: "GET" | "POST";
-    successMessage?: string;
-    errorMessage?: string;
+    submitAction?: 'email' | 'webhook' | 'redirect'; // Default: email
+    submitMethod?: 'POST' | 'GET'; // Default: POST
+    emailTo?: string;
+    useGmail?: boolean; // Force open in Gmail
     webhookUrl?: string;
     redirectUrl?: string;
+    successMessage?: string;
+    errorMessage?: string;
 
     // Field Styling
     inputTextColor?: string;
@@ -1180,6 +1184,19 @@ export interface ProductBlock extends BaseBlock {
       originalPrice?: string;
     };
 
+    // List/Loop Layout
+    displayMode?: 'single' | 'grid' | 'carousel';
+    itemsLimit?: number;
+    gridColumns?: number;
+    gap?: string;
+
+    // Sizing & Scroll
+    cardWidth?: string;
+    enableScroll?: boolean;
+    scrollDirection?: 'horizontal' | 'vertical';
+    containerHeight?: string;
+
+    // Content
     title?: string;
     description?: string;
     price?: string;
@@ -1954,6 +1971,7 @@ export const BLOCK_TEMPLATES: BlockTemplate[] = [
     block: {
       type: "form",
       props: {
+        submitAction: "email",
         title: "Contact Us",
         description: "Get in touch with us",
         fields: [
