@@ -2609,7 +2609,10 @@ export const MapBlockInspector: React.FC<{ block: Block; updateBlock: (id: strin
 
 export const InputBlockInspector: React.FC<{ block: Block; updateBlock: (id: string, updates: Partial<Block>) => void; activeTab: 'content' | 'style' | 'advanced'; }> = ({ block, updateBlock, activeTab }) => {
   const props = block.props as any;
-  const updateProp = (k: string, v: any) => updateBlock(block.id, { props: { ...props, [k]: v } });
+  const updateProp = (k: string | any, v?: any) => {
+    const u = typeof k === 'string' ? { [k]: v } : k;
+    updateBlock(block.id, { props: { ...props, ...u } });
+  };
 
   return (
     <div className="flex flex-col space-y-2">
@@ -2652,7 +2655,10 @@ export const InputBlockInspector: React.FC<{ block: Block; updateBlock: (id: str
 
 export const TextareaBlockInspector: React.FC<{ block: Block; updateBlock: (id: string, updates: Partial<Block>) => void; activeTab: 'content' | 'style' | 'advanced'; }> = ({ block, updateBlock, activeTab }) => {
   const props = block.props as any;
-  const updateProp = (k: string, v: any) => updateBlock(block.id, { props: { ...props, [k]: v } });
+  const updateProp = (k: string | any, v?: any) => {
+    const u = typeof k === 'string' ? { [k]: v } : k;
+    updateBlock(block.id, { props: { ...props, ...u } });
+  };
 
   return (
     <div className="flex flex-col space-y-2">
@@ -2687,7 +2693,10 @@ export const TextareaBlockInspector: React.FC<{ block: Block; updateBlock: (id: 
 
 export const CheckboxBlockInspector: React.FC<{ block: Block; updateBlock: (id: string, updates: Partial<Block>) => void; activeTab: 'content' | 'style' | 'advanced'; }> = ({ block, updateBlock, activeTab }) => {
   const props = block.props as any;
-  const updateProp = (k: string, v: any) => updateBlock(block.id, { props: { ...props, [k]: v } });
+  const updateProp = (k: string | any, v?: any) => {
+    const u = typeof k === 'string' ? { [k]: v } : k;
+    updateBlock(block.id, { props: { ...props, ...u } });
+  };
 
   return (
     <div className="flex flex-col space-y-2">
@@ -2727,7 +2736,10 @@ export const CheckboxBlockInspector: React.FC<{ block: Block; updateBlock: (id: 
 
 export const RadioBlockInspector: React.FC<{ block: Block; updateBlock: (id: string, updates: Partial<Block>) => void; activeTab: 'content' | 'style' | 'advanced'; }> = ({ block, updateBlock, activeTab }) => {
   const props = block.props as any;
-  const updateProp = (k: string, v: any) => updateBlock(block.id, { props: { ...props, [k]: v } });
+  const updateProp = (k: string | any, v?: any) => {
+    const u = typeof k === 'string' ? { [k]: v } : k;
+    updateBlock(block.id, { props: { ...props, ...u } });
+  };
 
   return (
     <div className="flex flex-col space-y-2">
@@ -2767,7 +2779,10 @@ export const RadioBlockInspector: React.FC<{ block: Block; updateBlock: (id: str
 
 export const SelectBlockInspector: React.FC<{ block: Block; updateBlock: (id: string, updates: Partial<Block>) => void; activeTab: 'content' | 'style' | 'advanced'; }> = ({ block, updateBlock, activeTab }) => {
   const props = block.props as any;
-  const updateProp = (k: string, v: any) => updateBlock(block.id, { props: { ...props, [k]: v } });
+  const updateProp = (k: string | any, v?: any) => {
+    const u = typeof k === 'string' ? { [k]: v } : k;
+    updateBlock(block.id, { props: { ...props, ...u } });
+  };
 
   // Helper to convert options array to string
   const optionsToString = (opts: any[]) => opts?.map(o => `${o.value}:${o.label}`).join('\n') || '';
@@ -3100,7 +3115,10 @@ const ScopedTypographyGroup = ({ block, prefix, onChange, title }: { block: any,
 
 export const GroupBlockInspector: React.FC<{ block: Block; updateBlock: (id: string, updates: Partial<Block>) => void; activeTab: 'content' | 'style' | 'advanced'; }> = ({ block, updateBlock, activeTab }) => {
   const props = block.props as any;
-  const updateProp = (k: string, v: any) => updateBlock(block.id, { props: { ...props, [k]: v } });
+  const updateProp = (k: string | any, v?: any) => {
+    const u = typeof k === 'string' ? { [k]: v } : k;
+    updateBlock(block.id, { props: { ...props, ...u } });
+  };
 
   return (
     <div className="flex flex-col space-y-2">
@@ -3175,7 +3193,10 @@ export const GroupBlockInspector: React.FC<{ block: Block; updateBlock: (id: str
 
 export const SocialFollowBlockInspector: React.FC<{ block: Block; updateBlock: (id: string, updates: Partial<Block>) => void; activeTab: 'content' | 'style' | 'advanced'; }> = ({ block, updateBlock, activeTab }) => {
   const props = block.props as any;
-  const updateProp = (k: string, v: any) => updateBlock(block.id, { props: { ...props, [k]: v } });
+  const updateProp = (k: string | any, v?: any) => {
+    const u = typeof k === 'string' ? { [k]: v } : k;
+    updateBlock(block.id, { props: { ...props, ...u } });
+  };
 
   const platformsList = props.platforms || [];
 
@@ -3395,7 +3416,10 @@ export const SocialFollowBlockInspector: React.FC<{ block: Block; updateBlock: (
 
 export const FormBlockInspector: React.FC<{ block: Block; updateBlock: (id: string, updates: Partial<Block>) => void; activeTab: 'content' | 'style' | 'advanced'; }> = ({ block, updateBlock, activeTab }) => {
   const props = block.props as any;
-  const updateProp = (k: string, v: any) => updateBlock(block.id, { props: { ...props, [k]: v } });
+  const updateProp = (k: string | any, v?: any) => {
+    const u = typeof k === 'string' ? { [k]: v } : k;
+    updateBlock(block.id, { props: { ...props, ...u } });
+  };
 
   return (
     <div className="flex flex-col space-y-2">
@@ -3596,7 +3620,10 @@ export const FormBlockInspector: React.FC<{ block: Block; updateBlock: (id: stri
 
 export const SurveyBlockInspector: React.FC<{ block: Block; updateBlock: (id: string, updates: Partial<Block>) => void; activeTab: 'content' | 'style' | 'advanced'; }> = ({ block, updateBlock, activeTab }) => {
   const props = block.props as any;
-  const updateProp = (k: string, v: any) => updateBlock(block.id, { props: { ...props, [k]: v } });
+  const updateProp = (k: string | any, v?: any) => {
+    const u = typeof k === 'string' ? { [k]: v } : k;
+    updateBlock(block.id, { props: { ...props, ...u } });
+  };
 
   return (
     <div className="flex flex-col space-y-2">
@@ -4111,6 +4138,26 @@ export const ProductBlockInspector: React.FC<{ block: Block; updateBlock: (id: s
   const props = block.props as any;
   const updateProp = (k: string, v: any) => updateBlock(block.id, { props: { ...props, [k]: v } });
 
+  const [selectedOverrideIndex, setSelectedOverrideIndex] = React.useState<number>(0);
+
+  const updateOverride = (index: number, field: string, value: any) => {
+    const currentOverrides = props.overrides || {};
+    const itemOverrides = currentOverrides[index] || {};
+
+    const newOverrides = {
+      ...currentOverrides,
+      [index]: {
+        ...itemOverrides,
+        [field]: value
+      }
+    };
+    updateProp('overrides', newOverrides);
+  };
+
+  const getOverride = (field: string) => {
+    return props.overrides?.[selectedOverrideIndex]?.[field] || '';
+  };
+
   return (
     <div className="flex flex-col space-y-2">
       {activeTab === 'content' && (
@@ -4220,13 +4267,38 @@ export const ProductBlockInspector: React.FC<{ block: Block; updateBlock: (id: s
                       {/* Grid Specific */}
                       {!props.enableScroll && (
                         <div className="space-y-3 pt-2">
-                          <ControlGroup label={`Columns (${props.gridColumns || 3})`}>
+                          <ControlGroup label="Grid Columns (Desktop)">
                             <input
                               type="range" min="1" max="6" step="1"
                               className="w-full h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-blue-500"
                               value={props.gridColumns || 3}
                               onChange={(e) => updateProp('gridColumns', parseInt(e.target.value))}
                             />
+                            <div className="flex justify-between text-[10px] text-gray-400 mt-1">
+                              <span>1</span><span>{props.gridColumns || 3}</span><span>6</span>
+                            </div>
+                          </ControlGroup>
+                          <ControlGroup label="Grid Columns (Tablet)">
+                            <input
+                              type="range" min="1" max="4" step="1"
+                              className="w-full h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                              value={props.gridColumnsTablet || 2}
+                              onChange={(e) => updateProp('gridColumnsTablet', parseInt(e.target.value))}
+                            />
+                            <div className="flex justify-between text-[10px] text-gray-400 mt-1">
+                              <span>1</span><span>{props.gridColumnsTablet || 2}</span><span>4</span>
+                            </div>
+                          </ControlGroup>
+                          <ControlGroup label="Grid Columns (Mobile)">
+                            <input
+                              type="range" min="1" max="3" step="1"
+                              className="w-full h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                              value={props.gridColumnsMobile || 1}
+                              onChange={(e) => updateProp('gridColumnsMobile', parseInt(e.target.value))}
+                            />
+                            <div className="flex justify-between text-[10px] text-gray-400 mt-1">
+                              <span>1</span><span>{props.gridColumnsMobile || 1}</span><span>3</span>
+                            </div>
                           </ControlGroup>
                           <ControlGroup label="Gap">
                             <UnitControl value={props.gap || '1rem'} onChange={(v) => updateProp('gap', v)} />
@@ -4266,6 +4338,52 @@ export const ProductBlockInspector: React.FC<{ block: Block; updateBlock: (id: s
               </PropertySection>
             )}
           </PropertySection>
+
+          {/* API OVERRIDES SECTION */}
+          {props.source === 'api' && (
+            <PropertySection title="Individual Item Editing" icon={Link2} defaultOpen={false}>
+              <div className="space-y-4 p-1">
+                <div className="bg-gray-800 p-2 rounded text-xs text-gray-400 mb-2">
+                  Select an item by index to override its specific details given from the API.
+                </div>
+
+                <ControlGroup label="Select Item">
+                  <select
+                    className={inputClasses}
+                    value={selectedOverrideIndex}
+                    onChange={(e) => setSelectedOverrideIndex(parseInt(e.target.value))}
+                  >
+                    {[...Array(props.itemsLimit || 6)].map((_, i) => (
+                      <option key={i} value={i}>Item {i + 1}</option>
+                    ))}
+                  </select>
+                </ControlGroup>
+
+                <div className="border-t border-gray-700 pt-3 mt-3 space-y-3">
+                  <div className="font-bold text-xs text-blue-400 mb-2">Overrides for Item {selectedOverrideIndex + 1}</div>
+
+                  <ControlGroup label="Override Title">
+                    <input type="text" className={inputClasses} placeholder="(Keep Value)" value={getOverride('title')} onChange={(e) => updateOverride(selectedOverrideIndex, 'title', e.target.value)} />
+                  </ControlGroup>
+                  <ControlGroup label="Override Price">
+                    <input type="text" className={inputClasses} placeholder="(Keep Value)" value={getOverride('price')} onChange={(e) => updateOverride(selectedOverrideIndex, 'price', e.target.value)} />
+                  </ControlGroup>
+                  <ControlGroup label="Override Desc">
+                    <textarea rows={2} className={inputClasses} placeholder="(Keep Value)" value={getOverride('description')} onChange={(e) => updateOverride(selectedOverrideIndex, 'description', e.target.value)} />
+                  </ControlGroup>
+                  <ControlGroup label="Override Image">
+                    <input type="text" className={inputClasses} placeholder="https://..." value={getOverride('imageUrl')} onChange={(e) => updateOverride(selectedOverrideIndex, 'imageUrl', e.target.value)} />
+                  </ControlGroup>
+                  <ControlGroup label="Btn Text">
+                    <input type="text" className={inputClasses} placeholder="(Keep Value)" value={getOverride('buttonText')} onChange={(e) => updateOverride(selectedOverrideIndex, 'buttonText', e.target.value)} />
+                  </ControlGroup>
+                  <ControlGroup label="Btn URL">
+                    <input type="text" className={inputClasses} placeholder="https://..." value={getOverride('buttonUrl')} onChange={(e) => updateOverride(selectedOverrideIndex, 'buttonUrl', e.target.value)} />
+                  </ControlGroup>
+                </div>
+              </div>
+            </PropertySection>
+          )}
 
           {props.source !== 'api' && (
             <>
@@ -4339,6 +4457,12 @@ export const ProductBlockInspector: React.FC<{ block: Block; updateBlock: (id: s
                 <span className="text-[10px] uppercase font-bold text-gray-400">Show Button</span>
                 <input type="checkbox" checked={props.showButton !== false} onChange={(e) => updateProp('showButton', e.target.checked)} className="rounded" />
               </div>
+              <ControlGroup label="Button Width">
+                <select className={inputClasses} value={props.buttonWidth || 'full'} onChange={(e) => updateProp('buttonWidth', e.target.value)}>
+                  <option value="full">Full Width</option>
+                  <option value="auto">Auto (Text Width)</option>
+                </select>
+              </ControlGroup>
             </div>
           </PropertySection>
         </>
@@ -4656,7 +4780,13 @@ export const PriceBlockInspector: React.FC<{ block: Block; updateBlock: (id: str
 };
 export const TestimonialBlockInspector: React.FC<{ block: Block; updateBlock: (id: string, updates: Partial<Block>) => void; activeTab: 'content' | 'style' | 'advanced'; }> = ({ block, updateBlock, activeTab }) => {
   const props = block.props as any;
-  const updateProp = (k: string, v: any) => updateBlock(block.id, { props: { ...props, [k]: v } });
+  const updateProp = (k: string | any, v?: any) => {
+    if (typeof k === 'object' && k !== null) {
+      updateBlock(block.id, { props: { ...props, ...k } });
+    } else {
+      updateBlock(block.id, { props: { ...props, [k]: v } });
+    }
+  };
   const openAssetModal = useAssetStore((state) => state.openModal);
 
   return (
@@ -4706,49 +4836,13 @@ export const TestimonialBlockInspector: React.FC<{ block: Block; updateBlock: (i
       )}
 
       {activeTab === 'style' && (
-        <>
-          <PropertySection title="Style & Colors" icon={Palette} defaultOpen={true}>
-            <ControlGroup label="Text Color">
-              <div className="flex gap-2">
-                <input type="color" value={props.color || '#3b82f6'} onChange={(e) => updateProp('color', e.target.value)} className="w-8 h-8 rounded border border-gray-600 bg-transparent p-0" />
-                <input type="text" value={props.color || ''} onChange={(e) => updateProp('color', e.target.value)} className={inputClasses} />
-              </div>
-            </ControlGroup>
-            <ControlGroup label="Author Color">
-              <div className="flex gap-2">
-                <input type="color" value={props.authorColor || '#9ca3af'} onChange={(e) => updateProp('authorColor', e.target.value)} className="w-8 h-8 rounded border border-gray-600 bg-transparent p-0" />
-                <input type="text" value={props.authorColor || ''} onChange={(e) => updateProp('authorColor', e.target.value)} className={inputClasses} />
-              </div>
-            </ControlGroup>
-            <ControlGroup label="Accent Color">
-              <div className="flex gap-2">
-                <input type="color" value={props.accentColor || '#fbbf24'} onChange={(e) => updateProp('accentColor', e.target.value)} className="w-8 h-8 rounded border border-gray-600 bg-transparent p-0" />
-                <input type="text" value={props.accentColor || ''} onChange={(e) => updateProp('accentColor', e.target.value)} className={inputClasses} placeholder="Rating/Icons" />
-              </div>
-            </ControlGroup>
-            <ControlGroup label="Alignment">
-              <div className="flex bg-[#1a1d21] rounded p-0.5 border border-[#3e444b]">
-                {['left', 'center', 'right'].map((align) => (
-                  <button
-                    key={align}
-                    onClick={() => updateProp('textAlign', align)}
-                    className={`flex-1 py-1 px-2 rounded-sm text-[10px] uppercase font-bold transition-all ${(props.textAlign || 'left') === align ? 'bg-[#3b82f6] text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'
-                      }`}
-                  >
-                    {align}
-                  </button>
-                ))}
-              </div>
-            </ControlGroup>
-          </PropertySection>
-
-          <PropertySection title="Container" icon={Maximize2}>
-            <BackgroundControl props={props} onChange={updateProp} />
-            <SpacingGroup block={block} onChange={updateProp} />
-            <BorderGroup block={block} onChange={updateProp} />
-            <EffectsGroup block={block} onChange={updateProp} />
-          </PropertySection>
-        </>
+        <div className="space-y-4 p-4">
+          <TypographyGroup block={block} onChange={updateProp} />
+          <DimensionsGroup block={block} onChange={updateProp} />
+          <BackgroundGroup block={block} onChange={updateProp} />
+          <BorderGroup block={block} onChange={updateProp} />
+          <EffectsGroup block={block} onChange={updateProp} />
+        </div>
       )}
 
       {activeTab === 'advanced' && <AdvancedPanel block={block} onUpdate={(u) => updateBlock(block.id, u)} />}

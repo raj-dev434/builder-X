@@ -3,6 +3,249 @@ import { BaseBlock } from './BaseBlock';
 import { ProductBlock as ProductBlockType, Block } from '../../schema/types';
 import { useCanvasStore } from '../../store/canvasStore';
 
+export const getProductGridCSS = (blockId: string, props: any, viewDevice: string) => {
+  const {
+    gap = '1rem',
+    gridColumns = 3,
+    gridColumnsTablet = 2,
+    gridColumnsMobile = 1,
+    cardWidth = '300px',
+    enableScroll = false,
+    scrollDirection = 'horizontal',
+    containerHeight = '400px',
+    layout = 'vertical',
+  } = props;
+
+  const gridClassName = `product-grid-${blockId}`;
+  let cssRules = '';
+  // Editor View Helpers
+  // Editor View Helpers
+
+  if (enableScroll && scrollDirection === 'horizontal') {
+    // CAROUSEL MODE - Horizontal Scrolling
+    cssRules = `
+        .${gridClassName} {
+          display: flex;
+          flex-direction: row;
+          overflow-x: auto;
+          gap: ${gap || '1rem'};
+          padding-bottom: 1rem;
+          /* Firefox Scrollbar */
+          scrollbar-width: thin;
+          scrollbar-color: #888 #f1f1f1;
+        }
+        
+        .${gridClassName} .product-card {
+          width: ${cardWidth || '300px'};
+          min-width: ${cardWidth || '300px'};
+          flex-shrink: 0;
+          flex-direction: ${layout === 'horizontal' ? 'row' : 'column'};
+        }
+        
+        ${layout === 'horizontal' ? `
+          .${gridClassName} .product-card-image {
+            width: 40%;
+            min-width: 120px;
+            aspect-ratio: auto;
+          }
+          .${gridClassName} .product-card-content {
+            width: 60%;
+          }
+        ` : `
+          .${gridClassName} .product-card-image {
+            width: 100%;
+            aspect-ratio: 4/3;
+          }
+        `}
+        
+        /* Mobile/Tablet Support */
+        @media (max-width: 1024px) {
+           .${gridClassName} .product-card {
+             width: ${cardWidth || '260px'} !important; 
+             min-width: ${cardWidth || '260px'} !important;
+           }
+        }
+
+        @media (max-width: 768px) {
+            .${gridClassName} .product-card {
+               /* Default small size for mobile as requested */
+               width: 220px !important; 
+               min-width: 220px !important;
+               flex-direction: column !important; /* Stack vertical on phone for small card */
+            }
+            .${gridClassName} .product-card-image {
+                width: 100% !important;
+                aspect-ratio: 4/3 !important;
+            }
+        }
+        
+        /* Webkit Scrollbar */
+        .${gridClassName}::-webkit-scrollbar {
+          height: 10px; /* Force visible height */
+        }
+        .${gridClassName}::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 5px;
+        }
+        .${gridClassName}::-webkit-scrollbar-thumb {
+          background: #888;
+          border-radius: 5px;
+          border: 2px solid #f1f1f1;
+        }
+        .${gridClassName}::-webkit-scrollbar-thumb:hover {
+          background: #555;
+        }
+      `;
+
+    // Editor Overrides for Carousel
+    if (viewDevice === 'mobile') {
+      cssRules += `
+            .${gridClassName} .product-card {
+               width: 220px !important; 
+               min-width: 220px !important;
+               flex-direction: column !important;
+            }
+            .${gridClassName} .product-card-image {
+                width: 100% !important;
+                aspect-ratio: 4/3 !important;
+            }
+          `;
+    }
+
+  } else if (enableScroll && scrollDirection === 'vertical') {
+    // VERTICAL LIST MODE - Vertical Scrolling
+    cssRules = `
+        .${gridClassName} {
+          display: grid;
+          grid-template-columns: 1fr;
+          overflow-y: auto;
+          max-height: ${containerHeight || '400px'};
+          gap: ${gap || '1rem'};
+        }
+        
+        .${gridClassName} .product-card {
+          flex-direction: ${layout === 'horizontal' ? 'row' : 'column'};
+        }
+        
+        ${layout === 'horizontal' ? `
+          .${gridClassName} .product-card-image {
+            width: 40%;
+            min-width: 120px;
+            aspect-ratio: auto;
+          }
+        ` : `
+          .${gridClassName} .product-card-image {
+            width: 100%;
+            aspect-ratio: 4/3;
+          }
+        `}
+        
+        .${gridClassName}::-webkit-scrollbar {
+          width: 8px;
+        }
+        .${gridClassName}::-webkit-scrollbar-track {
+          background: #f1f1f1;
+        }
+        .${gridClassName}::-webkit-scrollbar-thumb {
+          background: #888;
+          border-radius: 4px;
+        }
+      `;
+
+    // Editor Overrides for Vertical List
+    if (viewDevice === 'mobile') {
+      cssRules += `
+            .${gridClassName} .product-card {
+                flex-direction: column !important;
+            }
+            .${gridClassName} .product-card-image {
+                width: 100% !important;
+                aspect-ratio: 4/3 !important;
+            }
+         `;
+    }
+  } else {
+    // STANDARD GRID MODE - Simple Responsive (3/2/1 columns)
+
+    const baseStyles = `
+        /* Base: Mobile First - 1 column */
+        .${gridClassName} {
+          display: grid !important;
+          grid-template-columns: 1fr !important;
+          gap: ${gap || '1rem'};
+        }
+        
+        .${gridClassName} .product-card {
+          flex-direction: ${layout === 'horizontal' ? 'row' : 'column'};
+        }
+        
+        ${layout === 'horizontal' ? `
+          .${gridClassName} .product-card-image {
+            width: 40%;
+            min-width: 120px;
+            aspect-ratio: auto;
+          }
+        ` : `
+          .${gridClassName} .product-card-image {
+            width: 100%;
+            aspect-ratio: 4/3;
+          }
+        `}
+      `;
+
+    // Responsive Rules based on Props
+
+    // Default (Desktop)
+    const baseGrid = `
+        .${gridClassName} {
+          grid-template-columns: repeat(${gridColumns}, 1fr) !important;
+        }
+      `;
+
+    // Tablet Override
+    const tabletGrid = `
+         @media (max-width: 1024px) {
+            .${gridClassName} {
+              grid-template-columns: repeat(${gridColumnsTablet}, 1fr) !important;
+            }
+         }
+      `;
+
+    // Mobile Override
+    const mobileGrid = `
+          @media (max-width: 768px) {
+            .${gridClassName} {
+              grid-template-columns: repeat(${gridColumnsMobile}, 1fr) !important;
+            }
+            .${gridClassName} .product-card {
+                flex-direction: column !important;
+            }
+          }
+      `;
+
+    cssRules = baseStyles + baseGrid + tabletGrid + mobileGrid;
+
+    // Editor Override: Force view if inside editor (viewDevice is passed)
+    if (viewDevice === 'tablet') {
+      cssRules += `
+          .${gridClassName} {
+            grid-template-columns: repeat(${gridColumnsTablet}, 1fr) !important;
+          }
+        `;
+    } else if (viewDevice === 'mobile') {
+      cssRules += `
+          .${gridClassName} {
+            grid-template-columns: repeat(${gridColumnsMobile}, 1fr) !important;
+          }
+           .${gridClassName} .product-card {
+                flex-direction: column !important;
+            }
+        `;
+    }
+  }
+  return cssRules;
+}
+
 export const ProductBlock: React.FC<{
   block: ProductBlockType;
   isSelected: boolean;
@@ -20,6 +263,9 @@ export const ProductBlock: React.FC<{
     displayMode = 'single',
     itemsLimit = 6,
     gap = '1rem',
+    gridColumns = 3,
+    gridColumnsTablet = 2,
+    gridColumnsMobile = 1,
 
     // Sizing & Scroll
     cardWidth = '300px',
@@ -37,6 +283,7 @@ export const ProductBlock: React.FC<{
     imageAlt = 'Product Image',
     buttonText = 'Add to Cart',
     buttonUrl = '#',
+    buttonWidth = 'full',
     layout = 'vertical',
     showOriginalPrice = true,
     showButton = true,
@@ -175,7 +422,7 @@ export const ProductBlock: React.FC<{
             {showButton && (
               <a
                 href={buttonUrl}
-                className="inline-flex items-center justify-center w-full py-2.5 rounded-lg font-bold text-sm transition-all hover:translate-y-[-2px] active:translate-y-[0] shadow-md hover:shadow-lg"
+                className={`inline-flex items-center justify-center py-2.5 rounded-lg font-bold text-sm transition-all hover:translate-y-[-2px] active:translate-y-[0] shadow-md hover:shadow-lg ${buttonWidth === 'full' ? 'w-full' : 'w-auto px-6'}`}
                 style={{ backgroundColor: buttonColor, color: buttonTextColor }}
                 onClick={(e) => e.stopPropagation()}
               >
@@ -213,203 +460,10 @@ export const ProductBlock: React.FC<{
     const items = apiData.slice(0, itemsLimit || 6);
     const gridClassName = `product-grid-${block.id}`;
 
-    // Simple, clean CSS based on layout type
-    let cssRules = '';
-
-    // Editor View Helpers
-    const isMobile = viewDevice === 'mobile';
-    const isTablet = viewDevice === 'tablet';
-
-    if (enableScroll && scrollDirection === 'horizontal') {
-      // CAROUSEL MODE - Horizontal Scrolling
-      cssRules = `
-        .${gridClassName} {
-          display: flex;
-          flex-direction: row;
-          overflow-x: auto;
-          gap: ${gap || '1rem'};
-          padding-bottom: 1rem;
-          /* Firefox Scrollbar */
-          scrollbar-width: thin;
-          scrollbar-color: #888 #f1f1f1;
-        }
-        
-        .${gridClassName} .product-card {
-          width: ${cardWidth || '300px'};
-          min-width: ${cardWidth || '300px'};
-          flex-shrink: 0;
-          flex-direction: ${layout === 'horizontal' ? 'row' : 'column'};
-        }
-        
-        ${layout === 'horizontal' ? `
-          .${gridClassName} .product-card-image {
-            width: 40%;
-            min-width: 120px;
-            aspect-ratio: auto;
-          }
-          .${gridClassName} .product-card-content {
-            width: 60%;
-          }
-        ` : `
-          .${gridClassName} .product-card-image {
-            width: 100%;
-            aspect-ratio: 4/3;
-          }
-        `}
-        
-        /* Mobile Override (Editor or Browser) */
-        ${isMobile ? `
-          .${gridClassName} .product-card {
-            width: 90vw !important;
-            min-width: 90vw !important;
-            flex-direction: row !important;
-          }
-        ` : `
-          @media (max-width: 767px) {
-            .${gridClassName} .product-card {
-              width: 90vw !important;
-              min-width: 90vw !important;
-              flex-direction: row !important;
-            }
-          }
-        `}
-        
-        /* Webkit Scrollbar */
-        .${gridClassName}::-webkit-scrollbar {
-          height: 10px; /* Force visible height */
-        }
-        .${gridClassName}::-webkit-scrollbar-track {
-          background: #f1f1f1;
-          border-radius: 5px;
-        }
-        .${gridClassName}::-webkit-scrollbar-thumb {
-          background: #888;
-          border-radius: 5px;
-          border: 2px solid #f1f1f1;
-        }
-        .${gridClassName}::-webkit-scrollbar-thumb:hover {
-          background: #555;
-        }
-      `;
-    } else if (enableScroll && scrollDirection === 'vertical') {
-      // VERTICAL LIST MODE - Vertical Scrolling
-      cssRules = `
-        .${gridClassName} {
-          display: grid;
-          grid-template-columns: 1fr;
-          overflow-y: auto;
-          max-height: ${containerHeight || '400px'};
-          gap: ${gap || '1rem'};
-        }
-        
-        .${gridClassName} .product-card {
-          flex-direction: ${layout === 'horizontal' ? 'row' : 'column'};
-        }
-        
-        ${layout === 'horizontal' ? `
-          .${gridClassName} .product-card-image {
-            width: 40%;
-            min-width: 120px;
-            aspect-ratio: auto;
-          }
-        ` : `
-          .${gridClassName} .product-card-image {
-            width: 100%;
-            aspect-ratio: 4/3;
-          }
-        `}
-        
-        .${gridClassName}::-webkit-scrollbar {
-          width: 8px;
-        }
-        .${gridClassName}::-webkit-scrollbar-track {
-          background: #f1f1f1;
-        }
-        .${gridClassName}::-webkit-scrollbar-thumb {
-          background: #888;
-          border-radius: 4px;
-        }
-      `;
-    } else {
-      // STANDARD GRID MODE - Simple Responsive (3/2/1 columns)
-
-      const baseStyles = `
-        /* Base: Mobile First - 1 column */
-        .${gridClassName} {
-          display: grid !important;
-          grid-template-columns: 1fr !important;
-          gap: ${gap || '1rem'};
-        }
-        
-        .${gridClassName} .product-card {
-          flex-direction: ${layout === 'horizontal' ? 'row' : 'column'};
-        }
-        
-        ${layout === 'horizontal' ? `
-          .${gridClassName} .product-card-image {
-            width: 40%;
-            min-width: 120px;
-            aspect-ratio: auto;
-          }
-        ` : `
-          .${gridClassName} .product-card-image {
-            width: 100%;
-            aspect-ratio: 4/3;
-          }
-        `}
-      `;
-
-      // Responsive Rules
-      let responsiveRules = '';
-
-      if (isMobile) {
-        // Force Mobile View
-        responsiveRules = `
-            .${gridClassName} { grid-template-columns: 1fr !important; }
-            .${gridClassName} .product-card { flex-direction: row !important; }
-            
-            /* Sizing overrides */
-            .${gridClassName} .product-card-image { 
-              width: 40% !important; 
-              min-width: 120px !important; 
-              aspect-ratio: auto !important; 
-            }
-          `;
-      } else if (isTablet) {
-        // Force Tablet View
-        responsiveRules = `
-            .${gridClassName} { grid-template-columns: repeat(2, 1fr) !important; }
-            .${gridClassName} .product-card { flex-direction: column !important; }
-            .${gridClassName} .product-card-image { width: 100% !important; aspect-ratio: 4/3 !important; }
-          `;
-      } else {
-        // Desktop / Standard Browser Behavior
-        responsiveRules = `
-            /* Tablet */
-            @media (min-width: 768px) and (max-width: 1023px) {
-              .${gridClassName} {
-                grid-template-columns: repeat(2, 1fr) !important;
-              }
-              .${gridClassName} .product-card {
-                flex-direction: column;
-              }
-              .${gridClassName} .product-card-image {
-                width: 100%;
-                aspect-ratio: 4/3;
-              }
-            }
-            
-            /* Desktop */
-            @media (min-width: 1024px) {
-              .${gridClassName} {
-                grid-template-columns: repeat(3, 1fr) !important;
-              }
-            }
-          `;
-      }
-
-      cssRules = baseStyles + responsiveRules;
-    }
+    const cssRules = getProductGridCSS(block.id, {
+      itemsLimit, gap, gridColumns, gridColumnsTablet, gridColumnsMobile,
+      cardWidth, enableScroll, scrollDirection, containerHeight, layout
+    }, viewDevice);
 
     return (
       <>
@@ -422,7 +476,12 @@ export const ProductBlock: React.FC<{
           onDelete={onDelete}
           className={gridClassName}
         >
-          {items.map((item: any, index: number) => renderCard(item, index))}
+          {items.map((item: any, index: number) => {
+            // Apply Overrides if present
+            const override = block.props.overrides ? block.props.overrides[index] : {};
+            const finalItem = { ...item, ...override };
+            return renderCard(finalItem, index);
+          })}
         </BaseBlock>
       </>
     );

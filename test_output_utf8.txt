@@ -1,0 +1,159 @@
+﻿
+> builderx@0.1.0 test
+> jest src/components/blocks/__tests__/AlertInteraction.test.tsx
+
+node.exe : ΓùÅ 
+Validation Warning:
+At line:1 char:1
++ & "C:\Program File
+s\nodejs/node.exe" 
+"C:\Program Files\no
+dejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~
+    + CategoryInfo  
+            : NotS  
+  pecified: (ΓùÅ    
+ Validation Warn    
+ing::String) []    
+, RemoteExcepti    
+on
+    + FullyQualifie 
+   dErrorId : Nati  
+  veCommandError
+ 
+
+  Unknown option 
+"moduleNameMapping" 
+with value 
+{"^@/(.*)$": 
+"<rootDir>/src/$1"} 
+was found.
+  This is probably 
+a typing mistake. 
+Fixing it will 
+remove this message.
+
+  Configuration 
+Documentation:
+  https://jestjs.io/
+docs/configuration
+
+ΓùÅ Validation 
+Warning:
+
+  Unknown option 
+"moduleNameMapping" 
+with value 
+{"^@/(.*)$": 
+"<rootDir>/src/$1"} 
+was found.
+  This is probably 
+a typing mistake. 
+Fixing it will 
+remove this message.
+
+  Configuration 
+Documentation:
+  https://jestjs.io/
+docs/configuration
+
+ts-jest[config] 
+(WARN) [94mmessage
+[0m[90m TS151001: 
+[0mIf you have 
+issues related to 
+imports, you should 
+consider setting 
+`esModuleInterop` 
+to `true` in your 
+TypeScript 
+configuration file 
+(usually 
+`tsconfig.json`). 
+See https://blogs.ms
+dn.microsoft.com/typ
+escript/2018/01/31/a
+nnouncing-typescript
+-2-7/#easier-ecmascr
+ipt-module-interoper
+ability for more 
+information.
+FAIL src/components/
+blocks/__tests__/Ale
+rtInteraction.test.t
+sx
+  Alert and Button 
+Interaction
+    ΓêÜ Alert is 
+hidden when 
+initiallyHidden is 
+true in Preview 
+Mode (29 ms)
+    ΓêÜ Button 
+triggers Alert 
+visibility (36 ms)
+    ├ù Auto-dismiss 
+works (9 ms)
+
+  ΓùÅ Alert and 
+Button Interaction 
+ΓÇ║ Auto-dismiss 
+works
+
+    TypeError: 
+Cannot read 
+properties of 
+undefined (reading 
+'act')
+
+    [0m [90m 142 
+|[39m
+     [90m 143 
+|[39m         
+[90m// Wait for 
+dismiss 
+duration[39m
+    [31m[1m>[22m
+[39m[90m 144 
+|[39m         [33m
+React[39m[33m.[39
+mact(() 
+[33m=>[39m {
+     [90m     
+|[39m              
+ 
+[31m[1m^[22m[39m
+     [90m 145 
+|[39m             j
+est[33m.[39madvanc
+eTimersByTime([35m1
+000[39m)[33m;[39m
+     [90m 146 
+|[39m         
+})[33m;[39m
+     [90m 147 
+|[39m[0m
+
+      at 
+Object.<anonymous> (
+src/components/block
+s/__tests__/AlertInt
+eraction.test.tsx:14
+4:15)
+
+Test Suites: 1 
+failed, 1 total
+Tests:       1 
+failed, 2 passed, 3 
+total
+Snapshots:   0 total
+Time:        1.748 
+s, estimated 2 s
+Ran all test suites 
+matching src/compone
+nts/blocks/__tests__
+/AlertInteraction.te
+st.tsx.

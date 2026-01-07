@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BaseBlock } from './BaseBlock';
 import { Block } from '../../schema/types';
+import { getStandardStyles, getBackgroundStyles, getTypographyStyles } from '../../utils/styleUtils';
 
 export interface TestimonialItem {
   quote: string;
@@ -48,6 +49,33 @@ export interface TestimonialBlockProps {
     shadow?: string;
     alignment?: 'left' | 'center' | 'right';
 
+    // Standard Style Props (added for standardized inspectors)
+    width?: string;
+    height?: string;
+    color?: string;
+    fontFamily?: string;
+    fontSize?: string;
+    fontWeight?: string;
+    lineHeight?: string;
+    letterSpacing?: string;
+    wordSpacing?: string;
+    textTransform?: "none" | "uppercase" | "lowercase" | "capitalize";
+    textDecoration?: "none" | "underline" | "overline" | "line-through";
+    fontStyle?: "normal" | "italic" | "oblique";
+
+    // Background
+    backgroundType?: "classic" | "gradient";
+    backgroundImage?: string;
+    backgroundSize?: "cover" | "contain" | "auto" | "100%" | "100% 100%";
+    backgroundPosition?: "left" | "center" | "right" | "top" | "bottom";
+    backgroundRepeat?: "repeat" | "no-repeat" | "repeat-x" | "repeat-y";
+    backgroundAttachment?: "scroll" | "fixed" | "local";
+    gradientType?: "linear" | "radial";
+    gradientAngle?: number;
+    gradientColor1?: string;
+    gradientColor2?: string;
+    usePageBackground?: boolean;
+
     // Carousel props
     autoplay?: boolean;
     autoplaySpeed?: number;
@@ -88,9 +116,6 @@ export const TestimonialBlock: React.FC<{
     showTitle = true,
     showCompany = true,
     showQuote = true,
-    borderRadius = '12px',
-    border = '1px solid #e5e7eb',
-    shadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
     alignment = 'left',
 
     autoplay = false,
@@ -190,25 +215,26 @@ export const TestimonialBlock: React.FC<{
   const containerStyle: React.CSSProperties = {
     backgroundColor: (block.props as any).backgroundType === 'gradient' ? 'transparent' : backgroundColor,
     color: textColor,
-    padding: sizeStyles.container.padding,
-    borderRadius,
-    border,
-    boxShadow: shadow,
+    ...getStandardStyles(block.props), // Padding, Margin, Border, Shadow
+    ...getBackgroundStyles(block.props), // Background Image, Position, Size
     display: 'flex',
     flexDirection: layout === 'horizontal' ? 'row' : 'column',
     alignItems: layout === 'horizontal' ? 'flex-start' : 'stretch',
     gap: '20px',
     position: 'relative',
     overflow: 'hidden',
-    minWidth: '250px',
+    minWidth: block.props.width || '250px',
+    height: block.props.height,
     ...getAlignmentStyles()
   };
 
   const quoteStyle: React.CSSProperties = {
-    color: quoteColor,
     fontSize: sizeStyles.quote.fontSize,
     fontStyle: 'italic',
     lineHeight: '1.6',
+    ...getTypographyStyles(block.props), // Font Family, Weight, etc.
+    // Override color if specific quoteColor is not set, otherwise fall back to typography color
+    color: quoteColor !== '#374151' ? quoteColor : (block.props.color || quoteColor),
     margin: 0,
     position: 'relative',
     flex: 1,
@@ -218,13 +244,15 @@ export const TestimonialBlock: React.FC<{
   const authorStyle: React.CSSProperties = {
     color: authorColor,
     fontSize: sizeStyles.author.fontSize,
-    fontWeight: '600',
+    ...getTypographyStyles(block.props), // Inherit global font family, letter spacing, etc.
+    fontWeight: block.props.fontWeight || '600', // Default to 600 unless overridden globally
     margin: 0
   };
 
   const titleStyle: React.CSSProperties = {
     color: authorColor,
     fontSize: sizeStyles.title.fontSize,
+    ...getTypographyStyles(block.props),
     opacity: 0.7,
     margin: 0
   };

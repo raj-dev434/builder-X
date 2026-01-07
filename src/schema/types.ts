@@ -58,6 +58,9 @@ export interface BaseStyleProps {
   // Gradient
   gradientType?: "linear" | "radial";
   gradientDirection?: string; // e.g. "45deg", "to right"
+  gradientAngle?: number;
+  gradientColor1?: string;
+  gradientColor2?: string;
   gradientStart?: string;
   gradientEnd?: string;
 
@@ -1188,6 +1191,8 @@ export interface ProductBlock extends BaseBlock {
     displayMode?: 'single' | 'grid' | 'carousel';
     itemsLimit?: number;
     gridColumns?: number;
+    gridColumnsTablet?: number;
+    gridColumnsMobile?: number;
     gap?: string;
 
     // Sizing & Scroll
@@ -1206,6 +1211,19 @@ export interface ProductBlock extends BaseBlock {
     imageAlt?: string;
     buttonText?: string;
     buttonUrl?: string;
+    buttonWidth?: 'full' | 'auto';
+
+    // API Content Overrides
+    overrides?: Record<string | number, {
+      title?: string;
+      description?: string;
+      price?: string;
+      originalPrice?: string;
+      imageUrl?: string;
+      buttonText?: string;
+      buttonUrl?: string;
+    }>;
+
     layout?: "vertical" | "horizontal";
     imagePosition?: "left" | "right" | "top";
     showOriginalPrice?: boolean;

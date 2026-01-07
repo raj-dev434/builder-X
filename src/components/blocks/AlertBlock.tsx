@@ -41,12 +41,12 @@ export const AlertBlock: React.FC<AlertBlockProps> = ({
   const getVariantClasses = () => {
     const isGradient = (block.props as any).backgroundType === 'gradient';
     if (isGradient) {
-        switch (type) {
-          case 'success': return 'text-green-800 border-green-200 bg-transparent';
-          case 'warning': return 'text-yellow-800 border-yellow-200 bg-transparent';
-          case 'error':   return 'text-red-800 border-red-200 bg-transparent';
-          default:        return 'text-blue-800 border-blue-200 bg-transparent';
-        }
+      switch (type) {
+        case 'success': return 'text-green-800 border-green-200 bg-transparent';
+        case 'warning': return 'text-yellow-800 border-yellow-200 bg-transparent';
+        case 'error': return 'text-red-800 border-red-200 bg-transparent';
+        default: return 'text-blue-800 border-blue-200 bg-transparent';
+      }
     }
 
     switch (type) {
