@@ -104,7 +104,7 @@ export const Inspector: React.FC = () => {
   };
 
   // List of blocks that have fully modularized inspectors handling all tabs
-  const modularBlocks = ['section', 'row', 'column', 'text', 'image', 'button', 'divider', 'heading', 'testimonial', 'navbar', 'card', 'badge', 'alert', 'code', 'promo-code', 'flex'];
+  const modularBlocks = ['section', 'row', 'column', 'text', 'image', 'button', 'divider', 'heading', 'testimonial', 'navbar', 'card', 'badge', 'alert', 'code', 'promo-code', 'flex', 'grid'];
   const isModular = modularBlocks.includes(selectedBlock.type);
 
   return (

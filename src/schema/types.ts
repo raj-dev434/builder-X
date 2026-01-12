@@ -665,6 +665,20 @@ export interface ButtonBlock extends BaseBlock {
 
     // Style
     textColor?: string;
+    buttonBackgroundColor?: string;
+    buttonBackgroundImage?: string;
+    buttonBackgroundType?: "classic" | "gradient";
+    buttonGradientType?: "linear" | "radial";
+    buttonGradientAngle?: number;
+    buttonGradientColor1?: string;
+    buttonGradientColor2?: string;
+    buttonUsePageBackground?: boolean;
+    buttonBorder?: string;
+    buttonBorderRadius?: string;
+    buttonBorderColor?: string;
+    buttonBorderWidth?: string;
+    buttonBorderStyle?: "solid" | "dashed" | "dotted" | "double" | "none";
+    buttonIconUrl?: string;
     textAlign?: "left" | "center" | "right" | "justify";
 
     // Typography
@@ -1391,7 +1405,9 @@ export interface HeadingBlock extends BaseBlock {
   type: "heading";
   props: {
     text?: string;
+    title?: string;
     level?: 1 | 2 | 3 | 4 | 5 | 6;
+    htmlTag?: string;
     color?: string;
     fontSize?: string;
     fontWeight?: string;
@@ -1538,6 +1554,8 @@ export interface ElementorHeadingBlock extends BaseBlock {
   type: "elementor-heading";
   props: {
     title: string;
+    text?: string;
+    level?: 1 | 2 | 3 | 4 | 5 | 6;
     link?: string;
     linkTarget?: string;
     linkNoFollow?: boolean;
@@ -3182,7 +3200,9 @@ export const BLOCK_TEMPLATES: BlockTemplate[] = [
       type: "elementor-heading",
       props: {
         title: "Add Your Heading Text Here",
+        text: "Add Your Heading Text Here",
         htmlTag: "h2",
+        level: 2,
         alignment: "center",
         textColor: "#333333",
         fontSize: "2rem",

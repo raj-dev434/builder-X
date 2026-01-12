@@ -47,7 +47,6 @@ import { LinkBoxBlock } from '../blocks/LinkBoxBlock';
 import { ImageBoxBlock } from '../blocks/ImageBoxBlock';
 import { NavbarBlock } from '../blocks/NavbarBlock';
 import { InvoiceBlock } from '../blocks/InvoiceBlock';
-import { ElementorHeadingBlock } from '../blocks/elementor/ElementorHeadingBlock';
 
 
 interface BlockRendererProps {
@@ -283,8 +282,6 @@ export const BlockRenderer: React.FC<BlockRendererProps> = React.memo(({
         return <NavbarBlock {...propsWithChildren} block={block as any} />;
       case 'invoice':
         return <InvoiceBlock {...propsWithChildren} block={block as any} />;
-      case 'elementor-heading':
-        return <ElementorHeadingBlock {...propsWithChildren} block={block as any} />;
 
       default:
         // Fallback for unknown blocks - try to render basic

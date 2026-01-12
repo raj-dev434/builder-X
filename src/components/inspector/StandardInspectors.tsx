@@ -1,4 +1,5 @@
 import React from 'react';
+import { RichTextEditor } from './RichTextEditor';
 import { Block } from '../../schema/types';
 import {
   PropertySection,
@@ -15,8 +16,8 @@ import {
 } from './BlockInspectors';
 // --- ICONS ---
 import {
-  AlignLeft, AlignCenter, AlignRight,
-  RotateCcw, X, ArrowRight,
+  AlignLeft, AlignCenter, AlignRight, AlignJustify,
+  RotateCcw, ArrowRight,
   Layout, ArrowUp, ArrowDown, MoveVertical, MoveHorizontal,
   Maximize2
 } from 'lucide-react';
@@ -300,178 +301,65 @@ export const TextBlockInspector: React.FC<InspectorProps> = ({ block, updateBloc
   const props = block.props as any;
   const handleUpdate = createUpdateHandler(block, updateBlock);
 
-  // Helper functions for formatting detection and toggling
-  const hasFormatting = (tag: string): boolean => {
-    const content = props.content || '';
-    const regex = new RegExp(`<${tag}[^>]*>`, 'i');
-    return regex.test(content);
-  };
-
-  const toggleFormatting = (tag: string, closingTag?: string) => {
-    const content = props.content || 'Sample Text';
-    const close = closingTag || tag;
-    const openRegex = new RegExp(`<${tag}[^>]*>`, 'gi');
-    const closeRegex = new RegExp(`</${close}>`, 'gi');
-
-    if (hasFormatting(tag)) {
-      // Remove formatting
-      const newContent = content.replace(openRegex, '').replace(closeRegex, '');
-      handleUpdate('content', newContent);
-    } else {
-      // Add formatting
-      const newContent = `<${tag}>${content}</${close}>`;
-      handleUpdate('content', newContent);
-    }
-  };
-
-  const clearAllFormatting = () => {
-    const content = props.content || '';
-    // Strip all HTML tags
-    const plainText = content.replace(/<[^>]*>/g, '');
-    handleUpdate('content', plainText);
-  };
-
   if (activeTab === 'content') {
     return (
-      <div className="space-y-4 p-4">
+      <div className="space-y-4 p-4 text-block-inspector">
         <PropertySection title="Text Content" icon={AlignLeft} defaultOpen={true}>
-          <div className="space-y-2">
-            <label className="text-[11px] font-medium text-gray-300 uppercase tracking-wider">Content</label>
-            <textarea
-              value={props.content !== undefined ? props.content : ''}
-              onChange={(e) => handleUpdate('content', e.target.value)}
-              className={`${inputClasses} h-24 resize-y w-full`}
+          <div className="space-y-2 mb-4">
+            <RichTextEditor
+              value={props.content || ''}
+              onChange={(val) => handleUpdate('content', val)}
             />
           </div>
 
-          <ControlGroup label="Alignment">
+          {/* <ControlGroup label="Text Align">
+            <div className="flex items-center gap-2">
+              <div className="flex bg-[#1a1d21] rounded p-0.5 border border-[#3e444b] w-full">
+                {[
+                  { value: 'left', icon: AlignLeft, label: 'Left' },
+                  { value: 'center', icon: AlignCenter, label: 'Center' },
+                  { value: 'right', icon: AlignRight, label: 'Right' },
+                  { value: 'justify', icon: AlignJustify, label: 'Justify' },
+                ].map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => handleUpdate('textAlign', opt.value)}
+                    className={`flex-1 p-1.5 rounded-sm transition-colors ${props.textAlign === opt.value ? 'bg-[#3b82f6] text-white' : 'text-gray-400 hover:text-white'}`}
+                    title={opt.label}
+                  >
+                    <opt.icon className="w-3.5 h-3.5 mx-auto" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </ControlGroup>
+ */}
+          <ControlGroup label="Block Align">
             <div className="flex items-center gap-2">
               <div className="flex bg-[#1a1d21] rounded p-0.5 border border-[#3e444b]">
-                {['flex-start', 'center', 'flex-end'].map((align) => (
+                {['flex-start', 'center', 'flex-end', 'stretch'].map((align) => (
                   <button
                     key={align}
                     onClick={() => handleUpdate('alignSelf', align)}
-                    className={`p-1.5 rounded-sm transition-colors ${props.alignSelf === align ? 'bg-[#3b82f6] text-white' : 'text-gray-400 hover:text-white'}`}
-                    title={align === 'flex-start' ? 'Left' : align === 'center' ? 'Center' : 'Right'}
+                    className={`p-1.5 rounded-sm transition-colors ${props.alignSelf === align || (align === 'stretch' && !props.alignSelf) ? 'bg-[#3b82f6] text-white' : 'text-gray-400 hover:text-white'}`}
+                    title={align === 'flex-start' ? 'Left' : align === 'center' ? 'Center' : align === 'flex-end' ? 'Right' : 'Full Width'}
                   >
                     {align === 'flex-start' && <AlignLeft className="w-3.5 h-3.5" />}
                     {align === 'center' && <AlignCenter className="w-3.5 h-3.5" />}
                     {align === 'flex-end' && <AlignRight className="w-3.5 h-3.5" />}
+                    {align === 'stretch' && <AlignJustify className="w-3.5 h-3.5" />}
                   </button>
                 ))}
               </div>
               <button
                 onClick={() => handleUpdate('alignSelf', undefined)}
                 className="p-1.5 bg-[#15181b] hover:bg-[#1a1d21] text-gray-400 hover:text-white border border-[#2d3237] rounded-sm transition-colors"
-                title="Reset Alignment"
+                title="Reset Block Alignment"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
               </button>
             </div>
           </ControlGroup>
-        </PropertySection>
-
-        <PropertySection title="Text Formatting" icon={AlignLeft}>
-          <div className="space-y-3">
-            <ControlGroup label="Text Style">
-              <div className="grid grid-cols-4 gap-2">
-                <button
-                  onClick={() => toggleFormatting('strong')}
-                  className={`px-2 py-1.5 text-xs font-bold border border-[#2d3237] rounded-sm transition-colors ${hasFormatting('strong')
-                    ? 'bg-[#3b82f6] text-white'
-                    : 'bg-[#15181b] hover:bg-[#1a1d21] text-gray-300'
-                    }`}
-                  title="Bold (Toggle)"
-                >
-                  B
-                </button>
-                <button
-                  onClick={() => toggleFormatting('em')}
-                  className={`px-2 py-1.5 text-xs italic border border-[#2d3237] rounded-sm transition-colors ${hasFormatting('em')
-                    ? 'bg-[#3b82f6] text-white'
-                    : 'bg-[#15181b] hover:bg-[#1a1d21] text-gray-300'
-                    }`}
-                  title="Italic (Toggle)"
-                >
-                  I
-                </button>
-                <button
-                  onClick={() => toggleFormatting('u')}
-                  className={`px-2 py-1.5 text-xs underline border border-[#2d3237] rounded-sm transition-colors ${hasFormatting('u')
-                    ? 'bg-[#3b82f6] text-white'
-                    : 'bg-[#15181b] hover:bg-[#1a1d21] text-gray-300'
-                    }`}
-                  title="Underline (Toggle)"
-                >
-                  U
-                </button>
-                <button
-                  onClick={() => toggleFormatting('s')}
-                  className={`px-2 py-1.5 text-xs line-through border border-[#2d3237] rounded-sm transition-colors ${hasFormatting('s')
-                    ? 'bg-[#3b82f6] text-white'
-                    : 'bg-[#15181b] hover:bg-[#1a1d21] text-gray-300'
-                    }`}
-                  title="Strikethrough (Toggle)"
-                >
-                  S
-                </button>
-              </div>
-            </ControlGroup>
-
-            <ControlGroup label="Lists">
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => {
-                    const content = props.content || 'Sample Text';
-                    if (hasFormatting('ul')) {
-                      const newContent = content.replace(/<\/?ul[^>]*>/gi, '').replace(/<\/?li[^>]*>/gi, '');
-                      handleUpdate('content', newContent);
-                    } else {
-                      const newContent = `<ul><li>${content}</li></ul>`;
-                      handleUpdate('content', newContent);
-                    }
-                  }}
-                  className={`px-2 py-1.5 text-xs border border-[#2d3237] rounded-sm transition-colors ${hasFormatting('ul')
-                    ? 'bg-[#3b82f6] text-white'
-                    : 'bg-[#15181b] hover:bg-[#1a1d21] text-gray-300'
-                    }`}
-                  title="Bullet List (Toggle)"
-                >
-                  • List
-                </button>
-                <button
-                  onClick={() => {
-                    const content = props.content || 'Sample Text';
-                    if (hasFormatting('ol')) {
-                      const newContent = content.replace(/<\/?ol[^>]*>/gi, '').replace(/<\/?li[^>]*>/gi, '');
-                      handleUpdate('content', newContent);
-                    } else {
-                      const newContent = `<ol><li>${content}</li></ol>`;
-                      handleUpdate('content', newContent);
-                    }
-                  }}
-                  className={`px-2 py-1.5 text-xs border border-[#2d3237] rounded-sm transition-colors ${hasFormatting('ol')
-                    ? 'bg-[#3b82f6] text-white'
-                    : 'bg-[#15181b] hover:bg-[#1a1d21] text-gray-300'
-                    }`}
-                  title="Numbered List (Toggle)"
-                >
-                  1. List
-                </button>
-              </div>
-            </ControlGroup>
-
-            <div className="pt-2 border-t border-[#3e444b]">
-              <button
-                onClick={clearAllFormatting}
-                className="w-full px-3 py-2 text-xs font-medium bg-[#15181b] hover:bg-[#1a1d21] text-gray-300 hover:text-white border border-[#2d3237] rounded-sm transition-colors flex items-center justify-center gap-2"
-                title="Remove all formatting"
-              >
-                <X className="w-3.5 h-3.5" />
-                Clear All Formatting
-              </button>
-            </div>
-          </div>
         </PropertySection>
       </div>
     );

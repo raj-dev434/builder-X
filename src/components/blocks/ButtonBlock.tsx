@@ -46,11 +46,21 @@ export const ButtonBlock: React.FC<ButtonBlockProps> = ({
     iconPosition = 'after',
     iconSpacing = '8px',
     href,
-    linkType, // destructure needed for getHref
+    linkType,
     variant = 'primary',
     size = 'medium',
     email,
     phone,
+    buttonBackgroundColor,
+    buttonBackgroundImage,
+    buttonBorder,
+    buttonBorderRadius,
+    buttonBorderColor,
+    buttonBorderWidth,
+    buttonBorderStyle,
+    buttonIconUrl,
+    textColor,
+    color,
     ...styleProps
   } = block.props;
 
@@ -61,17 +71,18 @@ export const ButtonBlock: React.FC<ButtonBlockProps> = ({
     handleBlur,
     handleKeyDown
   } = useInlineEditing<HTMLElement>({
-    text,
+    text: text || '',
     onUpdate: (newText) => onUpdate({ props: { ...block.props, text: newText } }),
     isSelected
   });
 
   const getVariantClasses = () => {
-    // If custom colors are provided, we skip the variant's background/text classes
-    const hasCustomBg = !!block.props.backgroundColor;
-    const hasCustomColor = !!block.props.textColor || !!block.props.color;
+    // If custom button background or border is provided, we skip the variant's background classes
+    const hasCustomBg = !!buttonBackgroundColor || !!buttonBackgroundImage;
+    const hasCustomBorder = !!buttonBorder || !!buttonBorderWidth || !!buttonBorderColor;
+    const hasCustomColor = !!textColor || !!color;
 
-    if (hasCustomBg || hasCustomColor) {
+    if (hasCustomBg || hasCustomColor || hasCustomBorder) {
       return 'transition-all duration-200 transform active:scale-95 outline-none font-medium rounded-lg';
     }
 
@@ -106,11 +117,11 @@ export const ButtonBlock: React.FC<ButtonBlockProps> = ({
 
   // Determine the link destination
   const getHref = () => {
-    const { linkType = 'url' } = block.props;
+    const { linkType: internalLinkType = 'url' } = block.props;
 
-    if (linkType === 'email' && email) return `mailto:${email}`;
-    if (linkType === 'phone' && phone) return `tel:${phone}`;
-    if (linkType === 'url' && href) return href;
+    if (internalLinkType === 'email' && email) return `mailto:${email}`;
+    if (internalLinkType === 'phone' && phone) return `tel:${phone}`;
+    if (internalLinkType === 'url' && href) return href;
 
     // Fallback for legacy data where linkType might not be set
     if (!block.props.linkType) {
@@ -125,11 +136,33 @@ export const ButtonBlock: React.FC<ButtonBlockProps> = ({
   const linkUrl = getHref();
   const Component = linkUrl ? 'a' : 'button';
 
-  // Override text color if provided
-  const finalStyle: React.CSSProperties = {
-    ...styleProps,
-    color: (block.props.textColor || block.props.color) || undefined,
+  // Override styles for the button itself
+  const finalButtonStyle: React.CSSProperties = {
+    color: textColor || color || undefined,
+    border: buttonBorder,
+    borderRadius: buttonBorderRadius,
+    borderColor: buttonBorderColor,
+    borderWidth: buttonBorderWidth,
+    borderStyle: buttonBorderStyle,
   };
+
+  // Background handling for button
+  const buttonBgType = block.props.buttonBackgroundType || 'classic';
+  if (buttonBgType === 'gradient') {
+    const gType = block.props.buttonGradientType || 'linear';
+    const gAngle = block.props.buttonGradientAngle ?? 90;
+    const gColor1 = block.props.buttonGradientColor1 || '#667eea';
+    const gColor2 = block.props.buttonGradientColor2 || '#764ba2';
+
+    if (gType === 'linear') {
+      finalButtonStyle.backgroundImage = `linear-gradient(${gAngle}deg, ${gColor1}, ${gColor2})`;
+    } else {
+      finalButtonStyle.backgroundImage = `radial-gradient(circle, ${gColor1}, ${gColor2})`;
+    }
+  } else {
+    finalButtonStyle.backgroundColor = buttonBackgroundColor;
+    finalButtonStyle.backgroundImage = buttonBackgroundImage;
+  }
 
   return (
     <BaseBlock
@@ -138,6 +171,7 @@ export const ButtonBlock: React.FC<ButtonBlockProps> = ({
       onSelect={onSelect}
       onDelete={onDelete}
       className={`w-full ${block.props.textAlign === 'center' ? 'flex justify-center' : block.props.textAlign === 'right' ? 'flex justify-end' : ''}`}
+      {...styleProps}
     >
       <div className="w-full">
         <Component
@@ -149,15 +183,29 @@ export const ButtonBlock: React.FC<ButtonBlockProps> = ({
             ${getVariantClasses()}
             ${getSizeClasses()}
           `}
-          style={finalStyle}
+          style={finalButtonStyle}
           onClick={(e) => {
             if (!isPreviewMode) e.preventDefault(); // Prevent link navigation when not in preview
           }}
           onDoubleClick={handleDoubleClick}
         >
           <div className="flex items-center justify-center">
-            {/* Icon Before */}
-            {icon && iconPosition === 'before' && (
+            {/* External Icon */}
+            {buttonIconUrl && (
+              <img
+                src={buttonIconUrl}
+                alt=""
+                className="inline-block object-contain"
+                style={{
+                  marginRight: (text || !isEditing) ? iconSpacing : '0',
+                  width: '1.2em',
+                  height: '1.2em'
+                }}
+              />
+            )}
+
+            {/* Icon Before (Emoji) */}
+            {!buttonIconUrl && icon && iconPosition === 'before' && (
               <span style={{ marginRight: iconSpacing, fontSize: '1.2em', lineHeight: 1 }}>
                 {getIcon(icon)}
               </span>
@@ -167,17 +215,17 @@ export const ButtonBlock: React.FC<ButtonBlockProps> = ({
               ref={textRef}
               contentEditable={isEditing}
               suppressContentEditableWarning
-              className="outline-none min-w-[20px] text-center"
+              className={`outline-none min-w-[2px] text-center ${!text && !isEditing ? 'opacity-50 italic' : ''}`}
               style={{ cursor: isEditing ? 'text' : 'inherit' }}
               onBlur={handleBlur}
               onKeyDown={handleKeyDown}
             >
-              {text}
+              {text || (isEditing ? '' : 'Button Text')}
             </span>
             {children}
 
-            {/* Icon After */}
-            {icon && iconPosition !== 'before' && (
+            {/* Icon After (Emoji) */}
+            {!buttonIconUrl && icon && iconPosition !== 'before' && (
               <span style={{ marginLeft: iconSpacing, fontSize: '1.2em', lineHeight: 1 }}>
                 {getIcon(icon)}
               </span>

@@ -53,8 +53,8 @@ export const PropertySection = memo(({
   );
 });
 
-export const ControlGroup = memo(({ label, children }: { label: string; children: React.ReactNode }) => (
-  <div className="flex items-center gap-4">
+export const ControlGroup = memo(({ label, children, className = "" }: { label: string; children: React.ReactNode; className?: string }) => (
+  <div className={`flex items-center gap-4 ${className}`}>
     <div className="w-1/3 flex items-center justify-between">
       <span className="text-[11px] font-medium text-gray-300 uppercase tracking-wider">{label}</span>
     </div>
@@ -1144,7 +1144,9 @@ export const TransformGroup: React.FC<GroupProps> = ({ block, onChange }) => {
 
   const getTransformValue = (name: string, defaultValue: number) => {
     const str = props.transform || '';
-    const match = new RegExp(`${name}\\(([0-9.]+)`).exec(str);
+    // Look for name(value) or name(valueUnit)
+    const regex = new RegExp(`${name}\\((-?[0-9.]+)([^)]*)\\)`);
+    const match = regex.exec(str);
     return match ? parseFloat(match[1]) : defaultValue;
   };
 
@@ -1161,32 +1163,91 @@ export const TransformGroup: React.FC<GroupProps> = ({ block, onChange }) => {
     onChange('transform', str);
   };
 
+  const renderSlider = (label: string, name: string, min: number, max: number, step: number, defaultValue: number, unit: string = '') => {
+    const value = getTransformValue(name, defaultValue);
+    return (
+      <div className="space-y-1">
+        <div className="flex justify-between items-center">
+          <span className="text-[10px] text-gray-400 font-medium uppercase">{label}</span>
+          <span className="text-[10px] text-blue-400 font-bold">{value}{unit}</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <input
+            type="range"
+            min={min}
+            max={max}
+            step={step}
+            value={value}
+            onChange={(e) => updateTransform(name, parseFloat(e.target.value), unit)}
+            className="flex-1 h-1 bg-[#1a1d21] rounded-lg appearance-none cursor-pointer accent-blue-500"
+          />
+          <button
+            onClick={() => updateTransform(name, defaultValue, unit)}
+            className="text-gray-600 hover:text-gray-400 p-0.5 transition-colors"
+            title="Reset"
+          >
+            <RotateCcw className="w-3 h-3" />
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <PropertySection title="Transform" icon={Move}>
-      <div className="grid grid-cols-2 gap-2 mb-2">
-        <ControlGroup label="Scale">
-          <input
-            type="number" step="0.1" className={inputClasses}
-            value={getTransformValue('scale', 1)}
-            onChange={(e) => updateTransform('scale', parseFloat(e.target.value))}
-            placeholder="1"
-          />
-        </ControlGroup>
-        <ControlGroup label="Rotate (deg)">
-          <input
-            type="number" className={inputClasses}
-            value={getTransformValue('rotate', 0)}
-            onChange={(e) => updateTransform('rotate', parseFloat(e.target.value), 'deg')}
-            placeholder="0"
-          />
-        </ControlGroup>
+      <div className="space-y-4 pt-1">
+        {/* Basic Transforms */}
+        <div className="grid grid-cols-1 gap-4">
+          {renderSlider("Scale", "scale", 0, 3, 0.01, 1)}
+          {renderSlider("Rotate", "rotate", -180, 180, 1, 0, "deg")}
+        </div>
+
+        {/* Translation */}
+        <div className="pt-3 border-t border-[#3e444b] space-y-4">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Translate</span>
+            <div className="h-[1px] flex-1 bg-[#3e444b]"></div>
+          </div>
+          <div className="grid grid-cols-1 gap-4">
+            {renderSlider("Translate X", "translateX", -200, 200, 1, 0, "px")}
+            {renderSlider("Translate Y", "translateY", -200, 200, 1, 0, "px")}
+          </div>
+        </div>
+
+        {/* Skew */}
+        <div className="pt-3 border-t border-[#3e444b] space-y-4">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Skew</span>
+            <div className="h-[1px] flex-1 bg-[#3e444b]"></div>
+          </div>
+          <div className="grid grid-cols-1 gap-4">
+            {renderSlider("Skew X", "skewX", -45, 45, 1, 0, "deg")}
+            {renderSlider("Skew Y", "skewY", -45, 45, 1, 0, "deg")}
+          </div>
+        </div>
+
+        {/* Advanced Settings */}
+        <div className="pt-4 border-t border-blue-500/20 space-y-3">
+          <ControlGroup label="Origin">
+            <input
+              type="text"
+              className={inputClasses}
+              value={props.transformOrigin || ''}
+              onChange={(e) => onChange('transformOrigin', e.target.value)}
+              placeholder="center center"
+            />
+          </ControlGroup>
+          <ControlGroup label="Manual">
+            <input
+              type="text"
+              className={inputClasses}
+              value={props.transform || ''}
+              onChange={(e) => onChange('transform', e.target.value)}
+              placeholder="rotate(45deg) scale(1.1)"
+            />
+          </ControlGroup>
+        </div>
       </div>
-      <ControlGroup label="Manual">
-        <input type="text" className={inputClasses} value={props.transform || ''} onChange={(e) => onChange('transform', e.target.value)} placeholder="rotate(45deg) scale(1.1)" />
-      </ControlGroup>
-      <ControlGroup label="Origin">
-        <input type="text" className={inputClasses} value={props.transformOrigin || ''} onChange={(e) => onChange('transformOrigin', e.target.value)} placeholder="center center" />
-      </ControlGroup>
     </PropertySection>
   );
 };
@@ -1554,9 +1615,9 @@ export const ElementorHeadingInspector: React.FC<{
           <PropertySection title="Title" icon={Type} defaultOpen={true}>
             <ControlGroup label="Title">
               <textarea
-                value={props.text || ''}
-                onChange={(e) => updateProp('text', e.target.value)}
-                className={inputClasses}
+                value={props.text || props.title || ''}
+                onChange={(e) => updateProp({ text: e.target.value, title: e.target.value })}
+                className={`${inputClasses} min-h-[80px] resize-y`}
                 rows={3}
                 placeholder="Enter heading text..."
               />
@@ -1585,6 +1646,43 @@ export const ElementorHeadingInspector: React.FC<{
               </div>
             </ControlGroup>
 
+            <ControlGroup label="Size">
+              <select
+                value={props.size || 'default'}
+                onChange={(e) => updateProp('size', e.target.value)}
+                className={inputClasses}
+              >
+                <option value="default">Default</option>
+                <option value="small">Small</option>
+                <option value="medium">Medium</option>
+                <option value="large">Large</option>
+                <option value="xl">XL</option>
+                <option value="xxl">XXL</option>
+              </select>
+            </ControlGroup>
+
+            <ControlGroup label="HTML Tag">
+              <select
+                value={
+                  props.level
+                    ? String(props.level)
+                    : (props.htmlTag ? props.htmlTag.replace('h', '') : '2')
+                }
+                onChange={(e) => {
+                  const val = e.target.value;
+                  updateProp({ level: parseInt(val), htmlTag: `h${val}` });
+                }}
+                className={inputClasses}
+              >
+                <option value="1">H1</option>
+                <option value="2">H2</option>
+                <option value="3">H3</option>
+                <option value="4">H4</option>
+                <option value="5">H5</option>
+                <option value="6">H6</option>
+              </select>
+            </ControlGroup>
+
             <ControlGroup label="Alignment">
               <div className="flex bg-[#1a1d21] rounded border border-[#3e444b] overflow-hidden w-max">
                 {[
@@ -1604,21 +1702,6 @@ export const ElementorHeadingInspector: React.FC<{
                 ))}
               </div>
             </ControlGroup>
-
-            {/* <ControlGroup label="HTML Tag">
-              <select 
-                value={props.level || '2'} 
-                onChange={(e) => updateProp('level', parseInt(e.target.value))} 
-                className={inputClasses}
-              >
-                 <option value="1">H1</option>
-                 <option value="2">H2</option>
-                 <option value="3">H3</option>
-                 <option value="4">H4</option>
-                 <option value="5">H5</option>
-                 <option value="6">H6</option>
-              </select>
-           </ControlGroup> */}
           </PropertySection>
         </>
       )}
@@ -1630,14 +1713,14 @@ export const ElementorHeadingInspector: React.FC<{
               <div className="flex gap-2">
                 <input
                   type="color"
-                  value={props.color || '#333333'}
-                  onChange={(e) => updateProp('color', e.target.value)}
+                  value={props.color || props.textColor || '#333333'}
+                  onChange={(e) => updateProp({ color: e.target.value, textColor: e.target.value })}
                   className="w-8 h-8 rounded cursor-pointer border-0 bg-transparent"
                 />
                 <input
                   type="text"
-                  value={props.color || '#333333'}
-                  onChange={(e) => updateProp('color', e.target.value)}
+                  value={props.color || props.textColor || '#333333'}
+                  onChange={(e) => updateProp({ color: e.target.value, textColor: e.target.value })}
                   className={inputClasses}
                 />
               </div>
@@ -2011,12 +2094,15 @@ export const ImageBlockInspector: React.FC<{ block: Block; updateBlock: (id: str
       )}
     </div>
   );
-}; export const ButtonBlockInspector: React.FC<{ block: Block; updateBlock: (id: string, updates: Partial<Block>) => void; activeTab: 'content' | 'style' | 'advanced'; }> = ({ block, updateBlock, activeTab }) => {
+};
+
+export const ButtonBlockInspector: React.FC<{ block: Block; updateBlock: (id: string, updates: Partial<Block>) => void; activeTab: 'content' | 'style' | 'advanced'; }> = ({ block, updateBlock, activeTab }) => {
   const props = block.props as any;
   const updateProp = (k: string | any, v?: any) => {
     const u = typeof k === 'string' ? { [k]: v } : k;
     updateBlock(block.id, { props: { ...props, ...u } });
   };
+  const openAssetModal = useAssetStore((state) => state.openModal);
 
   const emojiIcons = [
     { name: 'star', label: 'Star ⭐' },
@@ -2070,9 +2156,10 @@ export const ImageBlockInspector: React.FC<{ block: Block; updateBlock: (id: str
             <ControlGroup label="Text">
               <input
                 type="text"
-                value={props.text || 'Button'}
+                value={props.text || ''}
                 onChange={(e) => updateProp('text', e.target.value)}
                 className={inputClasses}
+                placeholder="Button Text"
               />
             </ControlGroup>
 
@@ -2110,6 +2197,24 @@ export const ImageBlockInspector: React.FC<{ block: Block; updateBlock: (id: str
                   <option key={icon.name} value={icon.name}>{icon.label}</option>
                 ))}
               </select>
+            </ControlGroup>
+            <ControlGroup label="External Icon">
+              <div className="flex gap-1">
+                <input
+                  type="text"
+                  className={inputClasses}
+                  value={props.buttonIconUrl || ''}
+                  onChange={(e) => updateProp('buttonIconUrl', e.target.value)}
+                  placeholder="https://..."
+                />
+                <button
+                  onClick={() => openAssetModal((url) => updateProp('buttonIconUrl', url))}
+                  className="p-1.5 bg-[#1a1d21] border border-[#2d3237] rounded hover:border-blue-500/50 transition-colors"
+                  title="Choose from assets"
+                >
+                  <ImageIcon className="w-3.5 h-3.5 text-gray-400 font-bold" />
+                </button>
+              </div>
             </ControlGroup>
             <ControlGroup label="Icon Position">
               <select className={inputClasses} value={props.iconPosition || 'after'} onChange={(e) => updateProp('iconPosition', e.target.value)}>
@@ -2168,19 +2273,80 @@ export const ImageBlockInspector: React.FC<{ block: Block; updateBlock: (id: str
                 <option value="danger">Danger</option>
               </select>
             </ControlGroup>
-            <ControlGroup label="Background">
-              <BackgroundControl props={props} onChange={updateProp} />
-            </ControlGroup>
+            <div className="pt-2 border-t border-[#3e444b] mt-2">
+              <span className="text-[10px] font-bold text-gray-400 uppercase mb-3 block">Button Background</span>
+              <BackgroundControl
+                props={{
+                  ...props,
+                  backgroundColor: props.buttonBackgroundColor,
+                  backgroundImage: props.buttonBackgroundImage,
+                  backgroundType: props.buttonBackgroundType,
+                  gradientColor1: props.buttonGradientColor1,
+                  gradientColor2: props.buttonGradientColor2,
+                  gradientAngle: props.buttonGradientAngle,
+                  gradientType: props.buttonGradientType,
+                  usePageBackground: props.buttonUsePageBackground
+                }}
+                onChange={(key, value) => {
+                  if (typeof key === 'object') {
+                    const mapped: any = {};
+                    Object.entries(key).forEach(([k, v]) => {
+                      mapped[`button${k.charAt(0).toUpperCase()}${k.slice(1)}`] = v;
+                    });
+                    updateProp(mapped);
+                  } else {
+                    const mappedKey = `button${key.charAt(0).toUpperCase()}${key.slice(1)}`;
+                    updateProp(mappedKey, value);
+                  }
+                }}
+              />
+            </div>
             <ControlGroup label="Text Color">
               <div className="flex gap-2">
                 <input type="color" value={props.textColor || '#ffffff'} onChange={(e) => updateProp('textColor', e.target.value)} className="w-8 h-8 rounded border border-gray-600 bg-transparent p-0" />
                 <input type="text" value={props.textColor || ''} onChange={(e) => updateProp('textColor', e.target.value)} className={inputClasses} placeholder="Default" />
               </div>
             </ControlGroup>
+
+            <div className="pt-2 border-t border-[#3e444b] mt-2">
+              <span className="text-[10px] font-bold text-gray-400 uppercase mb-3 block">Button Border</span>
+              <ControlGroup label="Style">
+                <select
+                  value={props.buttonBorderStyle || 'none'}
+                  onChange={(e) => updateProp('buttonBorderStyle', e.target.value)}
+                  className={inputClasses}
+                >
+                  <option value="none">None</option>
+                  <option value="solid">Solid</option>
+                  <option value="dashed">Dashed</option>
+                  <option value="dotted">Dotted</option>
+                  <option value="double">Double</option>
+                </select>
+              </ControlGroup>
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                <div>
+                  <label className="text-[9px] text-gray-400 mb-1 block uppercase tracking-wider">Width</label>
+                  <UnitControl value={props.buttonBorderWidth} onChange={(val) => updateProp('buttonBorderWidth', val)} placeholder="0px" />
+                </div>
+                <div>
+                  <label className="text-[9px] text-gray-400 mb-1 block uppercase tracking-wider">Radius</label>
+                  <UnitControl value={props.buttonBorderRadius} onChange={(val) => updateProp('buttonBorderRadius', val)} placeholder="0px" />
+                </div>
+              </div>
+              <ControlGroup label="Color" className="mt-2">
+                <div className="flex gap-2">
+                  <input type="color" value={props.buttonBorderColor || '#000000'} onChange={(e) => updateProp('buttonBorderColor', e.target.value)} className="w-8 h-8 rounded border border-gray-600 bg-transparent p-0" />
+                  <input type="text" value={props.buttonBorderColor || ''} onChange={(e) => updateProp('buttonBorderColor', e.target.value)} className={inputClasses} placeholder="Default" />
+                </div>
+              </ControlGroup>
+            </div>
           </PropertySection>
 
-          <SpacingGroup block={block} onChange={updateProp} />
-          <BorderGroup block={block} onChange={updateProp} />
+          <PropertySection title="Block Container" icon={Maximize2}>
+            <SpacingGroup block={block} onChange={updateProp} />
+            <BackgroundGroup block={block} onChange={updateProp} />
+            <BorderGroup block={block} onChange={updateProp} />
+          </PropertySection>
 
           <PropertySection title="Shadow" icon={Sparkles}>
             <ControlGroup label="Box Shadow">
@@ -5500,8 +5666,8 @@ export const GridBlockInspector: React.FC<{ block: Block; updateBlock: (id: stri
         <>
           <PropertySection title="Grid Layout" icon={Layout} defaultOpen={true}>
             <div className="space-y-4">
-              {/* Columns & Rows */}
-              <div className="grid grid-cols-2 gap-3">
+              {/* Columns & Rows - STACKED */}
+              <div className="flex flex-col space-y-3">
                 <ControlGroup label="Columns">
                   <NumberControl
                     value={props.columns || 3}

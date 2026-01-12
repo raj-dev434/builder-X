@@ -5,7 +5,6 @@ import { useCanvasStore } from '../../store/canvasStore';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
 // Import BlockRenderer dynamically or directly. 
-// Note: Circular dependency is handled by runtime evaluation for function components usually.
 import { BlockRenderer } from '../canvas/BlockRenderer';
 
 export const GridBlock: React.FC<{
@@ -18,7 +17,7 @@ export const GridBlock: React.FC<{
     children?: React.ReactNode;
 }> = ({ block, isSelected, onSelect, onUpdate, onDelete }) => {
     const [isHovered, setIsHovered] = useState(false);
-    const { viewDevice } = useCanvasStore();
+    const { viewDevice, updateBlock: globalUpdateBlock, deleteBlock: globalDeleteBlock, selectBlock: globalSelectBlock } = useCanvasStore();
     const props = block.props as any;
 
     // Responsive Grid Helpers
@@ -73,7 +72,7 @@ export const GridBlock: React.FC<{
             >
                 {/* Content width wrapper */}
                 <div
-                    className="w-full"
+                    className="w-full h-full"
                     style={{
                         maxWidth: props.contentWidth === 'boxed' ? (props.contentWidthValue || '1140px') : '100%',
                         margin: props.contentWidth === 'boxed' ? '0 auto' : undefined,
@@ -84,20 +83,9 @@ export const GridBlock: React.FC<{
                             style={gridStyle}
                             className="relative"
                         >
-                            {/* DEBUG LOGS */}
-                            {(() => {
-                                // console.log(`[GridBlock DEBUG] ID: ${block.id}, Children: ${blockChildren.length}`);
-                                return null;
-                            })()}
-                            {/* Always show grid cells with light borders */}
                             {Array.from({ length: totalCells }).map((_, i) => {
                                 // Find child that belongs to this cell (by gridIndex prop)
-                                const childBlock = blockChildren.find((c) => {
-                                    const cProps = c.props;
-                                    return cProps?.gridIndex === i;
-                                });
-                                // Fallback logic currently disabled to force strict gridIndex usage which we set on drop
-
+                                const childBlock = blockChildren.find((c) => c?.props?.gridIndex === i);
                                 const hasValidChild = !!childBlock;
 
                                 return (
@@ -111,10 +99,10 @@ export const GridBlock: React.FC<{
                                         {hasValidChild && (
                                             <BlockRenderer
                                                 block={childBlock}
-                                                // Pass handlers - we might need to partially modify them or simple pass through
-                                                // The BlockRenderer inside will handle selection logic via store if onSelect not passed
-                                                // But we want standard behavior
-                                                depth={0} // Depth relative to grid cell?
+                                                onSelect={globalSelectBlock}
+                                                onUpdate={globalUpdateBlock}
+                                                onDelete={globalDeleteBlock}
+                                                depth={0}
                                                 parentId={block.id}
                                             />
                                         )}
@@ -139,7 +127,7 @@ const GridCell: React.FC<{
 }> = ({ index, parentId, hasChild, showOutline, children }) => {
     const { isOver, setNodeRef } = useDroppable({
         id: `grid-cell-${parentId}-${index}`,
-        disabled: hasChild, // Disable drop zone if cell already has content
+        disabled: hasChild,
         data: {
             type: 'GRID_CELL',
             parentId,
@@ -150,23 +138,25 @@ const GridCell: React.FC<{
     return (
         <div
             ref={setNodeRef}
-            className={`relative flex items-center justify-center min-h-[80px] transition-all ${showOutline
+            className={`relative flex flex-col items-stretch justify-center min-h-[100px] transition-all duration-300 rounded-lg ${showOutline
                 ? hasChild
-                    ? 'border border-blue-400/20 bg-transparent' // Light blue border when has content
-                    : 'border-2 border-dashed border-blue-400/30 bg-blue-500/5 hover:bg-blue-500/10 hover:border-blue-500/40' // Dashed when empty
+                    ? 'border border-blue-400/10 bg-transparent shadow-sm'
+                    : 'border-2 border-dashed border-blue-400/20 bg-blue-500/5 hover:bg-blue-500/10 hover:border-blue-500/40 hover:shadow-md'
                 : hasChild
-                    ? 'border border-gray-300/10 bg-transparent' // Very light gray when has content
-                    : 'border border-gray-300/10 bg-gray-500/5 hover:bg-gray-500/10' // Subtle when empty
-                } ${isOver && !hasChild ? 'ring-2 ring-green-500 bg-green-500/10' : ''
-                } rounded`}
+                    ? 'border border-transparent bg-transparent'
+                    : 'border border-gray-300/5 bg-gray-500/5 hover:bg-gray-500/10 hover:shadow-sm'
+                } ${isOver && !hasChild ? 'ring-2 ring-blue-500/50 bg-blue-500/15 scale-[0.99]' : ''
+                }`}
         >
             {children ? (
-                <div className="w-full h-full">
+                <div className="w-full h-full p-1 animate-in fade-in zoom-in-95 duration-200 flex flex-col items-stretch">
                     {children}
                 </div>
             ) : (
-                <div className="text-center opacity-0 hover:opacity-100 transition-opacity pointer-events-none">
-                    <p className="text-[9px] text-gray-400">Cell {index + 1}</p>
+                <div className="text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none self-center">
+                    <div className="bg-blue-500/10 rounded-full px-3 py-1 border border-blue-500/20">
+                        <p className="text-[10px] font-bold text-blue-400/70 tracking-tight">Cell {index + 1}</p>
+                    </div>
                 </div>
             )}
         </div>

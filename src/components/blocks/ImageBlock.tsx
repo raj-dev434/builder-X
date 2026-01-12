@@ -124,16 +124,19 @@ export const ImageBlock: React.FC<ImageBlockProps> = ({
   // Get alignSelf from props to determine alignment behavior
   const alignSelf = block.props.alignSelf;
 
-  // Calculate alignment styles using margin instead of alignSelf for better compatibility
-  // Calculate alignment styles
+  // Calculate alignment styles using margin for better compatibility
+  // Works regardless of whether parent is flex, grid, or block
   const getAlignmentStyles = (): React.CSSProperties => {
+    const align = alignSelf;
+
     const styles: React.CSSProperties = {
-      // Default to auto width so flex alignment works (unless explicitly set)
       width: block.props.width || 'auto',
       maxWidth: block.props.maxWidth || '100%',
       height: block.props.height || 'auto',
-      // Apply alignSelf directly to allow flex container to control positioning
-      alignSelf: alignSelf || 'auto',
+      display: 'block',
+      // Use margin-based alignment (works in any layout context)
+      marginLeft: align === 'center' ? 'auto' : align === 'flex-end' ? 'auto' : '0',
+      marginRight: align === 'center' ? 'auto' : align === 'flex-start' ? 'auto' : '0',
     };
 
     return styles;
