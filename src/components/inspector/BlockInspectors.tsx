@@ -10,16 +10,15 @@ import {
   Square, Layout as LayoutIcon, Layers, Link2, Link2Off,
   Video, Map as MapIcon, Minus, GripHorizontal,
   CheckSquare, List, Settings, X, MousePointer2 as Pointer,
-  Plus, Calendar, Lock, Trash2, RotateCcw, Code, MoveVertical, Database
+  Plus, Calendar, Lock, Trash2, RotateCcw, Code, MoveVertical
 } from 'lucide-react';
-import { ColorPicker } from '../ui/ColorPicker';
 import { DEFAULT_FORM_FIELDS } from '../blocks/formConstants';
 
 // ==========================================
 // SHARED UTILITIES & COMPONENTS
 // ==========================================
 
-export const inputClasses = "w-full bg-[#15181b] hover:bg-[#1a1d21] text-gray-300 text-xs px-2.5 py-1.5 rounded-sm border border-[#2d3237] focus:border-blue-500/50 focus:bg-[#1a1d21] focus:ring-1 focus:ring-blue-500/10 outline-none transition-all placeholder:text-gray-700 h-8";
+export const inputClasses = "w-full bg-[#15181b] hover:bg-[#1a1d21] text-gray-300 text-[11px] px-2.5 py-1.5 rounded-sm border border-[#2d3237] focus:border-blue-500/50 focus:bg-[#1a1d21] focus:ring-1 focus:ring-blue-500/10 outline-none transition-all placeholder:text-gray-700";
 
 export const PropertySection = memo(({
   title,
@@ -159,11 +158,11 @@ export const UnitControl = memo(({
   };
 
   return (
-    <div className="flex items-center min-w-0 bg-[#15181b] hover:bg-[#1a1d21] rounded-sm border border-[#2d3237] focus-within:border-blue-500/50 focus-within:ring-1 focus-within:ring-blue-500/10 overflow-hidden h-8 transition-all group">
+    <div className="flex items-center min-w-0 bg-[#15181b] hover:bg-[#1a1d21] rounded-sm border border-[#2d3237] focus-within:border-blue-500/50 focus-within:ring-1 focus-within:ring-blue-500/10 overflow-hidden h-7 transition-all group">
       <input
         type="text"
         inputMode="decimal"
-        className="flex-1 w-full bg-transparent text-gray-300 text-xs px-2 outline-none appearance-none min-w-0 placeholder:text-gray-600 font-medium"
+        className="flex-1 w-full bg-transparent text-gray-300 text-[11px] px-2 outline-none appearance-none min-w-0 placeholder:text-gray-600 font-medium"
         value={num}
         onChange={(e) => handleNumChange(e.target.value)}
         onKeyDown={(e) => {
@@ -177,7 +176,7 @@ export const UnitControl = memo(({
           <select
             value={unit}
             onChange={(e) => handleUnitChange(e.target.value)}
-            className="bg-transparent text-[10px] text-gray-500 font-bold px-1.5 outline-none appearance-none hover:text-gray-300 cursor-pointer text-center h-full z-10"
+            className="bg-transparent text-[9px] text-gray-500 font-bold px-1.5 outline-none appearance-none hover:text-gray-300 cursor-pointer text-center h-full z-10"
             style={{ textAlignLast: 'center' }}
           >
             {units.map(u => <option key={u} value={u} className="bg-[#262a2e]">{u}</option>)}
@@ -185,10 +184,10 @@ export const UnitControl = memo(({
           {/* Tiny indicator if needed, but select usually fine */}
         </div>
         <div className="flex flex-col border-l border-[#2d3237] h-full w-4">
-          <button onClick={() => adjust(step)} className="flex-1 hover:bg-[#32373d] flex items-center justify-center h-[15px] transition-colors focus:bg-[#3b82f6] focus:text-white group/btn">
+          <button onClick={() => adjust(step)} className="flex-1 hover:bg-[#32373d] flex items-center justify-center h-[13px] transition-colors focus:bg-[#3b82f6] focus:text-white group/btn">
             <ChevronDown className="w-2 h-2 rotate-180 text-gray-500 group-hover/btn:text-white" />
           </button>
-          <button onClick={() => adjust(-step)} className="flex-1 hover:bg-[#32373d] flex items-center justify-center h-[15px] border-t border-[#2d3237] transition-colors focus:bg-[#3b82f6] focus:text-white group/btn">
+          <button onClick={() => adjust(-step)} className="flex-1 hover:bg-[#32373d] flex items-center justify-center h-[13px] border-t border-[#2d3237] transition-colors focus:bg-[#3b82f6] focus:text-white group/btn">
             <ChevronDown className="w-2 h-2 text-gray-500 group-hover/btn:text-white" />
           </button>
         </div>
@@ -307,7 +306,7 @@ const LinkedUnitInput = ({
           {isLinked ? <Link2 className="w-3 h-3" /> : <Link2Off className="w-3 h-3" />}
         </button>
       </div>
-      <div className="grid grid-cols-2 gap-1.5">
+      <div className="grid grid-cols-2 gap-2">
         {(["top", "right", "bottom", "left"] as const).map((side) => (
           <UnitControl
             key={side}
@@ -636,41 +635,6 @@ export const TypographyGroup: React.FC<GroupProps & { title?: string }> = ({ blo
   );
 };
 
-
-export const ScopedTypographySection: React.FC<GroupProps & { prefix: string, title?: string }> = ({ block, onChange, prefix, title }) => {
-  const { props } = block;
-  
-  const handleScopedChange = (key: string, value: any) => {
-    // key is like 'fontSize', we want 'titleFontSize' if prefix is 'title'
-    const prefixedKey = `${prefix}${key.charAt(0).toUpperCase() + key.slice(1)}`;
-    onChange(prefixedKey, value);
-  };
-
-  const proxyProps = new Proxy(props, {
-    get: (target, prop: string) => {
-        if (typeof prop === 'string' && [
-            'fontFamily', 'fontSize', 'fontWeight', 'textTransform', 
-            'fontStyle', 'textDecoration', 'textAlign', 'lineHeight', 
-            'letterSpacing', 'color'
-        ].includes(prop)) {
-            const prefixedKey = `${prefix}${prop.charAt(0).toUpperCase() + prop.slice(1)}`;
-            return (target as any)[prefixedKey];
-        }
-        return target[prop as keyof typeof target];
-    }
-  });
-
-  const proxyBlock = { ...block, props: proxyProps };
-
-  return (
-    <TypographyGroup 
-        block={proxyBlock as Block} 
-        onChange={handleScopedChange} 
-        title={title || `${prefix.charAt(0).toUpperCase() + prefix.slice(1)} Typography`}
-    />
-  );
-};
-
 export const BackgroundControl = ({ props, onChange }: { props: any, onChange: (key: string | any, value?: any) => void }) => {
   const isGradient = props.backgroundType === 'gradient';
   const openAssetModal = useAssetStore((state) => state.openModal);
@@ -941,58 +905,81 @@ export const LayoutGroup: React.FC<GroupProps> = ({ block, onChange }) => {
 export const FlexItemGroup: React.FC<GroupProps> = ({ block, onChange }) => {
   const { props } = block;
   return (
-    // Flex Item Properties - Only show if parent is flex/grid
-    <PropertySection title="Flex/Grid Item" icon={LayoutIcon} defaultOpen={true}>
-      <div className="grid grid-cols-3 gap-1 mb-2">
-         <div className="min-w-0">
-           <label className="text-[9px] text-gray-400 mb-1 block uppercase tracking-wider truncate" title="Grow">Grow</label>
-           <input
-             type="text"
-             className={`${inputClasses} min-w-0 w-full`}
-             value={props.flexGrow ?? 0}
-             onChange={(e) => onChange('flexGrow', e.target.value)}
-           />
-         </div>
-         <div className="min-w-0">
-           <label className="text-[9px] text-gray-400 mb-1 block uppercase tracking-wider truncate" title="Shrink">Shrink</label>
-           <input
-             type="text"
-             className={`${inputClasses} min-w-0 w-full`}
-             value={props.flexShrink ?? 1}
-             onChange={(e) => onChange('flexShrink', e.target.value)}
-           />
-         </div>
-         <div className="min-w-0">
-           <label className="text-[9px] text-gray-400 mb-1 block uppercase tracking-wider truncate" title="Order">Order</label>
-           <input
-             type="text"
-             className={`${inputClasses} min-w-0 w-full`}
-             value={props.order ?? 0}
-             onChange={(e) => onChange('order', e.target.value)}
-           />
-         </div>
+    <PropertySection title="Flex/Grid Item" icon={LayoutIcon}>
+      <div className="space-y-3">
+        <div className="grid grid-cols-3 gap-2">
+          <div>
+            <label className="text-[9px] text-gray-400 mb-1 block uppercase tracking-wider">Grow</label>
+            <input
+              type="number"
+              className={inputClasses}
+              value={props.flexGrow ?? ''}
+              onChange={(e) => {
+                const val = parseFloat(e.target.value);
+                onChange('flexGrow', isNaN(val) ? undefined : val);
+              }}
+              placeholder="0"
+            />
+          </div>
+          <div>
+            <label className="text-[9px] text-gray-400 mb-1 block uppercase tracking-wider">Shrink</label>
+            <input
+              type="number"
+              className={inputClasses}
+              value={props.flexShrink ?? ''}
+              onChange={(e) => {
+                const val = parseFloat(e.target.value);
+                onChange('flexShrink', isNaN(val) ? undefined : val);
+              }}
+              placeholder="1"
+            />
+          </div>
+          <div>
+            <label className="text-[9px] text-gray-400 mb-1 block uppercase tracking-wider">Order</label>
+            <input
+              type="number"
+              className={inputClasses}
+              value={props.order ?? ''}
+              onChange={(e) => {
+                const val = parseFloat(e.target.value);
+                onChange('order', isNaN(val) ? undefined : val);
+              }}
+              placeholder="0"
+            />
+          </div>
+        </div>
+        <ControlGroup label="Basis">
+          <UnitControl value={props.flexBasis} onChange={(val) => onChange('flexBasis', val)} placeholder="auto" />
+        </ControlGroup>
+        <ControlGroup label="Align Self">
+          <div className="flex bg-[#1a1d21] rounded border border-[#3e444b] overflow-hidden mb-2">
+            {[
+              { value: 'auto', label: 'A', title: 'Auto' },
+              { value: 'flex-start', icon: AlignLeft, title: 'Start' },
+              { value: 'center', icon: AlignCenter, title: 'Center' },
+              { value: 'flex-end', icon: AlignRight, title: 'End' },
+              { value: 'stretch', icon: AlignJustify, title: 'Stretch' },
+            ].map((opt: any) => (
+              <button
+                key={opt.value}
+                onClick={() => onChange('alignSelf', opt.value)}
+                className={`flex-1 p-1.5 flex justify-center items-center hover:bg-[#2d3237] transition-colors ${props.alignSelf === opt.value ? 'bg-[#3b82f6] text-white' : 'text-gray-400'}`}
+                title={opt.title}
+              >
+                {opt.icon ? <opt.icon className="w-3.5 h-3.5" /> : <span className="text-[10px] font-bold">{opt.label}</span>}
+              </button>
+            ))}
+          </div>
+          <select className={inputClasses} value={props.alignSelf || "auto"} onChange={(e) => onChange('alignSelf', e.target.value)}>
+            <option value="auto">Auto</option>
+            <option value="flex-start">Start</option>
+            <option value="flex-end">End</option>
+            <option value="center">Center</option>
+            <option value="stretch">Stretch</option>
+            <option value="baseline">Baseline</option>
+          </select>
+        </ControlGroup>
       </div>
-
-      <ControlGroup label="Align Self">
-         <div className="flex bg-[#1a1d21] rounded border border-[#3e444b] overflow-hidden">
-           {[
-             { value: 'auto', icon: Square, label: 'Auto' },
-             { value: 'flex-start', icon: AlignLeft, label: 'Start' },
-             { value: 'center', icon: AlignCenter, label: 'Center' },
-             { value: 'flex-end', icon: AlignRight, label: 'End' },
-             { value: 'stretch', icon: AlignJustify, label: 'Str' }
-           ].map((option) => (
-             <button
-               key={option.value}
-               onClick={() => onChange('alignSelf', option.value)}
-               className={`flex-1 p-1.5 flex justify-center items-center hover:bg-[#2d3237] transition-colors ${props.alignSelf === option.value ? 'bg-[#3b82f6] text-white' : 'text-gray-400'}`}
-               title={option.label}
-             >
-               <option.icon className="w-3.5 h-3.5" />
-             </button>
-           ))}
-         </div>
-      </ControlGroup>
     </PropertySection>
   );
 };
@@ -1204,82 +1191,6 @@ export const TransformGroup: React.FC<GroupProps> = ({ block, onChange }) => {
   );
 };
 
-export const AppearanceGroup: React.FC<GroupProps> = ({ block, onChange }) => {
-  const { props } = block;
-  return (
-    <PropertySection title="Appearance" icon={Palette}>
-      <ControlGroup label="Opacity">
-         <div className="flex items-center gap-2">
-            <input
-              type="range" min="0" max="1" step="0.05"
-              value={props.opacity !== undefined ? props.opacity : 1}
-              onChange={(e) => onChange('opacity', parseFloat(e.target.value))}
-              className="flex-1 h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer"
-            />
-            <span className="text-[10px] text-gray-400 w-8 text-right">{props.opacity !== undefined ? props.opacity : 1}</span>
-         </div>
-      </ControlGroup>
-      <ControlGroup label="Mix Blend">
-        <select className={inputClasses} value={props.mixBlendMode || 'normal'} onChange={(e) => onChange('mixBlendMode', e.target.value)}>
-          <option value="normal">Normal</option>
-          <option value="multiply">Multiply</option>
-          <option value="screen">Screen</option>
-          <option value="overlay">Overlay</option>
-          <option value="darken">Darken</option>
-          <option value="lighten">Lighten</option>
-          <option value="difference">Difference</option>
-          <option value="exclusion">Exclusion</option>
-          <option value="hue">Hue</option>
-          <option value="saturation">Saturation</option>
-          <option value="color">Color</option>
-          <option value="luminosity">Luminosity</option>
-        </select>
-      </ControlGroup>
-    </PropertySection>
-  );
-};
-
-export const AttributesGroup: React.FC<GroupProps> = ({ block, onChange }) => {
-  const { props } = block;
-  return (
-    <PropertySection title="Attributes" icon={Settings}>
-      <ControlGroup label="Title Attribute">
-        <input
-          className={inputClasses}
-          value={props.titleAttribute || ''}
-          onChange={(e) => onChange('titleAttribute', e.target.value)}
-          placeholder="Hover tooltip text"
-        />
-      </ControlGroup>
-      <ControlGroup label="ARIA Label">
-        <input
-          className={inputClasses}
-          value={props.ariaLabel || ''}
-          onChange={(e) => onChange('ariaLabel', e.target.value)}
-          placeholder="Accessibility label"
-        />
-      </ControlGroup>
-    </PropertySection>
-  );
-};
-
-export const CustomCSSGroup: React.FC<GroupProps> = ({ block, onChange }) => {
-  const { props } = block;
-  return (
-    <PropertySection title="Custom CSS" icon={Code}>
-      <div className="flex flex-col gap-2">
-        <span className="text-[10px] text-gray-500">Apply custom styles to this block (e.g. border: 1px solid red;)</span>
-        <textarea
-           className={`${inputClasses} h-20 font-mono text-[10px]`}
-           value={props.customCSS || ''}
-           onChange={(e) => onChange('customCSS', e.target.value)}
-           placeholder="selector { property: value; }"
-        />
-      </div>
-    </PropertySection>
-  );
-};
-
 export const TransitionGroup: React.FC<GroupProps> = ({ block, onChange }) => {
   const { props } = block;
 
@@ -1433,11 +1344,8 @@ export const StyleProperties: React.FC<{ block: Block; updateBlock: (id: string,
       <OutlineGroup block={block} onChange={handleChange} />
       <FilterGroup block={block} onChange={handleChange} />
       <InteractionGroup block={block} onChange={handleChange} />
-      <AppearanceGroup block={block} onChange={handleChange} />
       <TransformGroup block={block} onChange={handleChange} />
       <TransitionGroup block={block} onChange={handleChange} />
-      <AttributesGroup block={block} onChange={handleChange} />
-      <CustomCSSGroup block={block} onChange={handleChange} />
     </div>
   );
 };
@@ -3025,19 +2933,7 @@ export const ContainerBlockInspector: React.FC<{ block: Block; updateBlock: (id:
     <div className="flex flex-col space-y-2">
       {activeTab === 'content' && (
         <>
-          <PropertySection title="Container" icon={LayoutIcon} defaultOpen={true}>
-            <ControlGroup label="Container Layout">
-              <select
-                className={inputClasses}
-                value={props.containerLayout || 'block'}
-                onChange={(e) => updateProp('containerLayout', e.target.value)}
-              >
-                <option value="block">Block (Default)</option>
-                {/* <option value="flex">Flexbox</option>
-                <option value="grid">Grid</option> */}
-              </select>
-            </ControlGroup>
-
+          <PropertySection title="Layout" icon={LayoutIcon} defaultOpen={true}>
             <ControlGroup label="Content Width">
               <select
                 className={inputClasses}
@@ -3048,145 +2944,33 @@ export const ContainerBlockInspector: React.FC<{ block: Block; updateBlock: (id:
                 <option value="full">Full Width</option>
               </select>
             </ControlGroup>
-
-            <ControlGroup label="Width">
-               <UnitControl value={props.width} onChange={(v) => updateProp('width', v)} placeholder="100%" />
-            </ControlGroup>
-
+            {props.contentWidth === 'boxed' && (
+              <ControlGroup label="Width">
+                <UnitControl value={props.width} onChange={(v) => updateProp('width', v)} />
+              </ControlGroup>
+            )}
             <ControlGroup label="Min Height">
-              <UnitControl value={props.minHeight} onChange={(v) => updateProp('minHeight', v)} placeholder="auto" />
+              <UnitControl value={props.minHeight} onChange={(v) => updateProp('minHeight', v)} />
             </ControlGroup>
-
-             <ControlGroup label="Overflow">
-              <select
-                className={inputClasses}
-                value={props.overflow || 'visible'}
-                onChange={(e) => updateProp('overflow', e.target.value)}
-              >
-                <option value="visible">Visible</option>
-                <option value="hidden">Hidden</option>
-                <option value="scroll">Scroll</option>
-                <option value="auto">Auto</option>
-              </select>
+            <ControlGroup label="Max Width">
+              <UnitControl value={props.maxWidth} onChange={(v) => updateProp('maxWidth', v)} />
             </ControlGroup>
           </PropertySection>
 
-          {props.containerLayout === 'grid' && (
-            <PropertySection title="Items" icon={Layers} defaultOpen={true}>
-              {/* Grid Columns */}
-              <ControlGroup label="Columns">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="range"
-                    min="1"
-                    max="12"
-                    step="1"
-                    className="flex-1 h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-blue-500"
-                    value={parseInt(props.gridTemplateColumns?.split('(')[1] || '1') || 1}
-                    onChange={(e) => updateProp('gridTemplateColumns', `repeat(${e.target.value}, 1fr)`)}
-                  />
-                  <div className="w-16">
-                     <UnitControl 
-                        value={parseInt(props.gridTemplateColumns?.split('(')[1] || '1')}
-                        onChange={(v) => updateProp('gridTemplateColumns', `repeat(${parseInt(v) || 1}, 1fr)`)}
-                        placeholder="1"
-                        units={['fr']} // Simplification for now, Elementor usually handles this via repeat(N, 1fr)
-                     />
-                  </div>
-                </div>
-              </ControlGroup>
-              
-              {/* Grid Rows */}
-              <ControlGroup label="Rows">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="range"
-                    min="1"
-                    max="12"
-                    step="1"
-                     className="flex-1 h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-blue-500"
-                    value={parseInt(props.gridTemplateRows?.split('(')[1] || '1') || 1}
-                     onChange={(e) => updateProp('gridTemplateRows', `repeat(${e.target.value}, 1fr)`)}
-                  />
-                   <div className="w-16">
-                     <UnitControl 
-                        value={parseInt(props.gridTemplateRows?.split('(')[1] || '1')}
-                        onChange={(v) => updateProp('gridTemplateRows', `repeat(${parseInt(v) || 1}, 1fr)`)}
-                        placeholder="1"
-                        units={['fr']}
-                     />
-                  </div>
-                </div>
-              </ControlGroup>
-
-              {/* Gaps */}
-               <div className="grid grid-cols-2 gap-1.5 mt-2">
-                 <ControlGroup label="Gaps (Col)">
-                    <UnitControl value={props.columnGap} onChange={(v) => updateProp('columnGap', v)} placeholder="0px" />
-                 </ControlGroup>
-                 <ControlGroup label="Gaps (Row)">
-                    <UnitControl value={props.rowGap} onChange={(v) => updateProp('rowGap', v)} placeholder="0px" />
-                 </ControlGroup>
-               </div>
-               
-               {/* Auto Flow */}
-              <ControlGroup label="Auto Flow">
-                <select
-                  className={inputClasses}
-                  value={props.gridAutoFlow || 'row'}
-                  onChange={(e) => updateProp('gridAutoFlow', e.target.value)}
+          <PropertySection title="Alignment" icon={AlignLeft}>
+            <div className="flex bg-[#1a1d21] rounded p-0.5 border border-[#3e444b]">
+              {['left', 'center', 'right', 'justify'].map((align) => (
+                <button
+                  key={align}
+                  onClick={() => updateProp('textAlign', align)}
+                  className={`flex-1 py-1 px-2 rounded-sm text-[10px] uppercase font-bold transition-all ${(props.textAlign || 'left') === align ? 'bg-[#3b82f6] text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'
+                    }`}
                 >
-                  <option value="row">Row (Default)</option>
-                  <option value="column">Column</option>
-                  <option value="dense">Dense</option>
-                  <option value="row dense">Row Dense</option>
-                  <option value="column dense">Column Dense</option>
-                </select>
-              </ControlGroup>
-
-              {/* Justify Items */}
-              <ControlGroup label="Justify Items">
-                 <div className="flex bg-[#1a1d21] rounded p-0.5 border border-[#3e444b]">
-                   {[
-                    { val: 'start', icon: AlignLeft },
-                     { val: 'center', icon: AlignCenter },
-                    { val: 'end', icon: AlignRight },
-                    { val: 'stretch', icon: AlignJustify }, // Using Justify icon for stretch
-                   ].map((opt) => (
-                    <button
-                      key={opt.val}
-                      onClick={() => updateProp('justifyItems', opt.val)}
-                       className={`flex-1 py-1 px-1 rounded-sm flex justify-center items-center transition-all ${props.justifyItems === opt.val ? 'bg-[#3b82f6] text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}
-                      title={opt.val}
-                    >
-                      <opt.icon className="w-3 h-3" />
-                    </button>
-                  ))}
-                 </div>
-              </ControlGroup>
-
-               {/* Align Items */}
-              <ControlGroup label="Align Items">
-                 <div className="flex bg-[#1a1d21] rounded p-0.5 border border-[#3e444b]">
-                   {[
-                    { val: 'start', icon: AlignLeft, rotate: 90 }, // Rotated for vertical align visual
-                     { val: 'center', icon: AlignCenter, rotate: 90 },
-                    { val: 'end', icon: AlignRight, rotate: 90 },
-                    { val: 'stretch', icon: AlignJustify, rotate: 90 },
-                   ].map((opt) => (
-                    <button
-                      key={opt.val}
-                      onClick={() => updateProp('alignItems', opt.val)}
-                       className={`flex-1 py-1 px-1 rounded-sm flex justify-center items-center transition-all ${props.alignItems === opt.val ? 'bg-[#3b82f6] text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}
-                      title={opt.val}
-                    >
-                      <opt.icon className={`w-3 h-3 ${opt.rotate ? `rotate-${opt.rotate}` : ''}`} style={{ transform: opt.rotate ? `rotate(${opt.rotate}deg)` : undefined }} />
-                    </button>
-                  ))}
-                 </div>
-              </ControlGroup>
-            </PropertySection>
-          )}
+                  {align}
+                </button>
+              ))}
+            </div>
+          </PropertySection>
         </>
       )}
 
@@ -3196,113 +2980,12 @@ export const ContainerBlockInspector: React.FC<{ block: Block; updateBlock: (id:
             <BackgroundControl props={props} onChange={updateProp} />
           </PropertySection>
 
-           <PropertySection title="Background Overlay" icon={Layers}>
-             <div className="space-y-3">
-               <ControlGroup label="Color">
-                  <div className="flex gap-1">
-                     <input
-                       type="color"
-                       value={props.backgroundOverlay || '#000000'}
-                       onChange={(e) => updateProp('backgroundOverlay', e.target.value)}
-                       className="w-8 h-8 rounded border border-[#3e444b] bg-transparent cursor-pointer p-0"
-                     />
-                    <input
-                      type="text"
-                      value={props.backgroundOverlay || ''}
-                      onChange={(e) => updateProp('backgroundOverlay', e.target.value)}
-                      className={inputClasses}
-                      placeholder="transparent"
-                     />
-                  </div>
-               </ControlGroup>
-               {props.backgroundOverlay && (
-                 <div className="space-y-2">
-                   <div className="flex justify-between text-[10px] text-gray-400 uppercase">
-                     <span>Opacity</span>
-                     <span>{Math.round((props.backgroundOverlayOpacity || 0.5) * 100)}%</span>
-                   </div>
-                   <input
-                     type="range"
-                     min="0"
-                     max="1"
-                     step="0.01"
-                     value={props.backgroundOverlayOpacity === undefined ? 0.5 : props.backgroundOverlayOpacity}
-                     onChange={(e) => updateProp('backgroundOverlayOpacity', parseFloat(e.target.value))}
-                     className="w-full h-1.5 bg-[#1a1d21] rounded-lg appearance-none cursor-pointer accent-blue-500"
-                   />
-                    <div className="flex justify-between text-[10px] text-gray-400 uppercase mt-2">
-                     <span>Blend Mode</span>
-                   </div>
-                    <select
-                      className={inputClasses}
-                      value={props.backgroundOverlayBlendMode || 'normal'}
-                      onChange={(e) => updateProp('backgroundOverlayBlendMode', e.target.value)}
-                    >
-                      <option value="normal">Normal</option>
-                      <option value="multiply">Multiply</option>
-                      <option value="screen">Screen</option>
-                      <option value="overlay">Overlay</option>
-                      <option value="darken">Darken</option>
-                      <option value="lighten">Lighten</option>
-                    </select>
-                 </div>
-               )}
-             </div>
-           </PropertySection>
-
-          <PropertySection title="Border" icon={Square}>
-             <div className="space-y-3">
-                <ControlGroup label="Border Type">
-                    <select
-                      className={inputClasses}
-                      value={props.borderStyle || 'none'}
-                      onChange={(e) => updateProp('borderStyle', e.target.value)}
-                    >
-                      <option value="none">None</option>
-                      <option value="solid">Solid</option>
-                      <option value="dashed">Dashed</option>
-                      <option value="dotted">Dotted</option>
-                      <option value="double">Double</option>
-                    </select>
-                </ControlGroup>
-                {props.borderStyle !== 'none' && (
-                  <>
-                     <ControlGroup label="Width">
-                         <UnitControl value={props.borderWidth} onChange={(v) => updateProp('borderWidth', v)} placeholder="1px" />
-                     </ControlGroup>
-                     <ControlGroup label="Color">
-                       <div className="flex gap-1">
-                          <input type="color" value={props.borderColor || '#000000'} onChange={(e) => updateProp('borderColor', e.target.value)} className="w-8 h-8 rounded border border-[#3e444b] bg-transparent cursor-pointer p-0" />
-                          <input type="text" value={props.borderColor || '#000000'} onChange={(e) => updateProp('borderColor', e.target.value)} className={inputClasses} />
-                       </div>
-                     </ControlGroup>
-                  </>
-                )}
-                 <div className="pt-2 border-t border-[#3e444b]">
-                    <span className="text-[10px] uppercase text-gray-400 font-bold mb-2 block">Border Radius</span>
-                    <div className="grid grid-cols-2 gap-2">
-                      <UnitControl value={props.borderTopLeftRadius} onChange={(v) => updateProp('borderTopLeftRadius', v)} placeholder="TL" />
-                      <UnitControl value={props.borderTopRightRadius} onChange={(v) => updateProp('borderTopRightRadius', v)} placeholder="TR" />
-                      <UnitControl value={props.borderBottomLeftRadius} onChange={(v) => updateProp('borderBottomLeftRadius', v)} placeholder="BL" />
-                      <UnitControl value={props.borderBottomRightRadius} onChange={(v) => updateProp('borderBottomRightRadius', v)} placeholder="BR" />
-                    </div>
-                </div>
-                 <div className="pt-2 border-t border-[#3e444b]">
-                    <span className="text-[10px] uppercase text-gray-400 font-bold mb-2 block">Box Shadow</span>
-                     <input
-                      type="text"
-                      className={inputClasses}
-                      value={props.boxShadow || ''}
-                       onChange={(e) => updateProp('boxShadow', e.target.value)}
-                       placeholder="e.g. 0 4px 6px -1px rgba(0,0,0,0.1)"
-                     />
-                 </div>
-             </div>
-          </PropertySection>
-
           <PropertySection title="Spacing" icon={Maximize2}>
             <SpacingGroup block={block} onChange={updateProp} />
           </PropertySection>
+
+          <BorderGroup block={block} onChange={updateProp} />
+          <EffectsGroup block={block} onChange={updateProp} />
         </>
       )}
 
@@ -3312,7 +2995,33 @@ export const ContainerBlockInspector: React.FC<{ block: Block; updateBlock: (id:
 };
 
 
+const ScopedTypographyGroup = ({ block, prefix, onChange, title }: { block: any, prefix: string, onChange: any, title: string }) => {
+  const props = block.props;
 
+  // Create a proxy block that maps prefixed props to standard props (e.g. titleFontSize -> fontSize)
+  const proxyProps = {
+    fontFamily: props[`${prefix}FontFamily`],
+    fontSize: props[`${prefix}FontSize`],
+    fontWeight: props[`${prefix}FontWeight`],
+    color: props[`${prefix}Color`],
+    textAlign: props[`${prefix}TextAlign`],
+    lineHeight: props[`${prefix}LineHeight`],
+    letterSpacing: props[`${prefix}LetterSpacing`],
+    textTransform: props[`${prefix}TextTransform`],
+    textDecoration: props[`${prefix}TextDecoration`],
+    fontStyle: props[`${prefix}FontStyle`],
+  };
+
+  const proxyBlock = { ...block, props: proxyProps };
+
+  const handleChange = (key: string, value: any) => {
+    // Map standard prop back to prefixed prop (e.g. fontSize -> titleFontSize)
+    const prefixedKey = `${prefix}${key.charAt(0).toUpperCase() + key.slice(1)}`;
+    onChange(prefixedKey, value);
+  };
+
+  return <TypographyGroup block={proxyBlock} onChange={handleChange} title={title} />;
+};
 
 export const GroupBlockInspector: React.FC<{ block: Block; updateBlock: (id: string, updates: Partial<Block>) => void; activeTab: 'content' | 'style' | 'advanced'; }> = ({ block, updateBlock, activeTab }) => {
   const props = block.props as any;
@@ -3369,10 +3078,10 @@ export const GroupBlockInspector: React.FC<{ block: Block; updateBlock: (id: str
       {activeTab === 'style' && (
         <>
           {props.showTitle && (
-            <ScopedTypographySection block={block} prefix="title" onChange={updateProp} title="Title Typography" />
+            <ScopedTypographyGroup block={block} prefix="title" onChange={updateProp} title="Title Typography" />
           )}
           {props.showDescription && (
-            <ScopedTypographySection block={block} prefix="description" onChange={updateProp} title="Description Typography" />
+            <ScopedTypographyGroup block={block} prefix="description" onChange={updateProp} title="Description Typography" />
           )}
 
           <PropertySection title="Appearance" icon={Palette} defaultOpen={true}>
@@ -4212,10 +3921,6 @@ export const CountdownTimerBlockInspector: React.FC<{ block: Block; updateBlock:
     </div>
   );
 };
-
-
-// ... existing imports ...
-
 export const ProgressBarBlockInspector: React.FC<{ block: Block; updateBlock: (id: string, updates: Partial<Block>) => void; activeTab: 'content' | 'style' | 'advanced'; }> = ({ block, updateBlock, activeTab }) => {
   const props = block.props as any;
   const updateProp = (k: string, v: any) => updateBlock(block.id, { props: { ...props, [k]: v } });
@@ -4224,156 +3929,61 @@ export const ProgressBarBlockInspector: React.FC<{ block: Block; updateBlock: (i
     <div className="flex flex-col space-y-2">
       {activeTab === 'content' && (
         <>
-          <PropertySection title="Progress Bar" icon={Layers} defaultOpen={true}>
+          <PropertySection title="Progress Settings" icon={Layers} defaultOpen={true}>
             <div className="space-y-4">
-               {/* Title Section */}
-               <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-gray-400 uppercase">Title</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <input 
-                      type="text" 
-                      className={inputClasses} 
-                      value={props.title || ''} 
-                      onChange={(e) => updateProp('title', e.target.value)}
-                      placeholder="My Skill"
-                    />
-                    <div className="w-8 h-8 flex items-center justify-center bg-[#202328] border border-[#2d3237] rounded">
-                       <Database size={12} className="text-gray-500" />
-                    </div>
-                  </div>
+              <ControlGroup label="Value">
+                <input type="number" className={inputClasses} value={props.value ?? 65} onChange={(e) => updateProp('value', Number(e.target.value))} />
+              </ControlGroup>
+              <ControlGroup label="Max Value">
+                <input type="number" className={inputClasses} value={props.max ?? 100} onChange={(e) => updateProp('max', Number(e.target.value))} />
+              </ControlGroup>
+              <ControlGroup label="Style">
+                <select className={inputClasses} value={props.style || 'line'} onChange={(e) => updateProp('style', e.target.value)}>
+                  <option value="line">Straight Line</option>
+                  <option value="circle">Circular</option>
+                  <option value="dash">Dashed / Segments</option>
+                </select>
+              </ControlGroup>
+              <ControlGroup label="Variant">
+                <select className={inputClasses} value={props.variant || 'default'} onChange={(e) => updateProp('variant', e.target.value)}>
+                  <option value="default">Default (Accent)</option>
+                  <option value="success">Success (Green)</option>
+                  <option value="warning">Warning (Orange)</option>
+                  <option value="danger">Danger (Red)</option>
+                  <option value="info">Info (Cyan)</option>
+                </select>
+              </ControlGroup>
+            </div>
+          </PropertySection>
 
-                  <ControlGroup label="Title HTML Tag">
-                    <select className={inputClasses} value={props.titleTag || 'p'} onChange={(e) => updateProp('titleTag', e.target.value)}>
-                      <option value="h1">H1</option>
-                      <option value="h2">H2</option>
-                      <option value="h3">H3</option>
-                      <option value="h4">H4</option>
-                      <option value="h5">H5</option>
-                      <option value="h6">H6</option>
-                      <option value="div">div</option>
-                      <option value="span">span</option>
-                      <option value="p">p</option>
-                    </select>
-                  </ControlGroup>
-
-                  <div className="flex items-center justify-between pt-1">
-                    <span className="text-[11px] text-gray-400">Display Title</span>
-                    <div 
-                      onClick={() => updateProp('showTitle', !props.showTitle)}
-                      className={`w-10 h-5 rounded-full relative cursor-pointer transition-colors ${props.showTitle ? 'bg-[#e5a8ff]' : 'bg-gray-600'}`}
-                    >
-                      <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform shadow-sm ${props.showTitle ? 'left-[22px]' : 'left-0.5'}`} />
-                      <span className={`absolute top-1 right-6 text-[8px] font-bold ${props.showTitle ? 'text-black' : 'hidden'}`}>Show</span>
-                    </div>
-                  </div>
-               </div>
-
-               <div className="w-full h-px bg-[#3e444b]" />
-
-               {/* Percentage Section */}
-               <div className="space-y-3">
-                  <ControlGroup label="Percentage">
-                    <div className="flex items-center gap-2">
-                      <input 
-                        type="range" 
-                        min="0" max="100" 
-                        value={props.value ?? 65} 
-                        onChange={(e) => updateProp('value', Number(e.target.value))}
-                        className="flex-1 accent-white"
-                      />
-                      <div className="flex gap-1">
-                          <input 
-                              type="number" 
-                              className="w-12 bg-[#15181b] border border-[#2d3237] text-gray-300 text-xs px-2 py-1.5 rounded"
-                              value={props.value ?? 65}
-                              onChange={(e) => updateProp('value', Number(e.target.value))}
-                          />
-                           <div className="w-8 h-8 flex items-center justify-center bg-[#202328] border border-[#2d3237] rounded">
-                              <Database size={12} className="text-gray-500" />
-                          </div>
-                      </div>
-                    </div>
-                  </ControlGroup>
-
-                  <div className="flex items-center justify-between pt-1">
-                    <span className="text-[11px] text-gray-400">Display Percentage</span>
-                    <div 
-                      onClick={() => updateProp('showPercentage', !props.showPercentage)}
-                      className={`w-10 h-5 rounded-full relative cursor-pointer transition-colors ${props.showPercentage ? 'bg-[#e5a8ff]' : 'bg-gray-600'}`}
-                    >
-                      <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform shadow-sm ${props.showPercentage ? 'left-[22px]' : 'left-0.5'}`} />
-                      <span className={`absolute top-1 right-6 text-[8px] font-bold ${props.showPercentage ? 'text-black' : 'hidden'}`}>Show</span>
-                    </div>
-                  </div>
-               </div>
-
-               <div className="w-full h-px bg-[#3e444b]" />
-
-               {/* Inner Text Section */}
-               <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-gray-400 uppercase">Inner Text</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <input 
-                      type="text" 
-                      className={inputClasses} 
-                      value={props.innerText || ''} 
-                      onChange={(e) => updateProp('innerText', e.target.value)}
-                      placeholder="Web Designer"
-                    />
-                    <div className="w-8 h-8 flex items-center justify-center bg-[#202328] border border-[#2d3237] rounded">
-                       <Database size={12} className="text-gray-500" />
-                    </div>
-                  </div>
-               </div>
-
-               <div className="w-full h-px bg-[#3e444b]" />
-
-               {/* Settings Section */}
-               <div className="space-y-3">
-                  <ControlGroup label="Style">
-                    <select className={inputClasses} value={props.style || 'line'} onChange={(e) => updateProp('style', e.target.value)}>
-                      <option value="line">Line</option>
-                      <option value="circle">Circle</option>
-                      <option value="dash">Dash</option>
-                    </select>
-                  </ControlGroup>
-
-                  <ControlGroup label="Variant">
-                    <select className={inputClasses} value={props.variant || 'default'} onChange={(e) => updateProp('variant', e.target.value)}>
-                      <option value="default">Default</option>
-                      <option value="success">Success</option>
-                      <option value="warning">Warning</option>
-                      <option value="danger">Danger</option>
-                      <option value="info">Info</option>
-                    </select>
-                  </ControlGroup>
-
-                  <div className="flex items-center justify-between pt-1">
-                    <span className="text-[11px] text-gray-400">Animated</span>
-                    <div 
-                      onClick={() => updateProp('animated', !props.animated)}
-                      className={`w-10 h-5 rounded-full relative cursor-pointer transition-colors ${props.animated ? 'bg-[#e5a8ff]' : 'bg-gray-600'}`}
-                    >
-                      <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform shadow-sm ${props.animated ? 'left-[22px]' : 'left-0.5'}`} />
-                      <span className={`absolute top-1 right-6 text-[8px] font-bold ${props.animated ? 'text-black' : 'hidden'}`}>On</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-1">
-                    <span className="text-[11px] text-gray-400">Striped</span>
-                    <div 
-                      onClick={() => updateProp('striped', !props.striped)}
-                      className={`w-10 h-5 rounded-full relative cursor-pointer transition-colors ${props.striped ? 'bg-[#e5a8ff]' : 'bg-gray-600'}`}
-                    >
-                      <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform shadow-sm ${props.striped ? 'left-[22px]' : 'left-0.5'}`} />
-                      <span className={`absolute top-1 right-6 text-[8px] font-bold ${props.striped ? 'text-black' : 'hidden'}`}>On</span>
-                    </div>
-                  </div>
-               </div>
+          <PropertySection title="Labels" icon={Type}>
+            <div className="flex items-center justify-between px-1 mb-4">
+              <span className="text-[10px] uppercase font-bold text-gray-400">Show Title</span>
+              <input type="checkbox" checked={props.showTitle !== false} onChange={(e) => updateProp('showTitle', e.target.checked)} className="rounded" />
+            </div>
+            {props.showTitle !== false && (
+              <ControlGroup label="Title">
+                <input type="text" className={inputClasses} value={props.title || ''} onChange={(e) => updateProp('title', e.target.value)} />
+              </ControlGroup>
+            )}
+            <div className="flex items-center justify-between px-1 mt-4 mb-2">
+              <span className="text-[10px] uppercase font-bold text-gray-400">Show Description</span>
+              <input type="checkbox" checked={props.showDescription !== false} onChange={(e) => updateProp('showDescription', e.target.checked)} className="rounded" />
+            </div>
+            {props.showDescription !== false && (
+              <ControlGroup label="Description">
+                <textarea className={inputClasses} value={props.description || ''} onChange={(e) => updateProp('description', e.target.value)} rows={2} />
+              </ControlGroup>
+            )}
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] uppercase font-bold text-gray-400">Show %</span>
+                <input type="checkbox" checked={props.showPercentage !== false} onChange={(e) => updateProp('showPercentage', e.target.checked)} className="rounded" />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] uppercase font-bold text-gray-400">Show Value</span>
+                <input type="checkbox" checked={props.showValue !== false} onChange={(e) => updateProp('showValue', e.target.checked)} className="rounded" />
+              </div>
             </div>
           </PropertySection>
         </>
@@ -4381,44 +3991,52 @@ export const ProgressBarBlockInspector: React.FC<{ block: Block; updateBlock: (i
 
       {activeTab === 'style' && (
         <>
-            {props.showTitle && (
-              <ScopedTypographySection block={block} prefix="title" onChange={updateProp} title="Title Style" />
-            )}
+          <PropertySection title="Bar Appearance" icon={Palette} defaultOpen={true}>
+            <ControlGroup label="Thickness">
+              <input type="text" className={inputClasses} value={props.thickness || '12px'} onChange={(e) => updateProp('thickness', e.target.value)} placeholder="e.g. 12px" />
+            </ControlGroup>
+            <ControlGroup label="Progress Color">
+              <div className="flex gap-2">
+                <input type="color" value={props.progressColor || '#3b82f6'} onChange={(e) => updateProp('progressColor', e.target.value)} className="w-8 h-8 rounded border border-gray-600 bg-transparent p-0" />
+                <input type="text" value={props.progressColor || ''} onChange={(e) => updateProp('progressColor', e.target.value)} className={inputClasses} placeholder="#3b82f6" />
+              </div>
+            </ControlGroup>
+            <ControlGroup label="Track Bg">
+              <div className="flex gap-2">
+                <input type="color" value={props.barBackgroundColor || '#f3f4f6'} onChange={(e) => updateProp('barBackgroundColor', e.target.value)} className="w-8 h-8 rounded border border-gray-600 bg-transparent p-0" />
+                <input type="text" value={props.barBackgroundColor || ''} onChange={(e) => updateProp('barBackgroundColor', e.target.value)} className={inputClasses} placeholder="rgba(0,0,0,0.1)" />
+              </div>
+            </ControlGroup>
+          </PropertySection>
 
-            {props.showPercentage && (
-              <ScopedTypographySection block={block} prefix="percentage" onChange={updateProp} title="Percentage Style" />
-            )}
+          <PropertySection title="Effects" icon={Sparkles}>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] uppercase font-bold text-gray-400">Animated</span>
+                <input type="checkbox" checked={props.animated !== false} onChange={(e) => updateProp('animated', e.target.checked)} className="rounded" />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] uppercase font-bold text-gray-400">Striped</span>
+                <input type="checkbox" checked={props.striped === true} onChange={(e) => updateProp('striped', e.target.checked)} className="rounded" />
+              </div>
+            </div>
+            <div className="mt-4">
+              <ControlGroup label="Size Preset">
+                <select className={inputClasses} value={props.size || 'medium'} onChange={(e) => updateProp('size', e.target.value)}>
+                  <option value="small">Small</option>
+                  <option value="medium">Medium</option>
+                  <option value="large">Large</option>
+                </select>
+              </ControlGroup>
+            </div>
+          </PropertySection>
 
-            {props.innerText && (
-              <ScopedTypographySection block={block} prefix="innerText" onChange={updateProp} title="Inner Text Style" />
-            )}
-
-           <PropertySection title="Track & Size" icon={Maximize2}>
-             <ControlGroup label="Track Color">
-                <ColorPicker color={props.barBackgroundColor || '#3b3e44'} onChange={(c) => updateProp('barBackgroundColor', c)} />
-             </ControlGroup>
-             <ControlGroup label="Progress Color">
-                <ColorPicker color={props.progressColor || '#6EC1E4'} onChange={(c) => updateProp('progressColor', c)} />
-             </ControlGroup>
-             
-             <div className="h-px bg-[#3e444b] my-3" />
-             
-             {props.style === 'circle' && (
-                 <ControlGroup label="Circle Size">
-                    <UnitControl value={props.circleSize || '128px'} onChange={(v) => updateProp('circleSize', v)} placeholder="128px" />
-                 </ControlGroup>
-             )}
-
-             <ControlGroup label={props.style === 'circle' ? 'Stroke Width' : 'Height'}>
-                <UnitControl value={props.height || '20px'} onChange={(v) => updateProp('height', v)} placeholder="20px" />
-             </ControlGroup>
-
-             <ControlGroup label="Border Radius">
-                <UnitControl value={props.borderRadius || '4px'} onChange={(v) => updateProp('borderRadius', v)} />
-             </ControlGroup>
-           </PropertySection>
-
-           <EffectsGroup block={block} onChange={updateProp} />
+          <PropertySection title="Container Style" icon={Maximize2}>
+            <BackgroundControl props={props} onChange={updateProp} />
+            <SpacingGroup block={block} onChange={updateProp} />
+            <BorderGroup block={block} onChange={updateProp} />
+            <EffectsGroup block={block} onChange={updateProp} />
+          </PropertySection>
         </>
       )}
 
@@ -5564,64 +5182,17 @@ export const AlertBlockInspector: React.FC<{ block: Block; updateBlock: (id: str
                 <option value="error">Error</option>
               </select>
             </ControlGroup>
-            
-            <ControlGroup label="Icon Style">
-               <select className={inputClasses} value={props.iconType || 'default'} onChange={(e) => updateProp('iconType', e.target.value)}>
-                 <option value="default">Default (Auto)</option>
-                 <option value="info">Info (i)</option>
-                 <option value="check">Check (✓)</option>
-                 <option value="warning">Warning (⚠)</option>
-                 <option value="error">Error (X)</option>
-                 <option value="bell">Bell</option>
-                 <option value="star">Star</option>
-                 <option value="flag">Flag</option>
-               </select>
-            </ControlGroup>
-
-            <div className="flex items-center justify-between px-1 mt-2 mb-2">
-              <span className="text-[10px] uppercase font-bold text-gray-400">Show Title</span>
-              <input type="checkbox" checked={props.showTitle !== false} onChange={(e) => updateProp('showTitle', e.target.checked)} className="rounded" />
-            </div>
-            
-            {props.showTitle !== false && (
-              <ControlGroup label="Title">
-                 <input type="text" className={inputClasses} value={props.title || ''} onChange={(e) => updateProp('title', e.target.value)} placeholder="Alert Title" />
-              </ControlGroup>
-            )}
-
             <ControlGroup label="Message">
               <textarea className={inputClasses} value={props.text || ''} onChange={(e) => updateProp('text', e.target.value)} rows={3} />
             </ControlGroup>
-
             <div className="flex items-center justify-between px-1 mt-2">
               <span className="text-[10px] uppercase font-bold text-gray-400">Show Icon</span>
               <input type="checkbox" checked={props.showIcon !== false} onChange={(e) => updateProp('showIcon', e.target.checked)} className="rounded" />
             </div>
-          </PropertySection>
-
-          <PropertySection title="Action Button" icon={MousePointer2}>
-             <ControlGroup label="Label">
-               <input type="text" className={inputClasses} value={props.actionLabel || ''} onChange={(e) => updateProp('actionLabel', e.target.value)} placeholder="e.g. Learn More" />
-             </ControlGroup>
-             <ControlGroup label="Link/URL">
-               <input type="text" className={inputClasses} value={props.actionLink || ''} onChange={(e) => updateProp('actionLink', e.target.value)} placeholder="https://..." />
-             </ControlGroup>
-          </PropertySection>
-
-          <PropertySection title="Behavior" icon={Settings}>
-            <div className="flex items-center justify-between px-1 mt-1">
+            <div className="flex items-center justify-between px-1 mt-2">
               <span className="text-[10px] uppercase font-bold text-gray-400">Dismissible</span>
               <input type="checkbox" checked={props.dismissible !== false} onChange={(e) => updateProp('dismissible', e.target.checked)} className="rounded" />
             </div>
-            <div className="flex items-center justify-between px-1 mt-2">
-              <span className="text-[10px] uppercase font-bold text-gray-400">Auto Dismiss</span>
-              <input type="checkbox" checked={props.autoDismiss || false} onChange={(e) => updateProp('autoDismiss', e.target.checked)} className="rounded" />
-            </div>
-            {props.autoDismiss && (
-               <ControlGroup label="Duration (ms)">
-                 <input type="number" className={inputClasses} value={props.dismissDuration || 5000} onChange={(e) => updateProp('dismissDuration', Number(e.target.value))} />
-               </ControlGroup>
-            )}
           </PropertySection>
         </>
       )}
@@ -5629,53 +5200,12 @@ export const AlertBlockInspector: React.FC<{ block: Block; updateBlock: (id: str
       {activeTab === 'style' && (
         <>
           <PropertySection title="Custom Style" icon={Palette} defaultOpen={true}>
-            <LayoutGroup block={block} onChange={updateProp} />
-            <ControlGroup label="Text Align">
-                 <div className="flex bg-[#1a1d21] rounded p-0.5 border border-[#3e444b]">
-                {['left', 'center', 'right'].map((align) => (
-                  <button
-                    key={align}
-                    onClick={() => updateProp('textAlign', align)}
-                    className={`flex-1 py-1 px-2 rounded-sm text-[10px] uppercase font-bold transition-all ${(props.textAlign || 'left') === align ? 'bg-[#3b82f6] text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'
-                      }`}
-                  >
-                    {align}
-                  </button>
-                ))}
-              </div>
-            </ControlGroup>
-            
             <BackgroundControl props={props} onChange={updateProp} />
-            
-            <ControlGroup label="Shadow Depth">
-               <select className={inputClasses} value={props.shadow || 'sm'} onChange={(e) => updateProp('shadow', e.target.value)}>
-                 <option value="none">None</option>
-                 <option value="sm">Small</option>
-                 <option value="md">Medium</option>
-                 <option value="lg">Large</option>
-                 <option value="xl">Extra Large</option>
-               </select>
-            </ControlGroup>
-
             <ControlGroup label="Text Color">
               <div className="flex gap-2">
                 <input type="color" value={props.textColor || '#333333'} onChange={(e) => updateProp('textColor', e.target.value)} className="w-8 h-8 rounded border border-gray-600 bg-transparent p-0" />
                 <input type="text" value={props.textColor || ''} onChange={(e) => updateProp('textColor', e.target.value)} className={inputClasses} placeholder="Override variant" />
               </div>
-            </ControlGroup>
-            <div className="flex items-center justify-between px-1 mt-2">
-              <span className="text-[10px] uppercase font-bold text-gray-400">Accent Border</span>
-              <input type="checkbox" checked={props.accentBorder || false} onChange={(e) => updateProp('accentBorder', e.target.checked)} className="rounded" />
-            </div>
-            
-            <ControlGroup label="Entrance Anim">
-               <select className={inputClasses} value={props.animation || 'none'} onChange={(e) => updateProp('animation', e.target.value)}>
-                 <option value="none">None</option>
-                 <option value="fadeIn">Fade In</option>
-                 <option value="slideIn">Slide In</option>
-                 <option value="bounce">Bounce</option>
-                 <option value="scale">Scale Up</option>
-               </select>
             </ControlGroup>
           </PropertySection>
 

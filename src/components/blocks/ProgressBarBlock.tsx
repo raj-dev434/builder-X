@@ -12,80 +12,54 @@ export const ProgressBarBlock: React.FC<{
   const { 
     value = 65,
     max = 100,
-    title = 'My Skill',
-    titleTag = 'p',
+    title = 'Progress',
     showTitle = true,
-    description = 'Web Designer',
-    showDescription = false,
+    description = 'Current progress status',
+    showDescription = true,
     showPercentage = true,
+    showValue = true,
     style = 'line',
-    height = '20px',
-    borderRadius = '4px',
-    progressColor = '#6EC1E4',
-    barBackgroundColor = '#3b3e44',
-    animated = false,
+    thickness = '12px',
+    progressColor = '#3b82f6',
+    barBackgroundColor = 'rgba(0,0,0,0.1)',
+    animated = true,
     striped = false,
-    innerText = '',
-    titleColor,
-    percentageColor,
-    innerTextColor = '#ffffff',
-    variant = 'default',
+    size = 'medium',
+    variant = 'default'
   } = block.props;
 
   const percentage = Math.min(Math.max((value / max) * 100, 0), 100);
-  const TitleTag = titleTag as React.ElementType;
-
-  const VARIANT_COLORS: Record<string, string> = {
-    default: progressColor, // Fallback to custom color
-    success: '#22c55e',
-    warning: '#eab308',
-    danger: '#ef4444',
-    info: '#3b82f6',
+  
+  const getVariantColor = () => {
+    switch (variant) {
+      case 'success': return '#10b981';
+      case 'warning': return '#f59e0b';
+      case 'danger': return '#ef4444';
+      case 'info': return '#06b6d4';
+      default: return progressColor;
+    }
   };
 
-  const activeColor = (variant && variant !== 'default') ? VARIANT_COLORS[variant] : progressColor;
+  const activeColor = getVariantColor();
+  const baseSize = size === 'small' ? '0.75rem' : size === 'large' ? '1.5rem' : '1rem';
 
   const renderLine = () => (
     <div className="w-full">
-      <div className="flex justify-between items-end mb-2">
-        {showTitle && title && (
-          <TitleTag 
-            className="font-bold text-sm tracking-wide"
-            style={{ color: titleColor }}
-          >
-            {title}
-          </TitleTag>
-        )}
-        {showPercentage && (
-             <span className="text-sm font-bold" style={{ color: percentageColor || '#fff' }}>
-               {Math.round(percentage)}%
-             </span>
-        )}
-      </div>
-
       <div 
-        className="w-full relative overflow-hidden transition-all duration-300"
+        className="w-full rounded-full relative overflow-hidden transition-all duration-300"
         style={{ 
-          height: height, 
-          backgroundColor: barBackgroundColor,
-          borderRadius: borderRadius
+          height: thickness, 
+          backgroundColor: barBackgroundColor 
         }}
       >
         <div 
-          className={`h-full transition-all duration-1000 ease-out relative flex items-center justify-end pr-2 ${striped ? 'overflow-hidden' : ''}`}
+          className={`h-full rounded-full transition-all duration-1000 ease-out relative ${striped ? 'overflow-hidden' : ''}`}
           style={{ 
             width: `${percentage}%`, 
             backgroundColor: activeColor,
-            borderRadius: borderRadius,
             boxShadow: animated ? `0 0 10px ${activeColor}40` : 'none'
           }}
         >
-          {innerText && (
-             <span className="text-[10px] font-bold whitespace-nowrap z-10 relative" style={{ color: innerTextColor }}>
-               {innerText}
-             </span>
-          )}
-
           {striped && (
             <div 
               className="absolute inset-0 opacity-20 animate-[move-bg_1s_linear_infinite]"
@@ -95,18 +69,8 @@ export const ProgressBarBlock: React.FC<{
               }}
             />
           )}
-          
-          {animated && !striped && (
-             <div className="absolute inset-0 bg-white/20 animate-pulse" />
-          )}
         </div>
       </div>
-      
-      {showDescription && description && (
-         <div className="mt-1 text-xs opacity-60">
-            {description}
-         </div>
-      )}
     </div>
   );
 
@@ -114,155 +78,59 @@ export const ProgressBarBlock: React.FC<{
     const radius = 40;
     const circumference = 2 * Math.PI * radius;
     const offset = circumference - (percentage / 100) * circumference;
-    
-    // Get scoped typography styles
-    const getTypographyStyle = (prefix: string) => {
-      const p = block.props as any;
-      return {
-        fontSize: p[`${prefix}FontSize`],
-        fontWeight: p[`${prefix}FontWeight`],
-        fontFamily: p[`${prefix}FontFamily`],
-        fontStyle: p[`${prefix}FontStyle`],
-        textTransform: p[`${prefix}TextTransform`] as any,
-        textDecoration: p[`${prefix}TextDecoration`],
-        lineHeight: p[`${prefix}LineHeight`],
-        letterSpacing: p[`${prefix}LetterSpacing`],
-      };
-    };
-
-    const circleSize = (block.props as any).circleSize || '128px';
 
     return (
-      <div className="w-full flex flex-col items-center">
-        <div className="relative flex items-center justify-center p-4">
-          <svg 
-            className={`transform -rotate-90 ${animated ? 'animate-[spin_3s_linear_infinite]' : ''}`}
-            style={{ width: circleSize, height: circleSize }}
-            viewBox="0 0 128 128"
-          >
-            <circle
-              cx="64"
-              cy="64"
-              r={radius}
-              stroke={barBackgroundColor}
-              strokeWidth={parseInt(String(height).replace('px','')) || 8}
-              fill="transparent"
-            />
-            <circle
-              cx="64"
-              cy="64"
-              r={radius}
-              stroke={activeColor}
-              strokeWidth={parseInt(String(height).replace('px','')) || 8}
-              fill="transparent"
-              strokeDasharray={circumference}
-              strokeDashoffset={offset}
-              strokeLinecap="round"
-              className="transition-all duration-1000 ease-out"
-            />
-          </svg>
-          <div className="absolute flex flex-col items-center pointer-events-none">
-               {showTitle && (
-                 <TitleTag 
-                   className="font-bold text-sm mb-1 text-center"
-                   style={{ 
-                     color: titleColor,
-                     ...getTypographyStyle('title')
-                   }}
-                 >
-                   {title}
-                 </TitleTag>
-               )}
-               {showPercentage && (
-                 <span 
-                    className="text-xl font-black" 
-                    style={{ 
-                      color: percentageColor || activeColor,
-                      ...getTypographyStyle('percentage')
-                    }}
-                 >
-                   {Math.round(percentage)}%
-                 </span>
-               )}
-               {innerText && (
-                  <span 
-                    className="text-[10px] font-bold text-gray-400 mt-0.5" 
-                    style={{ 
-                      color: innerTextColor,
-                      ...getTypographyStyle('innerText')
-                    }}
-                  >
-                    {innerText}
-                  </span>
-               )}
-          </div>
+      <div className="relative flex items-center justify-center" style={{ width: '120px', height: '120px' }}>
+        <svg className="w-full h-full transform -rotate-90">
+          <circle
+            cx="60"
+            cy="60"
+            r={radius}
+            stroke={barBackgroundColor}
+            strokeWidth="8"
+            fill="transparent"
+          />
+          <circle
+            cx="60"
+            cy="60"
+            r={radius}
+            stroke={activeColor}
+            strokeWidth="8"
+            fill="transparent"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+            className="transition-all duration-1000 ease-out"
+            style={{ filter: animated ? `drop-shadow(0 0 4px ${activeColor}40)` : 'none' }}
+          />
+        </svg>
+        <div className="absolute flex flex-col items-center">
+            {showPercentage && <span className="text-xl font-black" style={{ color: activeColor }}>{Math.round(percentage)}%</span>}
+            {showValue && <span className="text-[10px] opacity-60">{value}/{max}</span>}
         </div>
-        
-        {showDescription && description && (
-           <div className="mt-1 text-xs opacity-60 text-center max-w-[200px]">
-              {description}
-           </div>
-        )}
       </div>
     );
   };
 
   const renderDash = () => {
-    const totalSegments = 10;
-    const activeSegments = Math.round((percentage / 100) * totalSegments);
-    
-    return (
-      <div className="w-full">
-         <div className="flex justify-between items-end mb-2">
-            {showTitle && title && (
-               <TitleTag 
-                  className="font-bold text-sm tracking-wide"
-                  style={{ color: titleColor }}
-               >
-                  {title}
-               </TitleTag>
-            )}
-            {showPercentage && (
-               <span className="text-sm font-bold" style={{ color: percentageColor || '#fff' }}>
-                  {Math.round(percentage)}%
-               </span>
-            )}
-         </div>
-         <div className="flex w-full gap-1">
-            {[...Array(totalSegments)].map((_, i) => (
-               <div 
-                  key={i}
-                  className={`flex-1 transition-all duration-300 relative overflow-hidden ${animated && i < activeSegments ? 'animate-pulse' : ''}`}
-                  style={{ 
-                     height: height,
-                     backgroundColor: i < activeSegments ? activeColor : barBackgroundColor,
-                     borderRadius: borderRadius
-                  }}
-               >
-                  {striped && i < activeSegments && (
-                    <div 
-                      className="absolute inset-0 opacity-20 animate-[move-bg_1s_linear_infinite]"
-                      style={{
-                        backgroundImage: 'linear-gradient(45deg, rgba(255,255,255,0.7) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0.7) 75%, transparent 75%, transparent)',
-                        backgroundSize: '10px 10px'
-                      }}
-                    />
-                  )}
-               </div>
-            ))}
-         </div>
-         
-         {innerText && (
-            <div className="mt-1 text-[10px] font-bold text-right" style={{ color: innerTextColor }}>
-               {innerText}
-            </div>
-         )}
+    const segments = 10;
+    const activeSegments = Math.round((percentage / 100) * segments);
 
-          {showDescription && description && (
-            <div className="mt-0.5 text-xs opacity-60">
-                {description}
-            </div>
-          )}
+    return (
+      <div className="flex gap-1.5 w-full">
+        {Array.from({ length: segments }).map((_, i) => (
+          <div 
+            key={i}
+            className="flex-1 rounded-sm transition-all duration-500"
+            style={{ 
+              height: thickness,
+              backgroundColor: i < activeSegments ? activeColor : barBackgroundColor,
+              opacity: i < activeSegments ? 1 : 0.3,
+              transform: i < activeSegments && animated ? 'scaleY(1.1)' : 'scaleY(1)',
+              transitionDelay: `${i * 50}ms`
+            }}
+          />
+        ))}
       </div>
     );
   };
@@ -276,10 +144,26 @@ export const ProgressBarBlock: React.FC<{
       onDelete={onDelete}
       className="w-full"
     >
-      <div className="w-full p-2">
-         {style === 'line' && renderLine()}
-         {style === 'circle' && renderCircle()}
-         {style === 'dash' && renderDash()}
+      <div className="flex flex-col items-center text-center p-2 w-full">
+        {(showTitle || showDescription) && (
+          <div className="mb-4 w-full">
+            {showTitle && title && <h4 className="font-bold tracking-tight mb-1" style={{ fontSize: baseSize }}>{title}</h4>}
+            {showDescription && description && <p className="text-xs opacity-60">{description}</p>}
+          </div>
+        )}
+
+        <div className="w-full flex justify-center py-2">
+            {style === 'line' && renderLine()}
+            {style === 'circle' && renderCircle()}
+            {style === 'dash' && renderDash()}
+        </div>
+
+        {style !== 'circle' && (showValue || showPercentage) && (
+          <div className="w-full flex justify-between items-center mt-3 text-[11px] font-bold uppercase tracking-wider opacity-80">
+            {showValue && <span>{value} / {max}</span>}
+            {showPercentage && <span style={{ color: activeColor }}>{Math.round(percentage)}% complete</span>}
+          </div>
+        )}
 
         <style>
           {`

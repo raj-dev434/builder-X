@@ -82,9 +82,9 @@ export const Inspector: React.FC = () => {
 
   if (!selectedBlock) {
     return (
-      <div className="w-full bg-[#262a2e] border-l border-[#3e444b] p-4 h-full">
-        <h2 className="text-lg font-semibold text-gray-100 mb-4">Properties</h2>
-        <div className="text-center text-gray-400 py-8">
+      <div className="w-80 bg-gray-50 border-l border-gray-200 p-4 h-full">
+        <h2 className="text-lg font-semibold text-gray-800 mb-4">Properties</h2>
+        <div className="text-center text-gray-500 py-8">
           <div className="text-4xl mb-2">⚙️</div>
           <p>Select a block to edit its properties</p>
         </div>
@@ -108,7 +108,7 @@ export const Inspector: React.FC = () => {
   const isModular = modularBlocks.includes(selectedBlock.type);
 
   return (
-    <div className="w-full h-full flex flex-col bg-[#262a2e] text-white border-r border-[#3e444b] select-none" data-testid="inspector">
+    <div className="w-80 h-full flex flex-col bg-[#262a2e] text-white border-l border-[#3e444b] select-none" data-testid="inspector">
       {/* Header */}
       <div className="flex flex-col bg-[#262a2e] border-b border-[#3e444b] shadow-sm relative z-10">
         <div className="flex items-center justify-between px-4 py-3 bg-[#1e2227]">
@@ -166,7 +166,7 @@ export const Inspector: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide bg-[#262a2e]">
+      <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#262a2e]">
         {/* For modular blocks, delegate entirely to the inspector */}
         {isModular && (
           <div className="p-0">
