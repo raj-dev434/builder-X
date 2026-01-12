@@ -77,15 +77,15 @@ export interface BaseStyleProps {
   borderBottomWidth?: string;
   borderLeftWidth?: string;
   borderStyle?:
-  | "none"
-  | "solid"
-  | "dashed"
-  | "dotted"
-  | "double"
-  | "groove"
-  | "ridge"
-  | "inset"
-  | "outset";
+    | "none"
+    | "solid"
+    | "dashed"
+    | "dotted"
+    | "double"
+    | "groove"
+    | "ridge"
+    | "inset"
+    | "outset";
   borderRadius?: string;
   borderTopLeftRadius?: string;
   borderTopRightRadius?: string;
@@ -106,14 +106,14 @@ export interface BaseStyleProps {
   overflowX?: "visible" | "hidden" | "scroll" | "auto";
   overflowY?: "visible" | "hidden" | "scroll" | "auto";
   display?:
-  | "block"
-  | "inline"
-  | "inline-block"
-  | "flex"
-  | "inline-flex"
-  | "grid"
-  | "inline-grid"
-  | "none";
+    | "block"
+    | "inline"
+    | "inline-block"
+    | "flex"
+    | "inline-flex"
+    | "grid"
+    | "inline-grid"
+    | "none";
   position?: "static" | "relative" | "absolute" | "fixed" | "sticky";
   zIndex?: number;
 
@@ -127,12 +127,12 @@ export interface BaseStyleProps {
   // Flexbox
   flexDirection?: "row" | "column" | "row-reverse" | "column-reverse";
   justifyContent?:
-  | "flex-start"
-  | "flex-end"
-  | "center"
-  | "space-between"
-  | "space-around"
-  | "space-evenly";
+    | "flex-start"
+    | "flex-end"
+    | "center"
+    | "space-between"
+    | "space-around"
+    | "space-evenly";
   alignItems?: "stretch" | "flex-start" | "flex-end" | "center" | "baseline";
   flexWrap?: "nowrap" | "wrap" | "wrap-reverse";
   flexGrow?: number;
@@ -192,12 +192,12 @@ export interface BaseStyleProps {
   flexBasis?: string;
   justifySelf?: "auto" | "start" | "end" | "center" | "stretch";
   alignSelf?:
-  | "auto"
-  | "flex-start"
-  | "flex-end"
-  | "center"
-  | "baseline"
-  | "stretch";
+    | "auto"
+    | "flex-start"
+    | "flex-end"
+    | "center"
+    | "baseline"
+    | "stretch";
   placeSelf?: string;
   order?: number | string;
   gridColumn?: string;
@@ -215,15 +215,15 @@ export interface BaseStyleProps {
   outline?: string;
   outlineWidth?: string;
   outlineStyle?:
-  | "none"
-  | "solid"
-  | "dashed"
-  | "dotted"
-  | "double"
-  | "groove"
-  | "ridge"
-  | "inset"
-  | "outset";
+    | "none"
+    | "solid"
+    | "dashed"
+    | "dotted"
+    | "double"
+    | "groove"
+    | "ridge"
+    | "inset"
+    | "outset";
   outlineColor?: string;
   outlineOffset?: string;
 
@@ -235,17 +235,17 @@ export interface BaseStyleProps {
 
   // Interaction
   pointerEvents?:
-  | "auto"
-  | "none"
-  | "visiblePainted"
-  | "visibleFill"
-  | "visibleStroke"
-  | "visible"
-  | "painted"
-  | "fill"
-  | "stroke"
-  | "all"
-  | "inherit";
+    | "auto"
+    | "none"
+    | "visiblePainted"
+    | "visibleFill"
+    | "visibleStroke"
+    | "visible"
+    | "painted"
+    | "fill"
+    | "stroke"
+    | "all"
+    | "inherit";
   userSelect?: "auto" | "text" | "none" | "contain" | "all";
   caretColor?: string;
   accentColor?: string;
@@ -321,74 +321,74 @@ export interface BaseStyleProps {
   textAlign_tablet?: "left" | "center" | "right" | "justify";
   textAlign_desktop?: "left" | "center" | "right" | "justify";
   display_mobile?:
-  | "block"
-  | "inline"
-  | "inline-block"
-  | "flex"
-  | "inline-flex"
-  | "grid"
-  | "inline-grid"
-  | "none";
+    | "block"
+    | "inline"
+    | "inline-block"
+    | "flex"
+    | "inline-flex"
+    | "grid"
+    | "inline-grid"
+    | "none";
   display_tablet?:
-  | "block"
-  | "inline"
-  | "inline-block"
-  | "flex"
-  | "inline-flex"
-  | "grid"
-  | "inline-grid"
-  | "none";
+    | "block"
+    | "inline"
+    | "inline-block"
+    | "flex"
+    | "inline-flex"
+    | "grid"
+    | "inline-grid"
+    | "none";
   display_desktop?:
-  | "block"
-  | "inline"
-  | "inline-block"
-  | "flex"
-  | "inline-flex"
-  | "grid"
-  | "inline-grid"
-  | "none";
+    | "block"
+    | "inline"
+    | "inline-block"
+    | "flex"
+    | "inline-flex"
+    | "grid"
+    | "inline-grid"
+    | "none";
   flexDirection_mobile?: "row" | "column" | "row-reverse" | "column-reverse";
   flexDirection_tablet?: "row" | "column" | "row-reverse" | "column-reverse";
   flexDirection_desktop?: "row" | "column" | "row-reverse" | "column-reverse";
   justifyContent_mobile?:
-  | "flex-start"
-  | "flex-end"
-  | "center"
-  | "space-between"
-  | "space-around"
-  | "space-evenly";
+    | "flex-start"
+    | "flex-end"
+    | "center"
+    | "space-between"
+    | "space-around"
+    | "space-evenly";
   justifyContent_tablet?:
-  | "flex-start"
-  | "flex-end"
-  | "center"
-  | "space-between"
-  | "space-around"
-  | "space-evenly";
+    | "flex-start"
+    | "flex-end"
+    | "center"
+    | "space-between"
+    | "space-around"
+    | "space-evenly";
   justifyContent_desktop?:
-  | "flex-start"
-  | "flex-end"
-  | "center"
-  | "space-between"
-  | "space-around"
-  | "space-evenly";
+    | "flex-start"
+    | "flex-end"
+    | "center"
+    | "space-between"
+    | "space-around"
+    | "space-evenly";
   alignItems_mobile?:
-  | "stretch"
-  | "flex-start"
-  | "flex-end"
-  | "center"
-  | "baseline";
+    | "stretch"
+    | "flex-start"
+    | "flex-end"
+    | "center"
+    | "baseline";
   alignItems_tablet?:
-  | "stretch"
-  | "flex-start"
-  | "flex-end"
-  | "center"
-  | "baseline";
+    | "stretch"
+    | "flex-start"
+    | "flex-end"
+    | "center"
+    | "baseline";
   alignItems_desktop?:
-  | "stretch"
-  | "flex-start"
-  | "flex-end"
-  | "center"
-  | "baseline";
+    | "stretch"
+    | "flex-start"
+    | "flex-end"
+    | "center"
+    | "baseline";
 }
 
 export interface SectionBlock extends BaseBlock {
@@ -455,14 +455,20 @@ export interface RowBlock extends BaseBlock {
     contentWidthValue?: string; // Custom max-width for boxed
     gap?: string;
     justifyContent?:
-    | "flex-start"
-    | "center"
-    | "flex-end"
-    | "space-between"
-    | "space-around"
-    | "space-evenly";
+      | "flex-start"
+      | "center"
+      | "flex-end"
+      | "space-between"
+      | "space-around"
+      | "space-evenly";
     alignItems?: "flex-start" | "center" | "flex-end" | "stretch" | "baseline";
-    alignContent?: "flex-start" | "center" | "flex-end" | "space-between" | "space-around" | "stretch";
+    alignContent?:
+      | "flex-start"
+      | "center"
+      | "flex-end"
+      | "space-between"
+      | "space-around"
+      | "stretch";
     flexWrap?: "nowrap" | "wrap" | "wrap-reverse";
     flexDirection?: "row" | "column" | "row-reverse" | "column-reverse";
     layoutType?: string;
@@ -504,12 +510,12 @@ export interface ColumnBlock extends BaseBlock {
     minWidth?: string;
     gap?: string;
     justifyContent?:
-    | "flex-start"
-    | "center"
-    | "flex-end"
-    | "space-between"
-    | "space-around"
-    | "space-evenly";
+      | "flex-start"
+      | "center"
+      | "flex-end"
+      | "space-between"
+      | "space-around"
+      | "space-evenly";
     alignItems?: "flex-start" | "center" | "flex-end" | "stretch" | "baseline";
     flexDirection?: "row" | "column";
 
@@ -547,17 +553,17 @@ export interface TextBlock extends BaseBlock {
     // Typography
     fontSize?: string;
     fontWeight?:
-    | "normal"
-    | "bold"
-    | "100"
-    | "200"
-    | "300"
-    | "400"
-    | "500"
-    | "600"
-    | "700"
-    | "800"
-    | "900";
+      | "normal"
+      | "bold"
+      | "100"
+      | "200"
+      | "300"
+      | "400"
+      | "500"
+      | "600"
+      | "700"
+      | "800"
+      | "900";
     fontFamily?: string;
     lineHeight?: string;
     letterSpacing?: string;
@@ -670,17 +676,17 @@ export interface ButtonBlock extends BaseBlock {
     // Typography
     fontSize?: string;
     fontWeight?:
-    | "normal"
-    | "bold"
-    | "100"
-    | "200"
-    | "300"
-    | "400"
-    | "500"
-    | "600"
-    | "700"
-    | "800"
-    | "900";
+      | "normal"
+      | "bold"
+      | "100"
+      | "200"
+      | "300"
+      | "400"
+      | "500"
+      | "600"
+      | "700"
+      | "800"
+      | "900";
     fontFamily?: string;
     lineHeight?: string;
     letterSpacing?: string;
@@ -764,15 +770,15 @@ export interface DividerBlock extends BaseBlock {
     color?: string;
     backgroundColor?: string;
     style?:
-    | "solid"
-    | "dashed"
-    | "dotted"
-    | "double"
-    | "groove"
-    | "ridge"
-    | "inset"
-    | "outset"
-    | "undefined";
+      | "solid"
+      | "dashed"
+      | "dotted"
+      | "double"
+      | "groove"
+      | "ridge"
+      | "inset"
+      | "outset"
+      | "undefined";
     thickness?: string;
 
     // Spacing
@@ -784,12 +790,12 @@ export interface DividerBlock extends BaseBlock {
     // Layout
     display?: "block" | "inline-block" | "flex";
     alignSelf?:
-    | "auto"
-    | "flex-start"
-    | "flex-end"
-    | "center"
-    | "baseline"
-    | "stretch";
+      | "auto"
+      | "flex-start"
+      | "flex-end"
+      | "center"
+      | "baseline"
+      | "stretch";
 
     // Effects
     opacity?: number;
@@ -852,12 +858,12 @@ export interface FlexBoxBlock extends BaseBlock {
     // Layout
     flexDirection?: "row" | "column" | "row-reverse" | "column-reverse";
     justifyContent?:
-    | "flex-start"
-    | "center"
-    | "flex-end"
-    | "space-between"
-    | "space-around"
-    | "space-evenly";
+      | "flex-start"
+      | "center"
+      | "flex-end"
+      | "space-between"
+      | "space-around"
+      | "space-evenly";
     alignItems?: "flex-start" | "center" | "flex-end" | "stretch" | "baseline";
     flexWrap?: "nowrap" | "wrap" | "wrap-reverse";
     gap?: string;
@@ -917,7 +923,42 @@ export interface ContainerBlock extends BaseBlock {
   type: "container";
   props: {
     // Content settings
-    contentWidth?: "container" | "full";
+    // Content settings
+    contentWidth?: "boxed" | "full";
+    containerLayout?: "flex" | "grid" | "block";
+
+    // Flexbox
+    flexDirection?: "row" | "column" | "row-reverse" | "column-reverse";
+    flexWrap?: "nowrap" | "wrap" | "wrap-reverse";
+    justifyContent?:
+      | "flex-start"
+      | "center"
+      | "flex-end"
+      | "space-between"
+      | "space-around"
+      | "space-evenly";
+    alignItems?: "flex-start" | "center" | "flex-end" | "stretch" | "baseline";
+    alignContent?:
+      | "flex-start"
+      | "center"
+      | "flex-end"
+      | "space-between"
+      | "space-around"
+      | "stretch";
+    gap?: string;
+    rowGap?: string;
+    columnGap?: string;
+
+    // Grid
+    gridTemplateColumns?: string;
+    gridTemplateRows?: string;
+    gridAutoFlow?: "row" | "column" | "dense" | "row dense" | "column dense";
+    justifyItems?: "start" | "end" | "center" | "stretch";
+
+    // Dimensions
+    width?: string;
+    minHeight?: string;
+    overflow?: "visible" | "hidden" | "scroll" | "auto";
   } & BaseStyleProps;
 }
 
@@ -950,8 +991,16 @@ export interface GroupBlock extends BaseBlock {
     descriptionTextAlign?: "left" | "center" | "right" | "justify";
     descriptionLineHeight?: string;
     descriptionLetterSpacing?: string;
-    descriptionTextTransform?: "none" | "uppercase" | "lowercase" | "capitalize";
-    descriptionTextDecoration?: "none" | "underline" | "overline" | "line-through";
+    descriptionTextTransform?:
+      | "none"
+      | "uppercase"
+      | "lowercase"
+      | "capitalize";
+    descriptionTextDecoration?:
+      | "none"
+      | "underline"
+      | "overline"
+      | "line-through";
     descriptionFontStyle?: "normal" | "italic" | "oblique";
   } & BaseStyleProps;
 }
@@ -986,14 +1035,7 @@ export interface SocialFollowBlock extends BaseBlock {
 
 export interface FormField {
   id: string;
-  type:
-  | "text"
-  | "email"
-  | "tel"
-  | "textarea"
-  | "select"
-  | "checkbox"
-  | "radio";
+  type: "text" | "email" | "tel" | "textarea" | "select" | "checkbox" | "radio";
   label: string;
   placeholder?: string;
   required?: boolean;
@@ -1017,8 +1059,8 @@ export interface FormBlock extends BaseBlock {
     showDescription?: boolean;
 
     // Submission
-    submitAction?: 'email' | 'webhook' | 'redirect'; // Default: email
-    submitMethod?: 'POST' | 'GET'; // Default: POST
+    submitAction?: "email" | "webhook" | "redirect"; // Default: email
+    submitMethod?: "POST" | "GET"; // Default: POST
     emailTo?: string;
     useGmail?: boolean; // Force open in Gmail
     webhookUrl?: string;
@@ -1061,15 +1103,15 @@ export interface CodeBlock extends BaseBlock {
   props: {
     code?: string;
     language?:
-    | "html"
-    | "css"
-    | "javascript"
-    | "json"
-    | "xml"
-    | "sql"
-    | "text"
-    | "typescript"
-    | "python";
+      | "html"
+      | "css"
+      | "javascript"
+      | "json"
+      | "xml"
+      | "sql"
+      | "text"
+      | "typescript"
+      | "python";
     title?: string;
     description?: string;
     showLineNumbers?: boolean;
@@ -1144,32 +1186,6 @@ export interface CountdownTimerBlock extends BaseBlock {
   } & BaseStyleProps;
 }
 
-export interface ProgressBarBlock extends BaseBlock {
-  type: "progress-bar";
-  props: {
-    value?: number;
-    max?: number;
-    title?: string;
-    showTitle?: boolean;
-    description?: string;
-    showDescription?: boolean;
-    showPercentage?: boolean;
-    showValue?: boolean;
-
-    // Progress style
-    style?: "line" | "circle" | "dash";
-    thickness?: string;
-    progressColor?: string;
-    barBackgroundColor?: string;
-
-    // Animations & Effects
-    animated?: boolean;
-    striped?: boolean;
-    size?: "small" | "medium" | "large";
-    variant?: "default" | "success" | "warning" | "danger" | "info";
-  } & BaseStyleProps;
-}
-
 export interface TableBlock extends BaseBlock {
   type: "table";
   props: {
@@ -1196,7 +1212,7 @@ export interface ProductBlock extends BaseBlock {
   type: "product";
   props: {
     // API Integration
-    source?: 'manual' | 'api';
+    source?: "manual" | "api";
     apiUrl?: string;
     apiDataPath?: string;
     apiMapping?: {
@@ -1209,7 +1225,7 @@ export interface ProductBlock extends BaseBlock {
     };
 
     // List/Loop Layout
-    displayMode?: 'single' | 'grid' | 'carousel';
+    displayMode?: "single" | "grid" | "carousel";
     itemsLimit?: number;
     gridColumns?: number;
     gridColumnsTablet?: number;
@@ -1219,7 +1235,7 @@ export interface ProductBlock extends BaseBlock {
     // Sizing & Scroll
     cardWidth?: string;
     enableScroll?: boolean;
-    scrollDirection?: 'horizontal' | 'vertical';
+    scrollDirection?: "horizontal" | "vertical";
     containerHeight?: string;
 
     // Content
@@ -1232,18 +1248,21 @@ export interface ProductBlock extends BaseBlock {
     imageAlt?: string;
     buttonText?: string;
     buttonUrl?: string;
-    buttonWidth?: 'full' | 'auto';
+    buttonWidth?: "full" | "auto";
 
     // API Content Overrides
-    overrides?: Record<string | number, {
-      title?: string;
-      description?: string;
-      price?: string;
-      originalPrice?: string;
-      imageUrl?: string;
-      buttonText?: string;
-      buttonUrl?: string;
-    }>;
+    overrides?: Record<
+      string | number,
+      {
+        title?: string;
+        description?: string;
+        price?: string;
+        originalPrice?: string;
+        imageUrl?: string;
+        buttonText?: string;
+        buttonUrl?: string;
+      }
+    >;
 
     layout?: "vertical" | "horizontal";
     imagePosition?: "left" | "right" | "top";
@@ -1722,30 +1741,98 @@ export interface AlertBlock extends BaseBlock {
     fontSize?: string;
     fontWeight?: string;
     dismissible?: boolean;
+    autoDismiss?: boolean;
+    dismissDuration?: number;
     showIcon?: boolean;
     icon?: string;
+    title?: string;
+    showTitle?: boolean;
+    actionLabel?: string;
+    actionLink?: string;
+    accentBorder?: boolean;
+    iconType?:
+      | "default"
+      | "info"
+      | "check"
+      | "warning"
+      | "error"
+      | "bell"
+      | "star"
+      | "flag";
+    animation?: "none" | "fadeIn" | "slideIn" | "bounce" | "scale";
+    shadow?: "none" | "sm" | "md" | "lg" | "xl";
+    textAlign?: "left" | "center" | "right";
   } & BaseStyleProps;
 }
 
-export interface ProgressBlock extends BaseBlock {
-  type: "progress";
-  props: {
+export interface ProgressBarBlock extends BaseBlock {
+  type: "progress-bar" | "progress";
+  props: BaseStyleProps & {
     value?: number;
     max?: number;
-    label?: string;
+    title?: string;
+    titleTag?: string; // New: h1-h6, p, div
+    showTitle?: boolean;
+    description?: string;
+    showDescription?: boolean;
     showPercentage?: boolean;
-    backgroundColor?: string;
+    showValue?: boolean;
+    style?: "line" | "circle" | "dash";
+    height?: string; // New: Replaces thickness
+    thickness?: string;
+    borderRadius?: string; // New
     progressColor?: string;
-    textColor?: string;
-    borderColor?: string;
-    borderWidth?: string;
-    borderRadius?: string;
-    padding?: string;
-    margin?: string;
-    size?: "small" | "medium" | "large";
+    barBackgroundColor?: string;
     animated?: boolean;
     striped?: boolean;
-  } & BaseStyleProps;
+    circleSize?: string;
+    variant?: "default" | "success" | "warning" | "danger" | "info";
+
+    // Title Styling
+    titleFontFamily?: string;
+    titleFontSize?: string;
+    titleFontWeight?: string;
+    titleColor?: string;
+    titleTextAlign?: "left" | "center" | "right" | "justify";
+    titleLineHeight?: string;
+    titleLetterSpacing?: string;
+    titleTextTransform?: "none" | "uppercase" | "lowercase" | "capitalize";
+    titleTextDecoration?: "none" | "underline" | "overline" | "line-through";
+    titleFontStyle?: "normal" | "italic" | "oblique";
+
+    // Percentage Styling
+    percentageFontFamily?: string;
+    percentageFontSize?: string;
+    percentageFontWeight?: string;
+    percentageColor?: string;
+    percentageTextAlign?: "left" | "center" | "right" | "justify";
+    percentageLineHeight?: string;
+    percentageLetterSpacing?: string;
+    percentageTextTransform?: "none" | "uppercase" | "lowercase" | "capitalize";
+    percentageTextDecoration?:
+      | "none"
+      | "underline"
+      | "overline"
+      | "line-through";
+    percentageFontStyle?: "normal" | "italic" | "oblique";
+
+    // Inner Text Styling
+    innerText?: string;
+    innerTextColor?: string;
+    innerTextFontFamily?: string;
+    innerTextFontSize?: string;
+    innerTextFontWeight?: string;
+    innerTextTextAlign?: "left" | "center" | "right" | "justify";
+    innerTextLineHeight?: string;
+    innerTextLetterSpacing?: string;
+    innerTextTextTransform?: "none" | "uppercase" | "lowercase" | "capitalize";
+    innerTextTextDecoration?:
+      | "none"
+      | "underline"
+      | "overline"
+      | "line-through";
+    innerTextFontStyle?: "normal" | "italic" | "oblique";
+  };
 }
 
 export interface InvoiceBlock extends BaseBlock {
@@ -1832,7 +1919,6 @@ export type Block =
   | CardBlock
   | BadgeBlock
   | AlertBlock
-  | ProgressBlock
   | ColumnBlock
   | InvoiceBlock
   | ElementorHeadingBlock;
@@ -3112,31 +3198,7 @@ export const BLOCK_TEMPLATES: BlockTemplate[] = [
       },
     },
   },
-  {
-    id: "progress",
-    name: "Progress",
-    icon: "📊",
-    block: {
-      type: "progress",
-      props: {
-        value: 50,
-        max: 100,
-        label: "Progress",
-        showPercentage: true,
-        backgroundColor: "#e9ecef",
-        progressColor: "#007bff",
-        textColor: "#333333",
-        borderColor: "#dee2e6",
-        borderWidth: "1px",
-        borderRadius: "4px",
-        padding: "0.5rem",
-        margin: "0",
-        size: "medium",
-        animated: true,
-        striped: false,
-      },
-    },
-  },
+
   // {
   //   id: "invoice",
   //   name: "Invoice",
@@ -3203,15 +3265,14 @@ export interface PageSettings {
   fontFamily?: string;
   gridColor?: string;
   showGrid?: boolean;
-  backgroundType?: 'solid' | 'gradient';
+  backgroundType?: "solid" | "gradient";
   gradientStart?: string;
   gradientEnd?: string;
   gradientDirection?: string; // e.g. "to right", "45deg"
-  gradientType?: 'linear' | 'radial';
+  gradientType?: "linear" | "radial";
 }
 
 // Extend CanvasState to include global settings
 // Note: We are re-declaring it or you might need to find where it is originally defined if it's not here.
 // Checking file indicates BaseBlock etc are here, but CanvasState might be elsewhere or inferred??
 // Wait, I see `CanvasState` used in `canvasStore.ts`. Let's search if `CanvasState` is in `types.ts`.
-

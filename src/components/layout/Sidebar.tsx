@@ -10,6 +10,7 @@ import { DraggableBlock } from '../canvas/DraggableBlock';
 import { useTemplateStore } from '../../store/templateStore';
 import { useRecentStore } from '../../store/recentStore';
 import { useFavoriteStore } from '../../store/favoriteStore';
+import { useUIStore } from '../../store/uiStore';
 
 const COMPONENT_CATEGORIES: Record<string, string[]> = {
   'Favorites': [], // Dynamic content
@@ -64,8 +65,37 @@ export const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
     return null;
   };
 
+  // Retrieve insertion target from UI Store
+  const { insertionTarget, setInsertionTarget } = useUIStore(); // Assuming you add this hook import if not present
+
   const handleClick = (template: typeof BLOCK_TEMPLATES[0]) => {
     addRecent(template);
+
+    // 1. Priority: Insertion Target (Click '+' in Grid)
+    if (insertionTarget) {
+      const { parentId, index, gridIndex } = insertionTarget;
+      
+      const newBlock = { 
+        ...template.block,
+        props: {
+            ...template.block.props,
+            // If gridIndex is provided, use it
+            ...(gridIndex !== undefined ? { gridIndex } : {})
+        }
+      };
+
+      // Find parent to determine index if not provided
+      const parentBlock = blocks.find(b => b.id === parentId) || findBlockInfo(blocks, parentId)?.block;
+      const targetIndex = index ?? (parentBlock?.children?.length || 0);
+
+      addBlock(newBlock, parentId, targetIndex);
+      
+      // Clear target after use
+      setInsertionTarget(null);
+      return;
+    }
+
+    // 2. Fallback: Selected Block Logic
     if (selectedBlockId) {
       const info = findBlockInfo(blocks, selectedBlockId);
       if (info) {
@@ -78,6 +108,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
         return;
       }
     }
+    
+    // 3. Fallback: Add to root
     addBlock(template.block);
   };
 
