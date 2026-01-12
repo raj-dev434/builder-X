@@ -125,29 +125,16 @@ export const ImageBlock: React.FC<ImageBlockProps> = ({
   const alignSelf = block.props.alignSelf;
 
   // Calculate alignment styles using margin instead of alignSelf for better compatibility
+  // Calculate alignment styles
   const getAlignmentStyles = (): React.CSSProperties => {
-    if (!alignSelf || alignSelf === 'stretch') {
-      return { width: '100%' };
-    }
-
-    // Use margin auto for alignment
-    // If no explicit width is set, use a reasonable default (50%) to make alignment visible
     const styles: React.CSSProperties = {
-      width: block.props.width || '50%',
+      // Default to auto width so flex alignment works (unless explicitly set)
+      width: block.props.width || 'auto',
       maxWidth: block.props.maxWidth || '100%',
-      display: 'block'
+      height: block.props.height || 'auto',
+      // Apply alignSelf directly to allow flex container to control positioning
+      alignSelf: alignSelf || 'auto',
     };
-
-    if (alignSelf === 'flex-start') {
-      styles.marginRight = 'auto';
-      styles.marginLeft = '0';
-    } else if (alignSelf === 'center') {
-      styles.marginLeft = 'auto';
-      styles.marginRight = 'auto';
-    } else if (alignSelf === 'flex-end') {
-      styles.marginLeft = 'auto';
-      styles.marginRight = '0';
-    }
 
     return styles;
   };

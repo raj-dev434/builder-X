@@ -103,16 +103,12 @@ const NestedBlockRenderer: React.FC<NestedBlockRendererProps> = ({
   return (
     <SortableContext items={children.map(c => c.id)} strategy={strategy}>
       {/* 
-        For Grid type, we use 'contents' to let the parent GridBlock control layout directly.
-        For others (column, etc), we use flex-col for standard stacking.
+        Grid blocks handle their own layout internally with GridCells,
+        so we don't render drop zones here - they have cell-level drops instead
       */}
       <div className={isGrid ? "contents" : "flex flex-col w-full"}>
         {children.map((childBlock, index) => (
           <React.Fragment key={childBlock.id}>
-            {/* 
-                   DropZones break CSS Grid layouts because they count as grid items.
-                   We hide them in Grids, relying on standard Sortable reordering (swapping).
-                */}
             {!isGrid && <DropZone parentId={parentId} index={index} />}
 
             <BlockRenderer

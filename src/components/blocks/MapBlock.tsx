@@ -35,10 +35,13 @@ export const MapBlock: React.FC<MapBlockProps> = ({
     //  markerDescription = 'This is a location marker',
     overflow = 'hidden',
     mapType = 'roadmap', // roadmap, satellite, hybrid, terrain
+    interactionMode = 'always',
+    activationText = 'Click to interact',
     ...styleProps
   } = block.props;
 
   const { isPreviewMode } = useCanvasStore();
+  const [isInteracting, setIsInteracting] = React.useState(false);
 
   // Generate Google Maps embed URL
   const getMapUrl = () => {
@@ -71,6 +74,9 @@ export const MapBlock: React.FC<MapBlockProps> = ({
             padding,
             overflow
           }}
+          onMouseLeave={() => {
+            if (interactionMode === 'onClick') setIsInteracting(false);
+          }}
         >
           {interactive && mapUrl ? (
             <>
@@ -82,13 +88,29 @@ export const MapBlock: React.FC<MapBlockProps> = ({
                   border: 0,
                   borderRadius,
                   // Disable pointer events when not in preview mode or when selected to allow block selection
-                  pointerEvents: (!isPreviewMode || isSelected) ? 'none' : 'auto'
+                  // Also disable if interaction mode is 'onClick' and not yet interacting
+                  pointerEvents: (!isPreviewMode || isSelected)
+                    ? 'none'
+                    : (interactionMode === 'onClick' && !isInteracting ? 'none' : 'auto')
                 }}
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
                 title={`Map: ${address}`}
               />
+
+              {/* Interaction Mode Overlay (scrolling protection) */}
+              {isPreviewMode && !isSelected && interactionMode === 'onClick' && !isInteracting && (
+                <div
+                  className="absolute inset-0 z-20 flex items-center justify-center bg-black/5 hover:bg-black/10 transition-colors cursor-pointer group"
+                  onClick={() => setIsInteracting(true)}
+                >
+                  <button className="bg-white shadow-lg text-gray-800 px-4 py-2 rounded font-medium text-sm transform group-hover:scale-105 transition-transform pointer-events-none">
+                    {activationText}
+                  </button>
+                </div>
+              )}
+
               {showMarker && (
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10">
                   <div className="bg-red-500 text-white px-2 py-1 rounded-md text-xs font-semibold shadow-lg">

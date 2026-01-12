@@ -10,11 +10,16 @@ import {
   BackgroundGroup,
   BorderGroup,
   EffectsGroup,
-  LayoutGroup,
   TypographyGroup,
   AdvancedPanel
 } from './BlockInspectors';
-import { AlignLeft, AlignCenter, AlignRight, RotateCcw, X } from 'lucide-react';
+// --- ICONS ---
+import {
+  AlignLeft, AlignCenter, AlignRight,
+  RotateCcw, X, ArrowRight,
+  Layout, ArrowUp, ArrowDown, MoveVertical, MoveHorizontal,
+  Maximize2
+} from 'lucide-react';
 
 interface InspectorProps {
   block: Block;
@@ -35,12 +40,136 @@ const createUpdateHandler = (block: Block, updateBlock: (id: string, updates: Pa
 };
 
 export const RowBlockInspector: React.FC<InspectorProps> = ({ block, updateBlock, activeTab }) => {
+  const props = block.props as any;
   const handleUpdate = createUpdateHandler(block, updateBlock);
+
+  // default to 'row' if not specified
+  const isRow = (props.flexDirection || 'row').includes('row');
 
   if (activeTab === 'content') {
     return (
       <div className="space-y-4 p-4">
-        <LayoutGroup block={block} onChange={handleUpdate} />
+        <PropertySection title="Layout" icon={Layout} defaultOpen={true}>
+          <ControlGroup label="Direction">
+            <div className="flex bg-[#1a1d21] rounded border border-[#3e444b] overflow-hidden w-max">
+              <button
+                onClick={() => handleUpdate('flexDirection', 'row')}
+                className={`p-1.5 flex justify-center hover:bg-[#2d3237] transition-colors ${isRow ? 'bg-[#3b82f6] text-white' : 'text-gray-400'}`}
+                title="Horizontal (Row)"
+              >
+                <ArrowRight className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => handleUpdate('flexDirection', 'column')}
+                className={`p-1.5 flex justify-center hover:bg-[#2d3237] transition-colors ${!isRow ? 'bg-[#3b82f6] text-white' : 'text-gray-400'}`}
+                title="Vertical (Column)"
+              >
+                <ArrowDown className="w-4 h-4" />
+              </button>
+            </div>
+          </ControlGroup>
+
+          <ControlGroup label="Content Width">
+            <div className="space-y-2 w-full">
+              <select
+                value={props.contentWidth || 'full'}
+                onChange={(e) => handleUpdate('contentWidth', e.target.value)}
+                className={inputClasses}
+              >
+                <option value="full">Full Width</option>
+                <option value="boxed">Boxed</option>
+              </select>
+
+              {props.contentWidth === 'boxed' && (
+                <div className="animate-in fade-in slide-in-from-top-1 duration-200">
+                  <UnitControl
+                    value={props.contentWidthValue}
+                    onChange={(val) => handleUpdate('contentWidthValue', val)}
+                    placeholder="1140px"
+                  />
+                </div>
+              )}
+            </div>
+          </ControlGroup>
+
+          <ControlGroup label="Min Height">
+            <UnitControl
+              value={props.minHeight}
+              onChange={(val) => handleUpdate('minHeight', val)}
+              placeholder="0px"
+            />
+          </ControlGroup>
+
+          <ControlGroup label="Columns Gap">
+            <UnitControl
+              value={props.gap}
+              onChange={(val) => handleUpdate('gap', val)}
+              placeholder="0px"
+            />
+          </ControlGroup>
+        </PropertySection>
+
+        <PropertySection title="Alignment" icon={MoveVertical} defaultOpen={true}>
+          {/* MAIN AXIS */}
+          <ControlGroup label={isRow ? "Horizontal Align (Justify)" : "Vertical Align (Justify)"}>
+            <div className="flex bg-[#1a1d21] rounded border border-[#3e444b] overflow-hidden w-full">
+              {[
+                { value: 'flex-start', label: 'Start', icon: AlignLeft },
+                { value: 'center', label: 'Center', icon: AlignCenter },
+                { value: 'flex-end', label: 'End', icon: AlignRight },
+                { value: 'space-between', label: 'Space Between', icon: MoveHorizontal },
+                { value: 'space-around', label: 'Space Around', icon: MoveHorizontal },
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => handleUpdate('justifyContent', opt.value)}
+                  className={`flex-1 p-1.5 flex justify-center hover:bg-[#2d3237] transition-colors ${props.justifyContent === opt.value ? 'bg-[#3b82f6] text-white' : 'text-gray-400'}`}
+                  title={opt.label}
+                >
+                  <opt.icon className="w-3.5 h-3.5" />
+                </button>
+              ))}
+            </div>
+          </ControlGroup>
+
+          {/* CROSS AXIS */}
+          <ControlGroup label={isRow ? "Vertical Align (Align)" : "Horizontal Align (Align)"}>
+            <div className="flex bg-[#1a1d21] rounded border border-[#3e444b] overflow-hidden w-full">
+              {[
+                { value: 'flex-start', label: 'Start', icon: ArrowUp },
+                { value: 'center', label: 'Center', icon: MoveVertical },
+                { value: 'flex-end', label: 'End', icon: ArrowDown },
+                { value: 'stretch', label: 'Stretch', icon: Maximize2 },
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => handleUpdate('alignItems', opt.value)}
+                  className={`flex-1 p-1.5 flex justify-center hover:bg-[#2d3237] transition-colors ${props.alignItems === opt.value ? 'bg-[#3b82f6] text-white' : 'text-gray-400'}`}
+                  title={opt.label}
+                >
+                  <opt.icon className="w-3.5 h-3.5" />
+                </button>
+              ))}
+            </div>
+          </ControlGroup>
+        </PropertySection>
+
+        <ControlGroup label="HTML Tag">
+          <select
+            value={props.htmlTag || 'div'}
+            onChange={(e) => handleUpdate('htmlTag', e.target.value)}
+            className={inputClasses}
+          >
+            <option value="div">div</option>
+            <option value="section">section</option>
+            <option value="header">header</option>
+            <option value="footer">footer</option>
+            <option value="main">main</option>
+            <option value="article">article</option>
+            <option value="aside">aside</option>
+            <option value="nav">nav</option>
+          </select>
+        </ControlGroup>
       </div>
     );
   }
@@ -71,23 +200,80 @@ export const ColumnBlockInspector: React.FC<InspectorProps> = ({ block, updateBl
   if (activeTab === 'content') {
     return (
       <div className="space-y-4 p-4">
-        <PropertySection title="Column Layout" icon={AlignLeft} defaultOpen={true}>
-          <ControlGroup label="Width">
+        <PropertySection title="Layout" icon={Layout} defaultOpen={true}>
+          <ControlGroup label="Column Width">
             <UnitControl
               value={props.width}
               onChange={(val) => handleUpdate('width', val)}
               placeholder="auto"
             />
           </ControlGroup>
-          <ControlGroup label="Flex">
-            <UnitControl
-              value={props.flex}
-              onChange={(val) => handleUpdate('flex', val)}
-              placeholder="1"
-            />
-          </ControlGroup>
+
+          <div className="pt-2 border-t border-[#3e444b] mt-2 space-y-2">
+            <ControlGroup label="Vertical Align">
+              <div className="flex bg-[#1a1d21] rounded border border-[#3e444b] overflow-hidden w-full">
+                {[
+                  { value: 'flex-start', label: 'Top', icon: ArrowUp },
+                  { value: 'center', label: 'Middle', icon: MoveVertical },
+                  { value: 'flex-end', label: 'Bottom', icon: ArrowDown },
+                  { value: 'space-between', label: 'Space Between', icon: MoveHorizontal },
+                ].map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => handleUpdate('justifyContent', opt.value)}
+                    className={`flex-1 p-1.5 flex justify-center hover:bg-[#2d3237] transition-colors ${props.justifyContent === opt.value ? 'bg-[#3b82f6] text-white' : 'text-gray-400'}`}
+                    title={opt.label}
+                  >
+                    <opt.icon className="w-3.5 h-3.5" />
+                  </button>
+                ))}
+              </div>
+            </ControlGroup>
+
+            <ControlGroup label="Horizontal Align">
+              <div className="flex bg-[#1a1d21] rounded border border-[#3e444b] overflow-hidden w-full">
+                {[
+                  { value: 'flex-start', label: 'Start', icon: AlignLeft },
+                  { value: 'center', label: 'Center', icon: AlignCenter },
+                  { value: 'flex-end', label: 'End', icon: AlignRight },
+                  { value: 'stretch', label: 'Stretch', icon: Maximize2 },
+                ].map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => handleUpdate('alignItems', opt.value)}
+                    className={`flex-1 p-1.5 flex justify-center hover:bg-[#2d3237] transition-colors ${props.alignItems === opt.value ? 'bg-[#3b82f6] text-white' : 'text-gray-400'}`}
+                    title={opt.label}
+                  >
+                    <opt.icon className="w-3.5 h-3.5" />
+                  </button>
+                ))}
+              </div>
+            </ControlGroup>
+          </div>
+
+          <div className="pt-2 border-t border-[#3e444b] mt-2">
+            <ControlGroup label="Items Gap">
+              <UnitControl
+                value={props.gap}
+                onChange={(val) => handleUpdate('gap', val)}
+                placeholder="20px"
+              />
+            </ControlGroup>
+            <ControlGroup label="Html Tag">
+              <select
+                value={props.htmlTag || 'div'}
+                onChange={(e) => handleUpdate('htmlTag', e.target.value)}
+                className={inputClasses}
+              >
+                <option value="div">div</option>
+                <option value="section">section</option>
+                <option value="article">article</option>
+                <option value="aside">aside</option>
+                <option value="nav">nav</option>
+              </select>
+            </ControlGroup>
+          </div>
         </PropertySection>
-        <LayoutGroup block={block} onChange={handleUpdate} />
       </div>
     );
   }
@@ -152,7 +338,7 @@ export const TextBlockInspector: React.FC<InspectorProps> = ({ block, updateBloc
           <div className="space-y-2">
             <label className="text-[11px] font-medium text-gray-300 uppercase tracking-wider">Content</label>
             <textarea
-              value={props.content || 'Sample Text'}
+              value={props.content !== undefined ? props.content : ''}
               onChange={(e) => handleUpdate('content', e.target.value)}
               className={`${inputClasses} h-24 resize-y w-full`}
             />
@@ -192,8 +378,8 @@ export const TextBlockInspector: React.FC<InspectorProps> = ({ block, updateBloc
                 <button
                   onClick={() => toggleFormatting('strong')}
                   className={`px-2 py-1.5 text-xs font-bold border border-[#2d3237] rounded-sm transition-colors ${hasFormatting('strong')
-                      ? 'bg-[#3b82f6] text-white'
-                      : 'bg-[#15181b] hover:bg-[#1a1d21] text-gray-300'
+                    ? 'bg-[#3b82f6] text-white'
+                    : 'bg-[#15181b] hover:bg-[#1a1d21] text-gray-300'
                     }`}
                   title="Bold (Toggle)"
                 >
@@ -202,8 +388,8 @@ export const TextBlockInspector: React.FC<InspectorProps> = ({ block, updateBloc
                 <button
                   onClick={() => toggleFormatting('em')}
                   className={`px-2 py-1.5 text-xs italic border border-[#2d3237] rounded-sm transition-colors ${hasFormatting('em')
-                      ? 'bg-[#3b82f6] text-white'
-                      : 'bg-[#15181b] hover:bg-[#1a1d21] text-gray-300'
+                    ? 'bg-[#3b82f6] text-white'
+                    : 'bg-[#15181b] hover:bg-[#1a1d21] text-gray-300'
                     }`}
                   title="Italic (Toggle)"
                 >
@@ -212,8 +398,8 @@ export const TextBlockInspector: React.FC<InspectorProps> = ({ block, updateBloc
                 <button
                   onClick={() => toggleFormatting('u')}
                   className={`px-2 py-1.5 text-xs underline border border-[#2d3237] rounded-sm transition-colors ${hasFormatting('u')
-                      ? 'bg-[#3b82f6] text-white'
-                      : 'bg-[#15181b] hover:bg-[#1a1d21] text-gray-300'
+                    ? 'bg-[#3b82f6] text-white'
+                    : 'bg-[#15181b] hover:bg-[#1a1d21] text-gray-300'
                     }`}
                   title="Underline (Toggle)"
                 >
@@ -222,8 +408,8 @@ export const TextBlockInspector: React.FC<InspectorProps> = ({ block, updateBloc
                 <button
                   onClick={() => toggleFormatting('s')}
                   className={`px-2 py-1.5 text-xs line-through border border-[#2d3237] rounded-sm transition-colors ${hasFormatting('s')
-                      ? 'bg-[#3b82f6] text-white'
-                      : 'bg-[#15181b] hover:bg-[#1a1d21] text-gray-300'
+                    ? 'bg-[#3b82f6] text-white'
+                    : 'bg-[#15181b] hover:bg-[#1a1d21] text-gray-300'
                     }`}
                   title="Strikethrough (Toggle)"
                 >
@@ -246,8 +432,8 @@ export const TextBlockInspector: React.FC<InspectorProps> = ({ block, updateBloc
                     }
                   }}
                   className={`px-2 py-1.5 text-xs border border-[#2d3237] rounded-sm transition-colors ${hasFormatting('ul')
-                      ? 'bg-[#3b82f6] text-white'
-                      : 'bg-[#15181b] hover:bg-[#1a1d21] text-gray-300'
+                    ? 'bg-[#3b82f6] text-white'
+                    : 'bg-[#15181b] hover:bg-[#1a1d21] text-gray-300'
                     }`}
                   title="Bullet List (Toggle)"
                 >
@@ -265,8 +451,8 @@ export const TextBlockInspector: React.FC<InspectorProps> = ({ block, updateBloc
                     }
                   }}
                   className={`px-2 py-1.5 text-xs border border-[#2d3237] rounded-sm transition-colors ${hasFormatting('ol')
-                      ? 'bg-[#3b82f6] text-white'
-                      : 'bg-[#15181b] hover:bg-[#1a1d21] text-gray-300'
+                    ? 'bg-[#3b82f6] text-white'
+                    : 'bg-[#15181b] hover:bg-[#1a1d21] text-gray-300'
                     }`}
                   title="Numbered List (Toggle)"
                 >

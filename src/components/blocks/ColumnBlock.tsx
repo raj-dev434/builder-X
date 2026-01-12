@@ -100,10 +100,8 @@ export const ColumnBlock: React.FC<ColumnBlockProps> = ({
         height,
         minHeight,
         maxHeight,
-        flexDirection,
-        justifyContent,
-        alignItems,
-        gap,
+        // Layout props removed from outer wrapper to prevent conflicts
+        // flexDirection, justifyContent, alignItems, gap are on inner div
         padding,
         paddingTop,
         paddingRight,
@@ -150,12 +148,12 @@ export const ColumnBlock: React.FC<ColumnBlockProps> = ({
             onSelect={onSelect}
             onUpdate={onUpdate}
             onDelete={onDelete}
-            className="h-full"
+            className=""
             style={style}
         >
             <div
                 className={`
-          w-full h-full transition-all duration-200 min-h-[50px]
+          w-full transition-all duration-200 min-h-[50px]
           ${isHovered ? 'ring-1 ring-blue-200 ring-inset' : ''}
         `}
                 onMouseEnter={() => setIsHovered(true)}

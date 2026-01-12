@@ -10,7 +10,7 @@ import {
   Square, Layout as LayoutIcon, Layers, Link2, Link2Off,
   Video, Map as MapIcon, Minus, GripHorizontal,
   CheckSquare, List, Settings, X, MousePointer2 as Pointer,
-  Plus, Calendar, Lock, Trash2, RotateCcw, Code
+  Plus, Calendar, Lock, Trash2, RotateCcw, Code, MoveVertical
 } from 'lucide-react';
 import { DEFAULT_FORM_FIELDS } from '../blocks/formConstants';
 
@@ -2591,6 +2591,27 @@ export const MapBlockInspector: React.FC<{ block: Block; updateBlock: (id: strin
                 <option value="terrain">Terrain</option>
               </select>
             </ControlGroup>
+            <ControlGroup label="Scroll">
+              <select
+                className={inputClasses}
+                value={props.interactionMode || 'always'}
+                onChange={(e) => updateProp('interactionMode', e.target.value)}
+              >
+                <option value="always">Always Active</option>
+                <option value="onClick">Click to Activate</option>
+              </select>
+            </ControlGroup>
+            {props.interactionMode === 'onClick' && (
+              <ControlGroup label="Button Text">
+                <input
+                  type="text"
+                  className={inputClasses}
+                  value={props.activationText || 'Click to interact'}
+                  onChange={(e) => updateProp('activationText', e.target.value)}
+                  placeholder="Click to interact"
+                />
+              </ControlGroup>
+            )}
           </PropertySection>
           <BlockSettingsGroup block={block} onChange={updateProp} />
         </>
@@ -2973,117 +2994,6 @@ export const ContainerBlockInspector: React.FC<{ block: Block; updateBlock: (id:
   );
 };
 
-export const GridBlockInspector: React.FC<{ block: Block; updateBlock: (id: string, updates: Partial<Block>) => void; activeTab: 'content' | 'style' | 'advanced'; }> = ({ block, updateBlock, activeTab }) => {
-  const props = block.props as any;
-  const updateProp = (k: string, v: any) => updateBlock(block.id, { props: { ...props, [k]: v } });
-
-  return (
-    <div className="flex flex-col space-y-2">
-      {activeTab === 'content' && (
-        <>
-          <PropertySection title="Grid Configuration" icon={Layers} defaultOpen={true}>
-            <ControlGroup label="Columns">
-              <NumberControl
-                value={(() => {
-                  const match = (props.gridTemplateColumns || '').match(/repeat\((\d+)/);
-                  return match ? parseInt(match[1]) : 3;
-                })()}
-                onChange={(val) => updateProp('gridTemplateColumns', `repeat(${val}, 1fr)`)}
-                min={1}
-                max={12}
-                label="Cols"
-              />
-            </ControlGroup>
-
-            <ControlGroup label="Rows">
-              <NumberControl
-                value={(() => {
-                  const match = (props.gridTemplateRows || '').match(/repeat\((\d+)/);
-                  return match ? parseInt(match[1]) : 1;
-                })()}
-                onChange={(val) => updateProp('gridTemplateRows', `repeat(${val}, auto)`)}
-                min={1}
-                max={12}
-                label="Rows"
-              />
-            </ControlGroup>
-
-
-            <div className="mt-2 pt-2 border-t border-[#3e444b]">
-              <p className="text-[10px] text-gray-500 mb-2">Advanced: Raw CSS</p>
-              <ControlGroup label="Col Tpl">
-                <input
-                  type="text"
-                  className={inputClasses}
-                  value={props.gridTemplateColumns || ''}
-                  onChange={(e) => updateProp('gridTemplateColumns', e.target.value)}
-                  placeholder="repeat(3, 1fr)"
-                />
-              </ControlGroup>
-              <ControlGroup label="Row Tpl">
-                <input
-                  type="text"
-                  className={inputClasses}
-                  value={props.gridTemplateRows || ''}
-                  onChange={(e) => updateProp('gridTemplateRows', e.target.value)}
-                  placeholder="auto"
-                />
-              </ControlGroup>
-            </div>
-          </PropertySection>
-
-          <PropertySection title="Gaps" icon={Maximize2}>
-            <div className="grid grid-cols-2 gap-3">
-              <ControlGroup label="Row Gap">
-                <UnitControl value={props.rowGap} onChange={(v) => updateProp('rowGap', v)} />
-              </ControlGroup>
-              <ControlGroup label="Col Gap">
-                <UnitControl value={props.columnGap} onChange={(v) => updateProp('columnGap', v)} />
-              </ControlGroup>
-            </div>
-          </PropertySection>
-
-          <PropertySection title="Alignment" icon={AlignLeft}>
-            <ControlGroup label="Justify Items">
-              <select className={inputClasses} value={props.justifyItems || 'stretch'} onChange={(e) => updateProp('justifyItems', e.target.value)}>
-                <option value="start">Start</option>
-                <option value="center">Center</option>
-                <option value="end">End</option>
-                <option value="stretch">Stretch</option>
-              </select>
-            </ControlGroup>
-            <ControlGroup label="Align Items">
-              <select className={inputClasses} value={props.alignItems || 'stretch'} onChange={(e) => updateProp('alignItems', e.target.value)}>
-                <option value="start">Start</option>
-                <option value="center">Center</option>
-                <option value="end">End</option>
-                <option value="stretch">Stretch</option>
-              </select>
-            </ControlGroup>
-          </PropertySection>
-        </>
-      )}
-
-      {
-        activeTab === 'style' && (
-          <>
-            <PropertySection title="Appearance" icon={Palette} defaultOpen={true}>
-              <BackgroundControl props={props} onChange={updateProp} />
-            </PropertySection>
-
-            <PropertySection title="Box Style" icon={Maximize2}>
-              <SpacingGroup block={block} onChange={updateProp} />
-              <BorderGroup block={block} onChange={updateProp} />
-              <EffectsGroup block={block} onChange={updateProp} />
-            </PropertySection>
-          </>
-        )
-      }
-
-      {activeTab === 'advanced' && <AdvancedPanel block={block} onUpdate={(u) => updateBlock(block.id, u)} />}
-    </div >
-  );
-};
 
 const ScopedTypographyGroup = ({ block, prefix, onChange, title }: { block: any, prefix: string, onChange: any, title: string }) => {
   const props = block.props;
@@ -5573,3 +5483,180 @@ export const CodeBlockInspector: React.FC<{ block: Block; updateBlock: (id: stri
 
 
 
+
+export const GridBlockInspector: React.FC<{ block: Block; updateBlock: (id: string, updates: Partial<Block>) => void; activeTab: 'content' | 'style' | 'advanced'; }> = ({ block, updateBlock, activeTab }) => {
+  const props = block.props as any;
+  const updateProp = (k: string | object, v?: any) => {
+    if (typeof k === 'object') {
+      updateBlock(block.id, { props: { ...props, ...k } });
+    } else {
+      updateBlock(block.id, { props: { ...props, [k]: v } });
+    }
+  };
+
+  return (
+    <div className="flex flex-col space-y-2">
+      {activeTab === 'content' && (
+        <>
+          <PropertySection title="Grid Layout" icon={Layout} defaultOpen={true}>
+            <div className="space-y-4">
+              {/* Columns & Rows */}
+              <div className="grid grid-cols-2 gap-3">
+                <ControlGroup label="Columns">
+                  <NumberControl
+                    value={props.columns || 3}
+                    onChange={(v) => updateProp('columns', v)}
+                    min={1}
+                    max={12}
+                  />
+                </ControlGroup>
+                <ControlGroup label="Rows">
+                  <NumberControl
+                    value={props.rows || 2}
+                    onChange={(v) => updateProp('rows', v)}
+                    min={1}
+                    max={12}
+                  />
+                </ControlGroup>
+              </div>
+
+              {/* Gaps */}
+              <div className="pt-3 border-t border-[#3e444b]">
+                <div className="grid grid-cols-2 gap-3 mb-2">
+                  <ControlGroup label="Gap">
+                    <UnitControl
+                      value={props.gap}
+                      onChange={(v) => updateProp('gap', v)}
+                      placeholder="20px"
+                    />
+                  </ControlGroup>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <ControlGroup label="Row Gap">
+                    <UnitControl
+                      value={props.rowGap}
+                      onChange={(v) => updateProp('rowGap', v)}
+                      placeholder="Auto"
+                    />
+                  </ControlGroup>
+                  <ControlGroup label="Col Gap">
+                    <UnitControl
+                      value={props.columnGap}
+                      onChange={(v) => updateProp('columnGap', v)}
+                      placeholder="Auto"
+                    />
+                  </ControlGroup>
+                </div>
+              </div>
+            </div>
+          </PropertySection>
+
+          <PropertySection title="Alignment" icon={MoveVertical} defaultOpen={true}>
+            <div className="space-y-3">
+              <ControlGroup label="Justify Items (Horizontal)">
+                <select
+                  className={inputClasses}
+                  value={props.justifyItems || 'stretch'}
+                  onChange={(e) => updateProp('justifyItems', e.target.value)}
+                >
+                  <option value="start">Start</option>
+                  <option value="end">End</option>
+                  <option value="center">Center</option>
+                  <option value="stretch">Stretch</option>
+                </select>
+              </ControlGroup>
+              <ControlGroup label="Align Items (Vertical)">
+                <select
+                  className={inputClasses}
+                  value={props.alignItems || 'stretch'}
+                  onChange={(e) => updateProp('alignItems', e.target.value)}
+                >
+                  <option value="start">Start</option>
+                  <option value="end">End</option>
+                  <option value="center">Center</option>
+                  <option value="stretch">Stretch</option>
+                </select>
+              </ControlGroup>
+              <div className="pt-2 border-t border-[#3e444b] mt-2 space-y-2">
+                <ControlGroup label="Justify Content">
+                  <select
+                    className={inputClasses}
+                    value={props.justifyContent || 'start'}
+                    onChange={(e) => updateProp('justifyContent', e.target.value)}
+                  >
+                    <option value="start">Start</option>
+                    <option value="end">End</option>
+                    <option value="center">Center</option>
+                    <option value="stretch">Stretch</option>
+                    <option value="space-between">Space Between</option>
+                    <option value="space-around">Space Around</option>
+                    <option value="space-evenly">Space Evenly</option>
+                  </select>
+                </ControlGroup>
+                <ControlGroup label="Align Content">
+                  <select
+                    className={inputClasses}
+                    value={props.alignContent || 'start'}
+                    onChange={(e) => updateProp('alignContent', e.target.value)}
+                  >
+                    <option value="start">Start</option>
+                    <option value="end">End</option>
+                    <option value="center">Center</option>
+                    <option value="stretch">Stretch</option>
+                    <option value="space-between">Space Between</option>
+                    <option value="space-around">Space Around</option>
+                    <option value="space-evenly">Space Evenly</option>
+                  </select>
+                </ControlGroup>
+              </div>
+            </div>
+          </PropertySection>
+
+          <PropertySection title="Visuals" icon={Maximize2}>
+            <div className="flex items-center justify-between px-1">
+              <span className="text-[11px] font-medium text-gray-300">Show Grid Outline</span>
+              <input type="checkbox" checked={props.showGridOutline !== false} onChange={(e) => updateProp('showGridOutline', e.target.checked)} className="rounded bg-[#1a1d21] border-[#3e444b]" />
+            </div>
+          </PropertySection>
+
+          <PropertySection title="Advanced Layout" icon={Settings}>
+            <div className="space-y-3">
+              <ControlGroup label="Template Cols">
+                <input
+                  type="text"
+                  className={inputClasses}
+                  value={props.gridTemplateColumns || ''}
+                  onChange={(e) => updateProp('gridTemplateColumns', e.target.value)}
+                  placeholder="e.g. 1fr 2fr 1fr"
+                />
+              </ControlGroup>
+              <ControlGroup label="Template Rows">
+                <input
+                  type="text"
+                  className={inputClasses}
+                  value={props.gridTemplateRows || ''}
+                  onChange={(e) => updateProp('gridTemplateRows', e.target.value)}
+                  placeholder="e.g. auto auto"
+                />
+              </ControlGroup>
+            </div>
+          </PropertySection>
+        </>
+      )}
+
+      {activeTab === 'style' && (
+        <>
+          <PropertySection title="Container" icon={Maximize2} defaultOpen={true}>
+            <DimensionsGroup block={block} onChange={updateProp} />
+            <SpacingGroup block={block} onChange={updateProp} />
+            <BackgroundGroup block={block} onChange={updateProp} />
+            <BorderGroup block={block} onChange={updateProp} />
+            <EffectsGroup block={block} onChange={updateProp} />
+          </PropertySection>
+        </>
+      )}
+
+      {activeTab === 'advanced' && <AdvancedPanel block={block} onUpdate={(u) => updateBlock(block.id, u)} />}
+    </div>
+  );
+};

@@ -240,6 +240,46 @@ export const Layout: React.FC = () => {
     if (!over) return;
     const data = active.data.current;
 
+    if (over.data.current?.type === 'GRID_CELL') {
+      const { parentId, index: dropIndex } = over.data.current;
+      const { moveBlock, addBlock, updateBlock } = useCanvasStore.getState();
+
+      if (data?.type === 'template') {
+        // Adding new block from sidebar into grid cell
+        // We add it to the END of the children list (or 0), but with the correct gridIndex prop
+        const newBlock = {
+          ...data.template.block,
+          props: {
+            ...data.template.block.props,
+            gridIndex: dropIndex
+          }
+        };
+        addBlock(newBlock, parentId || undefined);
+      } else if (data?.type === 'block') {
+        // Moving existing block to grid cell
+        if (active.id === over.id) return;
+
+        // const activePos = findBlockPosition(blocks, active.id.toString());
+        // We don't care about the array index for grids, just append content
+        const targetParent = useCanvasStore.getState().blockMap.get(parentId);
+        const targetIndex = targetParent?.children?.length || 0;
+
+        moveBlock(active.id.toString(), parentId, targetIndex);
+
+        // CRITICAL: Update the gridIndex prop to position it correctly in the grid
+        // We do this immediately after the move
+        setTimeout(() => {
+          updateBlock(active.id.toString(), {
+            props: {
+              ...(active.data.current?.block?.props || {}),
+              gridIndex: dropIndex
+            }
+          });
+        }, 0);
+      }
+      return;
+    }
+
     // Check if we dropped on a DropZone
     if (over.data.current?.type === 'DROP_ZONE') {
       const { parentId, index: dropIndex } = over.data.current;

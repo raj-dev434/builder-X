@@ -378,7 +378,20 @@ export const useCanvasStore = create<CanvasStore>()(
             return blocks.map((b) => {
               if (b.id === parentId) {
                 const children = [...(b.children || [])];
+
+                // For grid layouts: pad array with nulls if index is beyond current length
+                // This allows blocks to be placed at specific grid positions (e.g., cell 5 in an empty grid)
                 if (
+                  typeof index === "number" &&
+                  index >= 0 &&
+                  index > children.length
+                ) {
+                  // Pad with nulls up to the desired index
+                  while (children.length < index) {
+                    children.push(null as any);
+                  }
+                  children.push(newBlock);
+                } else if (
                   typeof index === "number" &&
                   index >= 0 &&
                   index <= children.length

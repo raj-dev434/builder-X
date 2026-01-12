@@ -28,6 +28,7 @@ export const RowBlock: React.FC<RowBlockProps> = ({
     gap = '1rem',
     justifyContent,
     alignItems,
+    alignContent,
     flexWrap = 'wrap',
     flexDirection,
     flexDirection_mobile,
@@ -87,11 +88,10 @@ export const RowBlock: React.FC<RowBlockProps> = ({
 
   const style: React.CSSProperties = {
     display: 'flex',
-    gap,
-    justifyContent,
-    alignItems,
-    flexWrap,
-    flexDirection: responsiveFlexDirection,
+    // Removed inner layout props from outer wrapper to prevent conflicts
+    // gap, justifyContent, alignItems, alignContent, flexWrap, flexDirection 
+    // are handled by the inner div.
+
     overflowX,
     padding,
     paddingTop,
@@ -159,26 +159,44 @@ export const RowBlock: React.FC<RowBlockProps> = ({
 
 
         {/* Row Content */}
-        <div className="flex-1">
-                {children ? (
-                    <React.Fragment>
-                        {children}
-                    </React.Fragment>
-                ) : (
-                    <div
-                        className={`
-                flex-1 flex flex-col items-center justify-center text-gray-400 
-                rounded-lg border-2 border-dashed border-gray-300 min-h-[60px] p-4 m-2 transition-all duration-200
-                hover:border-gray-400 hover:bg-gray-50
-              `}
-                    >
-                        <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        <p className="text-sm font-medium mb-1">Empty Row</p>
-                        <p className="text-xs">Drop columns or blocks here</p>
-                    </div>
-                )}
+        {/* Row Content */}
+        <div
+          className="flex-1 w-full"
+          style={{
+            maxWidth: block.props.contentWidth === 'boxed' ? (block.props.contentWidthValue || '1140px') : '100%',
+            margin: block.props.contentWidth === 'boxed' ? '0 auto' : undefined,
+            width: '100%'
+          }}
+        >
+          <div className="flex w-full h-full" style={{
+            gap,
+            justifyContent,
+            alignItems,
+            alignContent,
+            flexWrap,
+            flexDirection: responsiveFlexDirection,
+            minHeight // Ensure minHeight is passed to the inner flex container if needed, or keep it on wrapper
+          }}>
+            {children ? (
+              <React.Fragment>
+                {children}
+              </React.Fragment>
+            ) : (
+              <div
+                className={`
+            flex-1 flex flex-col items-center justify-center text-gray-400 
+            rounded-lg border-2 border-dashed border-gray-300 min-h-[60px] p-4 m-2 transition-all duration-200
+            hover:border-gray-400 hover:bg-gray-50
+          `}
+              >
+                <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                <p className="text-sm font-medium mb-1">Empty Row</p>
+                <p className="text-xs">Drop columns or blocks here</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </BaseBlock>

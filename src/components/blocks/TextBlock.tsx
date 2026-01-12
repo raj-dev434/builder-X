@@ -258,8 +258,8 @@ export const TextBlock: React.FC<TextBlockProps> = ({
             dangerouslySetInnerHTML={{ __html: content }}
           />
         ) : (
-          <p
-            className="text-content w-full cursor-pointer hover:bg-black/5 transition-colors"
+          <div
+            className="text-content w-full cursor-pointer hover:bg-black/5 transition-colors min-h-[1.5em]"
             style={{ font: 'inherit', color: 'inherit', textAlign: 'inherit' }}
             onDoubleClick={handleDoubleClick}
             role="button"
@@ -271,8 +271,13 @@ export const TextBlock: React.FC<TextBlockProps> = ({
                 handleDoubleClick();
               }
             }}
-            dangerouslySetInnerHTML={{ __html: content }}
-          />
+          >
+            {content ? (
+              <div dangerouslySetInnerHTML={{ __html: content }} />
+            ) : (
+              <span className="text-gray-300 italic select-none">start typing...</span>
+            )}
+          </div>
         )}
       </div>
       <style>{`
@@ -284,6 +289,6 @@ export const TextBlock: React.FC<TextBlockProps> = ({
           color: #1d4ed8;
         }
       `}</style>
-    </BaseBlock>
+    </BaseBlock >
   );
 };

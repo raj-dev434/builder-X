@@ -12,6 +12,7 @@ export interface BaseBlock {
 export interface BaseStyleProps {
   // HTML Tag
   tag?: string;
+  htmlTag?: string;
   htmlId?: string;
 
   // Typography
@@ -206,6 +207,9 @@ export interface BaseStyleProps {
   gridRowStart?: string;
   gridRowEnd?: string;
   gridArea?: string;
+
+  // Grid Cell Index (Container Logic)
+  gridIndex?: number;
 
   // Outline
   outline?: string;
@@ -447,6 +451,8 @@ export interface RowBlock extends BaseBlock {
   type: "row";
   props: {
     // Layout
+    contentWidth?: "boxed" | "full";
+    contentWidthValue?: string; // Custom max-width for boxed
     gap?: string;
     justifyContent?:
     | "flex-start"
@@ -456,6 +462,7 @@ export interface RowBlock extends BaseBlock {
     | "space-around"
     | "space-evenly";
     alignItems?: "flex-start" | "center" | "flex-end" | "stretch" | "baseline";
+    alignContent?: "flex-start" | "center" | "flex-end" | "space-between" | "space-around" | "stretch";
     flexWrap?: "nowrap" | "wrap" | "wrap-reverse";
     flexDirection?: "row" | "column" | "row-reverse" | "column-reverse";
     layoutType?: string;
@@ -801,13 +808,27 @@ export interface DividerBlock extends BaseBlock {
 export interface GridBlock extends BaseBlock {
   type: "grid";
   props: {
-    // Grid specific
-    gridTemplateColumns?: string;
+    // Grid Layout
+    columns?: number; // Number of columns (default 3)
+    rows?: number; // Number of rows (default 2)
+    gridTemplateColumns?: string; // Auto-generated or custom
+    gridTemplateRows?: string; // Auto-generated or custom
+
+    // Gaps
     gap?: string;
     rowGap?: string;
     columnGap?: string;
+
+    // Alignment
     justifyItems?: "start" | "end" | "center" | "stretch";
     alignItems?: "start" | "end" | "center" | "stretch";
+
+    // Content Width
+    contentWidth?: "full" | "boxed";
+    contentWidthValue?: string; // Custom max-width when boxed
+
+    // Visual Helpers
+    showGridOutline?: boolean;
 
     // Responsive Grid
     gridTemplateColumns_desktop?: string;
@@ -1445,7 +1466,10 @@ export interface MapBlock extends BaseBlock {
     borderRadius?: string;
     border?: string;
     margin?: string;
+    padding?: string;
     interactive?: boolean;
+    interactionMode?: "always" | "onClick";
+    activationText?: string;
     showMarker?: boolean;
     markerTitle?: string;
     markerDescription?: string;
@@ -2381,8 +2405,27 @@ export const BLOCK_TEMPLATES: BlockTemplate[] = [
 
   // Multi-column layouts with mobile responsiveness
   {
+    id: "column",
+    name: "Column",
+    icon: "▮",
+    block: {
+      type: "column",
+      props: {
+        flex: "1",
+        minWidth: "0",
+        minHeight: "150px",
+        width_mobile: "100%",
+        padding: "1rem",
+        flexDirection: "column",
+        gap: "0.5rem",
+        backgroundColor: "transparent",
+      },
+      children: [],
+    },
+  },
+  {
     id: "2-column",
-    name: "2 Columns",
+    name: "Columns",
     icon: "▮▮",
     block: {
       type: "row",
@@ -2432,263 +2475,263 @@ export const BLOCK_TEMPLATES: BlockTemplate[] = [
       ],
     },
   },
-  {
-    id: "3-column",
-    name: "3 Columns",
-    icon: "▮▮▮",
-    block: {
-      type: "row",
-      props: {
-        gap: "1rem",
-        flexDirection: "row",
-        flexDirection_mobile: "column", // Stack on mobile
-        justifyContent: "flex-start",
-        alignItems: "stretch",
-        flexWrap: "nowrap",
-        padding: "1rem",
-        backgroundColor: "transparent",
-        layoutType: "3-column",
-      },
-      // @ts-ignore - IDs are auto-generated when blocks are added to canvas
-      children: [
-        {
-          type: "column",
-          props: {
-            flex: "1",
-            minWidth: "0",
-            minHeight: "150px",
-            width_mobile: "100%", // Full width on mobile
-            padding: "1.5rem",
-            flexDirection: "column",
-            gap: "0.75rem",
-            backgroundColor: "#f8f9fa",
-            borderRadius: "8px",
-          },
-          children: [],
-        } as any,
-        {
-          type: "column",
-          props: {
-            flex: "1",
-            minWidth: "0",
-            minHeight: "150px",
-            width_mobile: "100%", // Full width on mobile
-            padding: "1.5rem",
-            flexDirection: "column",
-            gap: "0.75rem",
-            backgroundColor: "#f8f9fa",
-            borderRadius: "8px",
-          },
-          children: [],
-        } as any,
-        {
-          type: "column",
-          props: {
-            flex: "1",
-            minWidth: "0",
-            minHeight: "150px",
-            width_mobile: "100%", // Full width on mobile
-            padding: "1.5rem",
-            flexDirection: "column",
-            gap: "0.75rem",
-            backgroundColor: "#f8f9fa",
-            borderRadius: "8px",
-          },
-          children: [],
-        },
-      ],
-    },
-  },
-  {
-    id: "4-column",
-    name: "4 Columns",
-    icon: "▮▮▮▮",
-    block: {
-      type: "row",
-      props: {
-        gap: "1rem",
-        flexDirection: "row",
-        flexDirection_mobile: "column",
-        justifyContent: "flex-start",
-        alignItems: "stretch",
-        flexWrap: "nowrap",
-        padding: "1rem",
-        backgroundColor: "transparent",
-        layoutType: "4-column",
-      },
-      // @ts-ignore - IDs are auto-generated when blocks are added to canvas
-      children: [
-        {
-          type: "column",
-          props: {
-            flex: "1",
-            minWidth: "0",
-            minHeight: "150px",
-            width_mobile: "100%",
-            padding: "1.5rem",
-            flexDirection: "column",
-            gap: "0.75rem",
-            backgroundColor: "#f8f9fa",
-            borderRadius: "8px",
-          },
-          children: [],
-        } as any,
-        {
-          type: "column",
-          props: {
-            flex: "1",
-            minWidth: "0",
-            minHeight: "150px",
-            width_mobile: "100%",
-            padding: "1.5rem",
-            flexDirection: "column",
-            gap: "0.75rem",
-            backgroundColor: "#f8f9fa",
-            borderRadius: "8px",
-          },
-          children: [],
-        } as any,
-        {
-          type: "column",
-          props: {
-            flex: "1",
-            minWidth: "0",
-            minHeight: "150px",
-            width_mobile: "100%",
-            padding: "1.5rem",
-            flexDirection: "column",
-            gap: "0.75rem",
-            backgroundColor: "#f8f9fa",
-            borderRadius: "8px",
-          },
-          children: [],
-        } as any,
-        {
-          type: "column",
-          props: {
-            flex: "1",
-            minWidth: "0",
-            minHeight: "150px",
-            width_mobile: "100%",
-            padding: "1.5rem",
-            flexDirection: "column",
-            gap: "0.75rem",
-            backgroundColor: "#f8f9fa",
-            borderRadius: "8px",
-          },
-          children: [],
-        },
-      ],
-    },
-  },
-  {
-    id: "5-column",
-    name: "5 Columns",
-    icon: "▮▮▮▮▮",
-    block: {
-      type: "row",
-      props: {
-        gap: "1rem",
-        flexDirection: "row",
-        flexDirection_mobile: "row", // Keep row on mobile for scrolling
-        justifyContent: "center",
-        alignItems: "stretch",
-        flexWrap: "nowrap",
-        padding: "1rem",
-        backgroundColor: "transparent",
-        layoutType: "5-column",
-        overflowX: "auto",
-      },
-      // @ts-ignore - IDs are auto-generated when blocks are added to canvas
-      children: [
-        {
-          type: "column",
-          props: {
-            flex: "1",
-            minWidth: "150px",
-            minHeight: "150px",
-            width_mobile: "100%",
-            padding: "1.5rem",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "flex-start",
-            gap: "0.75rem",
-            backgroundColor: "#f8f9fa",
-            borderRadius: "8px",
-          },
-          children: [],
-        } as any,
-        {
-          type: "column",
-          props: {
-            flex: "1",
-            minWidth: "150px",
-            minHeight: "150px",
-            width_mobile: "100%",
-            padding: "1.5rem",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "flex-start",
-            gap: "0.75rem",
-            backgroundColor: "#f8f9fa",
-            borderRadius: "8px",
-          },
-          children: [],
-        } as any,
-        {
-          type: "column",
-          props: {
-            flex: "1",
-            minWidth: "150px",
-            minHeight: "150px",
-            width_mobile: "100%",
-            padding: "1.5rem",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "flex-start",
-            gap: "0.75rem",
-            backgroundColor: "#f8f9fa",
-            borderRadius: "8px",
-          },
-          children: [],
-        } as any,
-        {
-          type: "column",
-          props: {
-            flex: "1",
-            minWidth: "150px",
-            minHeight: "150px",
-            width_mobile: "100%",
-            padding: "1.5rem",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "flex-start",
-            gap: "0.75rem",
-            backgroundColor: "#f8f9fa",
-            borderRadius: "8px",
-          },
-          children: [],
-        } as any,
-        {
-          type: "column",
-          props: {
-            flex: "1",
-            minWidth: "150px",
-            minHeight: "150px",
-            width_mobile: "100%",
-            padding: "1.5rem",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "flex-start",
-            gap: "0.75rem",
-            backgroundColor: "#f8f9fa",
-            borderRadius: "8px",
-          },
-          children: [],
-        },
-      ],
-    },
-  },
+  // {
+  //   id: "3-column",
+  //   name: "3 Columns",
+  //   icon: "▮▮▮",
+  //   block: {
+  //     type: "row",
+  //     props: {
+  //       gap: "1rem",
+  //       flexDirection: "row",
+  //       flexDirection_mobile: "column", // Stack on mobile
+  //       justifyContent: "flex-start",
+  //       alignItems: "stretch",
+  //       flexWrap: "nowrap",
+  //       padding: "1rem",
+  //       backgroundColor: "transparent",
+  //       layoutType: "3-column",
+  //     },
+  //     // @ts-ignore - IDs are auto-generated when blocks are added to canvas
+  //     children: [
+  //       {
+  //         type: "column",
+  //         props: {
+  //           flex: "1",
+  //           minWidth: "0",
+  //           minHeight: "150px",
+  //           width_mobile: "100%", // Full width on mobile
+  //           padding: "1.5rem",
+  //           flexDirection: "column",
+  //           gap: "0.75rem",
+  //           backgroundColor: "#f8f9fa",
+  //           borderRadius: "8px",
+  //         },
+  //         children: [],
+  //       } as any,
+  //       {
+  //         type: "column",
+  //         props: {
+  //           flex: "1",
+  //           minWidth: "0",
+  //           minHeight: "150px",
+  //           width_mobile: "100%", // Full width on mobile
+  //           padding: "1.5rem",
+  //           flexDirection: "column",
+  //           gap: "0.75rem",
+  //           backgroundColor: "#f8f9fa",
+  //           borderRadius: "8px",
+  //         },
+  //         children: [],
+  //       } as any,
+  //       {
+  //         type: "column",
+  //         props: {
+  //           flex: "1",
+  //           minWidth: "0",
+  //           minHeight: "150px",
+  //           width_mobile: "100%", // Full width on mobile
+  //           padding: "1.5rem",
+  //           flexDirection: "column",
+  //           gap: "0.75rem",
+  //           backgroundColor: "#f8f9fa",
+  //           borderRadius: "8px",
+  //         },
+  //         children: [],
+  //       },
+  //     ],
+  //   },
+  // },
+  // {
+  //   id: "4-column",
+  //   name: "4 Columns",
+  //   icon: "▮▮▮▮",
+  //   block: {
+  //     type: "row",
+  //     props: {
+  //       gap: "1rem",
+  //       flexDirection: "row",
+  //       flexDirection_mobile: "column",
+  //       justifyContent: "flex-start",
+  //       alignItems: "stretch",
+  //       flexWrap: "nowrap",
+  //       padding: "1rem",
+  //       backgroundColor: "transparent",
+  //       layoutType: "4-column",
+  //     },
+  //     // @ts-ignore - IDs are auto-generated when blocks are added to canvas
+  //     children: [
+  //       {
+  //         type: "column",
+  //         props: {
+  //           flex: "1",
+  //           minWidth: "0",
+  //           minHeight: "150px",
+  //           width_mobile: "100%",
+  //           padding: "1.5rem",
+  //           flexDirection: "column",
+  //           gap: "0.75rem",
+  //           backgroundColor: "#f8f9fa",
+  //           borderRadius: "8px",
+  //         },
+  //         children: [],
+  //       } as any,
+  //       {
+  //         type: "column",
+  //         props: {
+  //           flex: "1",
+  //           minWidth: "0",
+  //           minHeight: "150px",
+  //           width_mobile: "100%",
+  //           padding: "1.5rem",
+  //           flexDirection: "column",
+  //           gap: "0.75rem",
+  //           backgroundColor: "#f8f9fa",
+  //           borderRadius: "8px",
+  //         },
+  //         children: [],
+  //       } as any,
+  //       {
+  //         type: "column",
+  //         props: {
+  //           flex: "1",
+  //           minWidth: "0",
+  //           minHeight: "150px",
+  //           width_mobile: "100%",
+  //           padding: "1.5rem",
+  //           flexDirection: "column",
+  //           gap: "0.75rem",
+  //           backgroundColor: "#f8f9fa",
+  //           borderRadius: "8px",
+  //         },
+  //         children: [],
+  //       } as any,
+  //       {
+  //         type: "column",
+  //         props: {
+  //           flex: "1",
+  //           minWidth: "0",
+  //           minHeight: "150px",
+  //           width_mobile: "100%",
+  //           padding: "1.5rem",
+  //           flexDirection: "column",
+  //           gap: "0.75rem",
+  //           backgroundColor: "#f8f9fa",
+  //           borderRadius: "8px",
+  //         },
+  //         children: [],
+  //       },
+  //     ],
+  //   },
+  // },
+  // {
+  //   id: "5-column",
+  //   name: "5 Columns",
+  //   icon: "▮▮▮▮▮",
+  //   block: {
+  //     type: "row",
+  //     props: {
+  //       gap: "1rem",
+  //       flexDirection: "row",
+  //       flexDirection_mobile: "row", // Keep row on mobile for scrolling
+  //       justifyContent: "center",
+  //       alignItems: "stretch",
+  //       flexWrap: "nowrap",
+  //       padding: "1rem",
+  //       backgroundColor: "transparent",
+  //       layoutType: "5-column",
+  //       overflowX: "auto",
+  //     },
+  //     // @ts-ignore - IDs are auto-generated when blocks are added to canvas
+  //     children: [
+  //       {
+  //         type: "column",
+  //         props: {
+  //           flex: "1",
+  //           minWidth: "150px",
+  //           minHeight: "150px",
+  //           width_mobile: "100%",
+  //           padding: "1.5rem",
+  //           flexDirection: "column",
+  //           alignItems: "center",
+  //           justifyContent: "flex-start",
+  //           gap: "0.75rem",
+  //           backgroundColor: "#f8f9fa",
+  //           borderRadius: "8px",
+  //         },
+  //         children: [],
+  //       } as any,
+  //       {
+  //         type: "column",
+  //         props: {
+  //           flex: "1",
+  //           minWidth: "150px",
+  //           minHeight: "150px",
+  //           width_mobile: "100%",
+  //           padding: "1.5rem",
+  //           flexDirection: "column",
+  //           alignItems: "center",
+  //           justifyContent: "flex-start",
+  //           gap: "0.75rem",
+  //           backgroundColor: "#f8f9fa",
+  //           borderRadius: "8px",
+  //         },
+  //         children: [],
+  //       } as any,
+  //       {
+  //         type: "column",
+  //         props: {
+  //           flex: "1",
+  //           minWidth: "150px",
+  //           minHeight: "150px",
+  //           width_mobile: "100%",
+  //           padding: "1.5rem",
+  //           flexDirection: "column",
+  //           alignItems: "center",
+  //           justifyContent: "flex-start",
+  //           gap: "0.75rem",
+  //           backgroundColor: "#f8f9fa",
+  //           borderRadius: "8px",
+  //         },
+  //         children: [],
+  //       } as any,
+  //       {
+  //         type: "column",
+  //         props: {
+  //           flex: "1",
+  //           minWidth: "150px",
+  //           minHeight: "150px",
+  //           width_mobile: "100%",
+  //           padding: "1.5rem",
+  //           flexDirection: "column",
+  //           alignItems: "center",
+  //           justifyContent: "flex-start",
+  //           gap: "0.75rem",
+  //           backgroundColor: "#f8f9fa",
+  //           borderRadius: "8px",
+  //         },
+  //         children: [],
+  //       } as any,
+  //       {
+  //         type: "column",
+  //         props: {
+  //           flex: "1",
+  //           minWidth: "150px",
+  //           minHeight: "150px",
+  //           width_mobile: "100%",
+  //           padding: "1.5rem",
+  //           flexDirection: "column",
+  //           alignItems: "center",
+  //           justifyContent: "flex-start",
+  //           gap: "0.75rem",
+  //           backgroundColor: "#f8f9fa",
+  //           borderRadius: "8px",
+  //         },
+  //         children: [],
+  //       },
+  //     ],
+  //   },
+  // },
 
   // New GrapeJS-style block templates
   // Basic Components
@@ -3094,42 +3137,42 @@ export const BLOCK_TEMPLATES: BlockTemplate[] = [
       },
     },
   },
-  {
-    id: "invoice",
-    name: "Invoice",
-    icon: "🧾",
-    block: {
-      type: "invoice",
-      props: {
-        invoiceNumber: "INV-001",
-        invoiceDate: "2023-10-27",
-        dueDate: "2023-11-27",
-        status: "draft",
-        companyName: "Your Company",
-        companyAddress: "123 Business St, City, Country",
-        clientName: "Client Name",
-        clientAddress: "456 Client St, City, Country",
-        items: [
-          {
-            id: "1",
-            description: "Web Design Service",
-            quantity: 1,
-            price: 500,
-          },
-          { id: "2", description: "Hosting (1 Year)", quantity: 1, price: 120 },
-        ],
-        currency: "$",
-        taxRate: 10,
-        discount: 0,
-        backgroundColor: "#ffffff",
-        padding: "2rem",
-        borderWidth: "1px",
-        borderColor: "#e5e7eb",
-        borderRadius: "8px",
-        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-      },
-    },
-  },
+  // {
+  //   id: "invoice",
+  //   name: "Invoice",
+  //   icon: "🧾",
+  //   block: {
+  //     type: "invoice",
+  //     props: {
+  //       invoiceNumber: "INV-001",
+  //       invoiceDate: "2023-10-27",
+  //       dueDate: "2023-11-27",
+  //       status: "draft",
+  //       companyName: "Your Company",
+  //       companyAddress: "123 Business St, City, Country",
+  //       clientName: "Client Name",
+  //       clientAddress: "456 Client St, City, Country",
+  //       items: [
+  //         {
+  //           id: "1",
+  //           description: "Web Design Service",
+  //           quantity: 1,
+  //           price: 500,
+  //         },
+  //         { id: "2", description: "Hosting (1 Year)", quantity: 1, price: 120 },
+  //       ],
+  //       currency: "$",
+  //       taxRate: 10,
+  //       discount: 0,
+  //       backgroundColor: "#ffffff",
+  //       padding: "2rem",
+  //       borderWidth: "1px",
+  //       borderColor: "#e5e7eb",
+  //       borderRadius: "8px",
+  //       boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+  //     },
+  //   },
+  // },
   // Elementor Blocks
   {
     id: "elementor-heading",

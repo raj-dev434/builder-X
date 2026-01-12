@@ -20,7 +20,7 @@ export const useRecentStore = create<RecentStore>()(
             (t) => t.id !== template.id
           );
           // Add to front and limit to 5
-          const newRecent = [template, ...filtered].slice(0, 10);
+          const newRecent = [template, ...filtered].slice(0, 2);
           return { recentTemplates: newRecent };
         });
       },
