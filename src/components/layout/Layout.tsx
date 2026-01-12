@@ -1,45 +1,24 @@
-import React, { useState, useEffect } from "react";
-import {
-  DndContext,
-  DragEndEvent,
-  DragOverlay,
-  DragStartEvent,
-  DragOverEvent,
-  useSensor,
-  useSensors,
-  PointerSensor,
-} from "@dnd-kit/core";
-import { DropIndicator, DragOverInfo } from "../canvas/DropIndicator";
-import { useCanvasStore } from "../../store/canvasStore";
-import { useTemplateStore } from "../../store/templateStore";
-import { useUIStore } from "../../store/uiStore";
-import { BlockTemplate, Block } from "../../schema/types";
-import { Canvas } from "../canvas/Canvas";
-import { Inspector } from "../inspector/Inspector";
-import { Toolbar } from "./Toolbar";
-import { Sidebar } from "./Sidebar";
-import { PreviewControlBar } from "./PreviewBar";
-import { GlobalStyles } from "./GlobalStyles";
-import { AssetManager } from "../assets/AssetManager";
+import React, { useState, useEffect } from 'react';
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, DragOverEvent, useSensor, useSensors, PointerSensor } from '@dnd-kit/core';
+import { DropIndicator, DragOverInfo } from '../canvas/DropIndicator';
+import { useCanvasStore } from '../../store/canvasStore';
+import { useTemplateStore } from '../../store/templateStore';
+import { BlockTemplate, Block } from '../../schema/types';
+import { Canvas } from '../canvas/Canvas';
+import { Inspector } from '../inspector/Inspector';
+import { Toolbar } from './Toolbar';
+import { Sidebar } from './Sidebar';
+import { PreviewControlBar } from './PreviewBar';
+import { GlobalStyles } from './GlobalStyles';
+import { AssetManager } from '../assets/AssetManager';
 
-import { PageSettingsInspector } from "../inspector/PageSettingsInspector";
-import { LayersPanel } from "./LayersPanel";
-import { HistoryPanel } from "./HistoryPanel";
+import { PageSettingsInspector } from '../inspector/PageSettingsInspector';
+import { LayersPanel } from './LayersPanel';
+import { HistoryPanel } from './HistoryPanel';
 
 export const Layout: React.FC = () => {
   const { selectedBlockIds, isPreviewMode } = useCanvasStore();
   const { initializeDefaultTemplates } = useTemplateStore();
-  
-  // UI Store
-  const { 
-    isSidebarOpen, 
-    leftPanelMode, 
-    sidebarWidth,
-    setSidebarOpen,
-    setLeftPanelMode,
-    setSidebarWidth 
-  } = useUIStore();
-  
   const selectedBlockId = selectedBlockIds[0];
 
   useEffect(() => {
@@ -54,14 +33,15 @@ export const Layout: React.FC = () => {
     })
   );
 
-  const [activeTemplate, setActiveTemplate] = useState<BlockTemplate | null>(
-    null
-  );
+  const [activeTemplate, setActiveTemplate] = useState<BlockTemplate | null>(null);
   const [activeBlock, setActiveBlock] = useState<Block | null>(null);
+  const [leftPanelMode, setLeftPanelMode] = useState<'blocks' | 'properties' | 'layers' | 'history' | 'settings'>('blocks');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOverInfo, setDragOverInfo] = useState<DragOverInfo | null>(null);
 
   // Resizable Sidebar State
+  const [sidebarWidth, setSidebarWidth] = useState(320);
   const [isResizingSidebar, setIsResizingSidebar] = useState(false);
 
   useEffect(() => {
@@ -76,78 +56,79 @@ export const Layout: React.FC = () => {
 
     const handleMouseUp = () => {
       setIsResizingSidebar(false);
-      document.body.style.cursor = "default";
+      document.body.style.cursor = 'default';
     };
 
     if (isResizingSidebar) {
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
-      document.body.style.cursor = "col-resize";
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'col-resize';
     }
 
     return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-      document.body.style.cursor = "default";
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'default';
     };
-  }, [isResizingSidebar, setSidebarWidth]);
+  }, [isResizingSidebar]);
 
   const startResizing = (e: React.MouseEvent) => {
     e.preventDefault();
     setIsResizingSidebar(true);
   };
 
+
   useEffect(() => {
     if (selectedBlockId) {
-      if (leftPanelMode !== "layers" && leftPanelMode !== "history") {
-        setLeftPanelMode("properties");
-        if (!isSidebarOpen) setSidebarOpen(true);
+      if (leftPanelMode !== 'layers' && leftPanelMode !== 'history') {
+        setLeftPanelMode('properties');
+        if (!isSidebarOpen) setIsSidebarOpen(true);
       }
     }
   }, [selectedBlockId]);
 
   const handleToggleBlocks = () => {
     if (!isSidebarOpen) {
-      setSidebarOpen(true);
-      setLeftPanelMode("blocks");
-    } else if (leftPanelMode === "blocks") {
-      setSidebarOpen(false);
+      setIsSidebarOpen(true);
+      setLeftPanelMode('blocks');
+    } else if (leftPanelMode === 'blocks') {
+      setIsSidebarOpen(false);
     } else {
-      setLeftPanelMode("blocks");
+      setLeftPanelMode('blocks');
     }
   };
 
   const handleToggleLayers = () => {
     if (!isSidebarOpen) {
-      setSidebarOpen(true);
-      setLeftPanelMode("layers");
-    } else if (leftPanelMode === "layers") {
-      setSidebarOpen(false);
+      setIsSidebarOpen(true);
+      setLeftPanelMode('layers');
+    } else if (leftPanelMode === 'layers') {
+      setIsSidebarOpen(false);
     } else {
-      setLeftPanelMode("layers");
+      setLeftPanelMode('layers');
     }
   };
 
   const handleToggleHistory = () => {
     if (!isSidebarOpen) {
-      setSidebarOpen(true);
-      setLeftPanelMode("history");
-    } else if (leftPanelMode === "history") {
-      setSidebarOpen(false);
+      setIsSidebarOpen(true);
+      setLeftPanelMode('history');
+    } else if (leftPanelMode === 'history') {
+      setIsSidebarOpen(false);
     } else {
-      setLeftPanelMode("history");
+      setLeftPanelMode('history');
     }
   };
 
   const handleOpenSettings = () => {
     if (!isSidebarOpen) {
-      setSidebarOpen(true);
+      setIsSidebarOpen(true);
     }
-    setLeftPanelMode("settings");
+    setLeftPanelMode('settings');
   };
 
   const handleCloseSidebar = () => {
-    setSidebarOpen(false);
+    setIsSidebarOpen(false);
   };
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -156,19 +137,15 @@ export const Layout: React.FC = () => {
 
     setIsDragging(true);
 
-    if (data?.type === "template") {
+    if (data?.type === 'template') {
       setActiveTemplate(data.template);
-    } else if (data?.type === "block") {
+    } else if (data?.type === 'block') {
       setActiveBlock(data.block);
     }
   };
 
   // Helper to find block position in the tree
-  const findBlockPosition = (
-    blocks: Block[],
-    id: string,
-    parentId: string | null = null
-  ): { block: Block; index: number; parentId: string | null } | null => {
+  const findBlockPosition = (blocks: Block[], id: string, parentId: string | null = null): { block: Block; index: number; parentId: string | null } | null => {
     for (let i = 0; i < blocks.length; i++) {
       if (blocks[i].id === id) {
         return { block: blocks[i], index: i, parentId };
@@ -191,14 +168,12 @@ export const Layout: React.FC = () => {
 
     // If over a DropZone, let the DropZone component handle the visual feedback (green line)
     // We can clear our generic drag indicator
-    if (over.data.current?.type === "DROP_ZONE") {
+    if (over.data.current?.type === 'DROP_ZONE') {
       setDragOverInfo(null);
       return;
     }
 
-    const overNode =
-      over.data.current?.sortable?.node ||
-      document.getElementById(over.id.toString());
+    const overNode = over.data.current?.sortable?.node || document.getElementById(over.id.toString());
     const overRect = overNode?.getBoundingClientRect();
 
     if (!overRect) {
@@ -212,17 +187,15 @@ export const Layout: React.FC = () => {
     // This fixes issues when dragging tall blocks over short blocks
     let pointerY = 0;
     if (active.rect.current?.translated) {
-      pointerY =
-        active.rect.current.translated.top +
-        active.rect.current.translated.height / 2;
+      pointerY = active.rect.current.translated.top + (active.rect.current.translated.height / 2);
     }
 
     // Check event.activatorEvent instead of active.activatorEvent
     if (event.activatorEvent) {
       // Try multiple properties as dnd-kit can attach different event types
       const evt = event.activatorEvent as any;
-      if (typeof evt.clientY === "number") pointerY = evt.clientY;
-      else if (typeof evt.y === "number") pointerY = evt.y;
+      if (typeof evt.clientY === 'number') pointerY = evt.clientY;
+      else if (typeof evt.y === 'number') pointerY = evt.y;
       // For touch events
       else if (evt.touches?.[0]?.clientY) pointerY = evt.touches[0].clientY;
     }
@@ -232,17 +205,17 @@ export const Layout: React.FC = () => {
     const distBottom = Math.abs(pointerY - bottom);
 
     // Default to sibling/bottom
-    let type: "sibling" | "nest" = "sibling";
-    let position: "top" | "bottom" | "inside" = "bottom";
+    let type: 'sibling' | 'nest' = 'sibling';
+    let position: 'top' | 'bottom' | 'inside' = 'bottom';
 
     if (distTop < threshold) {
-      position = "top";
+      position = 'top';
     } else if (distBottom < threshold) {
-      position = "bottom";
+      position = 'bottom';
     } else {
       // Middle area - attempt to nest
-      type = "nest";
-      position = "inside";
+      type = 'nest';
+      position = 'inside';
     }
 
     setDragOverInfo({
@@ -252,8 +225,8 @@ export const Layout: React.FC = () => {
         top: overRect.top,
         left: overRect.left,
         width: overRect.width,
-        height: overRect.height,
-      },
+        height: overRect.height
+      }
     });
   };
 
@@ -267,22 +240,22 @@ export const Layout: React.FC = () => {
     if (!over) return;
     const data = active.data.current;
 
-    if (over.data.current?.type === "GRID_CELL") {
+    if (over.data.current?.type === 'GRID_CELL') {
       const { parentId, index: dropIndex } = over.data.current;
       const { moveBlock, addBlock, updateBlock } = useCanvasStore.getState();
 
-      if (data?.type === "template") {
+      if (data?.type === 'template') {
         // Adding new block from sidebar into grid cell
         // We add it to the END of the children list (or 0), but with the correct gridIndex prop
         const newBlock = {
           ...data.template.block,
           props: {
             ...data.template.block.props,
-            gridIndex: dropIndex,
-          },
+            gridIndex: dropIndex
+          }
         };
         addBlock(newBlock, parentId || undefined);
-      } else if (data?.type === "block") {
+      } else if (data?.type === 'block') {
         // Moving existing block to grid cell
         if (active.id === over.id) return;
 
@@ -299,8 +272,8 @@ export const Layout: React.FC = () => {
           updateBlock(active.id.toString(), {
             props: {
               ...(active.data.current?.block?.props || {}),
-              gridIndex: dropIndex,
-            },
+              gridIndex: dropIndex
+            }
           });
         }, 0);
       }
@@ -308,15 +281,15 @@ export const Layout: React.FC = () => {
     }
 
     // Check if we dropped on a DropZone
-    if (over.data.current?.type === "DROP_ZONE") {
+    if (over.data.current?.type === 'DROP_ZONE') {
       const { parentId, index: dropIndex } = over.data.current;
       const blocks = useCanvasStore.getState().blocks;
       const { moveBlock, addBlock } = useCanvasStore.getState();
 
-      if (data?.type === "template") {
+      if (data?.type === 'template') {
         // Adding new block from sidebar - straightforward insert
         addBlock(data.template.block, parentId || undefined, dropIndex);
-      } else if (data?.type === "block") {
+      } else if (data?.type === 'block') {
         // Moving existing block
         // Check for self-drop (shouldn't happen with valid zones but safety first)
         if (active.id === over.id) return;
@@ -335,30 +308,12 @@ export const Layout: React.FC = () => {
           }
 
           // Prevent unnecessary moves (dropping exactly where it started)
-          if (
-            activePos.parentId === parentId &&
-            activePos.index === finalIndex
-          ) {
+          if (activePos.parentId === parentId && activePos.index === finalIndex) {
             return;
           }
 
           moveBlock(active.id.toString(), parentId, finalIndex);
         }
-      }
-      return;
-    }
-
-    // Check if we dropped on the Empty Canvas (Root)
-    if (over.id === "canvas-drop-zone") {
-      const blocks = useCanvasStore.getState().blocks;
-      const { addBlock, moveBlock } = useCanvasStore.getState();
-
-      if (data?.type === "template") {
-        // Add to the end of root
-        addBlock(data.template.block, undefined, blocks.length);
-      } else if (data?.type === "block") {
-        // Move to end of root
-        moveBlock(active.id.toString(), null, blocks.length);
       }
       return;
     }
@@ -369,9 +324,7 @@ export const Layout: React.FC = () => {
 
     // Identify drop target
     const overPos = findBlockPosition(blocks, over.id.toString());
-    const targetBlock =
-      useCanvasStore.getState().blocks.find((b) => b.id === over.id) ||
-      overPos?.block;
+    const targetBlock = useCanvasStore.getState().blocks.find(b => b.id === over.id) || overPos?.block;
 
     if (!targetBlock) {
       return;
@@ -379,24 +332,20 @@ export const Layout: React.FC = () => {
 
     // Determine drop position type (Edge vs Inside)
     let isEdgeDrop = false;
-    let edgePos: "top" | "bottom" = "bottom";
+    let edgePos: 'top' | 'bottom' = 'bottom';
 
     if (over.rect) {
       let pointerY = 0;
       if (event.activatorEvent) {
         const evt = event.activatorEvent as any;
-        if (typeof evt.clientY === "number") pointerY = evt.clientY;
-        else if (typeof evt.y === "number") pointerY = evt.y;
+        if (typeof evt.clientY === 'number') pointerY = evt.clientY;
+        else if (typeof evt.y === 'number') pointerY = evt.y;
         else if (evt.touches?.[0]?.clientY) pointerY = evt.touches[0].clientY;
         else if (active.rect.current?.translated) {
-          pointerY =
-            active.rect.current.translated.top +
-            active.rect.current.translated.height / 2;
+          pointerY = active.rect.current.translated.top + (active.rect.current.translated.height / 2);
         }
       } else if (active.rect.current?.translated) {
-        pointerY =
-          active.rect.current.translated.top +
-          active.rect.current.translated.height / 2;
+        pointerY = active.rect.current.translated.top + (active.rect.current.translated.height / 2);
       }
 
       const overRect = over.rect;
@@ -406,49 +355,30 @@ export const Layout: React.FC = () => {
 
       if (distTop < threshold) {
         isEdgeDrop = true;
-        edgePos = "top";
+        edgePos = 'top';
       } else if (distBottom < threshold) {
         isEdgeDrop = true;
-        edgePos = "bottom";
+        edgePos = 'bottom';
       }
     }
 
     // List of block types that can accept children (Containers)
-    const CONTAINER_TYPES = [
-      "section",
-      "row",
-      "column",
-      "container",
-      "form",
-      "group",
-      "div",
-      "body",
-      "grid",
-    ];
-    const isContainer =
-      targetBlock && CONTAINER_TYPES.includes(targetBlock.type);
+    const CONTAINER_TYPES = ['section', 'row', 'column', 'container', 'form', 'group', 'div', 'body', 'grid'];
+    const isContainer = targetBlock && CONTAINER_TYPES.includes(targetBlock.type);
 
     // EXECUTE DROP
-    if (data?.type === "template") {
+    if (data?.type === 'template') {
       // Dragging from sidebar
       if (!isEdgeDrop && isContainer) {
         // Nest inside target (only if container)
-        addBlock(
-          data.template.block,
-          targetBlock.id,
-          targetBlock.children ? targetBlock.children.length : 0
-        );
+        addBlock(data.template.block, targetBlock.id, targetBlock.children ? targetBlock.children.length : 0);
       } else {
         // Drop as sibling
         const parentId = overPos?.parentId;
-        const index = overPos
-          ? edgePos === "top"
-            ? overPos.index
-            : overPos.index + 1
-          : blocks.length;
+        const index = overPos ? (edgePos === 'top' ? overPos.index : overPos.index + 1) : blocks.length;
         addBlock(data.template.block, parentId || undefined, index);
       }
-    } else if (data?.type === "block") {
+    } else if (data?.type === 'block') {
       // Reordering existing block
       const activePos = findBlockPosition(blocks, active.id.toString());
       if (activePos && overPos) {
@@ -457,40 +387,28 @@ export const Layout: React.FC = () => {
         if (!isEdgeDrop && isContainer) {
           // Nesting logic
           if (active.id !== targetBlock.id) {
-            moveBlock(
-              active.id.toString(),
-              targetBlock.id,
-              targetBlock.children ? targetBlock.children.length : 0
-            );
+            moveBlock(active.id.toString(), targetBlock.id, targetBlock.children ? targetBlock.children.length : 0);
           }
         } else {
           // Sibling logic
-          const parentId = overPos.parentId; // This defaults to the target's parent.
+          const parentId = overPos.parentId; // This defaults to the target's parent. 
           let index = overPos.index;
-          if (edgePos === "bottom") index += 1;
+          if (edgePos === 'bottom') index += 1;
 
           // Adjust index if moving within same parent and moving down
           if (parentId === activePos.parentId && activePos.index < index) {
             index -= 1;
           }
 
-          moveBlock(active.id.toString(), parentId || "", index);
+          moveBlock(active.id.toString(), parentId || '', index);
         }
       }
     }
   };
 
   return (
-    <DndContext
-      sensors={sensors}
-      onDragStart={handleDragStart}
-      onDragOver={handleDragOver}
-      onDragEnd={handleDragEnd}
-    >
-      <div
-        className="h-screen flex flex-col bg-gray-100"
-        data-testid="js-layout"
-      >
+    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
+      <div className="h-screen flex flex-col bg-gray-100" data-testid="js-layout">
         <DropIndicator info={dragOverInfo} />
         <GlobalStyles />
         {isPreviewMode ? (
@@ -501,9 +419,9 @@ export const Layout: React.FC = () => {
             onToggleLayers={handleToggleLayers}
             onToggleHistory={handleToggleHistory}
             onOpenPageSettings={handleOpenSettings}
-            componentsPanelOpen={isSidebarOpen && leftPanelMode === "blocks"}
-            layersPanelOpen={isSidebarOpen && leftPanelMode === "layers"}
-            historyPanelOpen={isSidebarOpen && leftPanelMode === "history"}
+            componentsPanelOpen={isSidebarOpen && leftPanelMode === 'blocks'}
+            layersPanelOpen={isSidebarOpen && leftPanelMode === 'layers'}
+            historyPanelOpen={isSidebarOpen && leftPanelMode === 'history'}
           />
         )}
 
@@ -521,21 +439,18 @@ export const Layout: React.FC = () => {
                 `}
               style={{ width: isSidebarOpen ? sidebarWidth : 0 }}
             >
-              <div
-                className="h-full overflow-hidden"
-                style={{ width: sidebarWidth }}
-              >
-                {leftPanelMode === "blocks" ? (
+              <div className="h-full overflow-hidden" style={{ width: sidebarWidth }}>
+                {leftPanelMode === 'blocks' ? (
                   <div className="h-full bg-gray-800 border-r border-gray-700">
                     <Sidebar onClose={handleCloseSidebar} />
                   </div>
-                ) : leftPanelMode === "layers" ? (
+                ) : leftPanelMode === 'layers' ? (
                   <div className="h-full bg-gray-800 border-r border-gray-700">
                     <LayersPanel onClose={handleCloseSidebar} />
                   </div>
-                ) : leftPanelMode === "history" ? (
+                ) : leftPanelMode === 'history' ? (
                   <HistoryPanel onClose={handleCloseSidebar} />
-                ) : leftPanelMode === "settings" ? (
+                ) : leftPanelMode === 'settings' ? (
                   <div className="h-full">
                     <PageSettingsInspector />
                   </div>
@@ -553,31 +468,6 @@ export const Layout: React.FC = () => {
                   onMouseDown={startResizing}
                 />
               )}
-
-              {/* Sidebar Toggle Button */}
-              <button
-                onClick={() => setSidebarOpen(!isSidebarOpen)}
-                className={`
-                  absolute top-1/2 -translate-y-1/2 right-0 
-                  translate-x-full 
-                  w-4 h-16 
-                  bg-[#262a2e] 
-                  border-y border-r border-[#3e444b] 
-                  rounded-r-md 
-                  flex items-center justify-center 
-                  text-gray-400 hover:text-white 
-                  cursor-pointer 
-                  z-40
-                  shadow-md
-                `}
-                title={isSidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
-              >
-                {isSidebarOpen ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-                )}
-              </button>
             </div>
           )}
 
@@ -590,12 +480,8 @@ export const Layout: React.FC = () => {
       <DragOverlay zIndex={10000}>
         {activeTemplate ? (
           <div className="flex flex-col items-center justify-center p-4 bg-gray-800 border border-gray-600 rounded-lg shadow-2xl w-32 h-24 opacity-90 cursor-grabbing">
-            <span className="text-3xl mb-2 text-gray-200">
-              {activeTemplate.icon}
-            </span>
-            <span className="text-sm font-medium text-gray-100 text-center leading-tight">
-              {activeTemplate.name}
-            </span>
+            <span className="text-3xl mb-2 text-gray-200">{activeTemplate.icon}</span>
+            <span className="text-sm font-medium text-gray-100 text-center leading-tight">{activeTemplate.name}</span>
           </div>
         ) : activeBlock ? (
           <div className="p-2 bg-white border-2 border-blue-500 rounded shadow-lg opacity-90 cursor-grabbing">
