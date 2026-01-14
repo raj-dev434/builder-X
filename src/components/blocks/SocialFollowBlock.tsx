@@ -10,7 +10,7 @@ export interface SocialFollowBlockProps {
       name: string;
       url: string;
       // icon prop is deprecated in favor of name-based lookup, but kept for custom overrides if needed
-      icon?: string; 
+      icon?: string;
       color?: string;
     }>;
     layout?: 'horizontal' | 'vertical';
@@ -55,10 +55,10 @@ export const SocialFollowBlock: React.FC<{
   onDelete: () => void;
 }> = ({ block, isSelected, onSelect, onUpdate, onDelete }) => {
   const props = block.props as any;
-  const { 
+  const {
     platforms = defaultPlatforms,
     layout = 'horizontal',
-    iconSize = '16px',
+    iconSize = '20px',
     gap = '10px',
     justifyContent = 'center',
     showLabels = false,
@@ -73,65 +73,65 @@ export const SocialFollowBlock: React.FC<{
 
   // Official Brand Colors Map
   const BRAND_COLORS: Record<string, string> = {
-      'Facebook': '#1877f2',
-      'Twitter': '#1da1f2',
-      'Instagram': '#e4405f',
-      'LinkedIn': '#0077b5',
-      'YouTube': '#ff0000',
-      'GitHub': '#333333',
-      'TikTok': '#000000',
-      'Dribbble': '#ea4c89'
+    'Facebook': '#1877f2',
+    'Twitter': '#1da1f2',
+    'Instagram': '#e4405f',
+    'LinkedIn': '#0077b5',
+    'YouTube': '#ff0000',
+    'GitHub': '#333333',
+    'TikTok': '#000000',
+    'Dribbble': '#ea4c89'
   };
 
   const getIconStyle = (platformName: string, color: string | undefined): React.CSSProperties => {
-      const isCustom = view === 'custom';
-      const brandColor = BRAND_COLORS[platformName] || color || '#555';
-      const primary = isCustom ? iconPrimaryColor : brandColor;
-      const secondary = isCustom ? iconSecondaryColor : '#ffffff';
+    const isCustom = view === 'custom';
+    const brandColor = BRAND_COLORS[platformName] || color || '#555';
+    const primary = isCustom ? iconPrimaryColor : brandColor;
+    const secondary = isCustom ? iconSecondaryColor : '#ffffff';
 
-      let baseStyle: React.CSSProperties = {
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          textDecoration: 'none',
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          fontSize: iconSize,
-          width: buttonStyle === 'minimal' ? 'auto' : `calc(${iconSize} + 20px)`, 
-          height: buttonStyle === 'minimal' ? 'auto' : `calc(${iconSize} + 20px)`,
-          lineHeight: 1,
-          padding: showLabels && buttonStyle !== 'minimal' ? '0 12px' : '0',
-          borderRadius: shape === 'circle' ? '50%' : shape === 'rounded' ? '4px' : '0px',
-      };
+    let baseStyle: React.CSSProperties = {
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      textDecoration: 'none',
+      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      fontSize: iconSize,
+      width: buttonStyle === 'minimal' ? 'auto' : `calc(${iconSize} + 16px)`,
+      height: buttonStyle === 'minimal' ? 'auto' : `calc(${iconSize} + 16px)`,
+      lineHeight: 1,
+      padding: showLabels && buttonStyle !== 'minimal' ? '0 12px' : '0',
+      borderRadius: shape === 'circle' ? '50%' : shape === 'rounded' ? '4px' : '0px',
+    };
 
-      if (showLabels && buttonStyle !== 'minimal') {
-          baseStyle.width = 'auto';
-      }
+    if (showLabels && buttonStyle !== 'minimal') {
+      baseStyle.width = 'auto';
+    }
 
-      switch (buttonStyle) {
-          case 'solid':
-              baseStyle.backgroundColor = primary;
-              baseStyle.color = secondary;
-              break;
-          case 'framed':
-              baseStyle.backgroundColor = 'transparent';
-              baseStyle.border = `1px solid ${primary}`;
-              baseStyle.color = primary;
-              break;
-          case 'minimal':
-              baseStyle.backgroundColor = 'transparent';
-              baseStyle.color = primary;
-              break;
-      }
+    switch (buttonStyle) {
+      case 'solid':
+        baseStyle.backgroundColor = primary;
+        baseStyle.color = secondary;
+        break;
+      case 'framed':
+        baseStyle.backgroundColor = 'transparent';
+        baseStyle.border = `1px solid ${primary}`;
+        baseStyle.color = primary;
+        break;
+      case 'minimal':
+        baseStyle.backgroundColor = 'transparent';
+        baseStyle.color = primary;
+        break;
+    }
 
-      return baseStyle;
+    return baseStyle;
   };
 
   const getHref = (url: string) => {
-      if (!url) return '#';
-      if (url.startsWith('http') || url.startsWith('mailto:') || url.startsWith('tel:')) return url;
-      return `https://${url}`;
+    if (!url) return '#';
+    if (url.startsWith('http') || url.startsWith('mailto:') || url.startsWith('tel:')) return url;
+    return `https://${url}`;
   };
-      
+
   return (
     <BaseBlock
       block={block}
@@ -141,7 +141,7 @@ export const SocialFollowBlock: React.FC<{
       onDelete={onDelete}
       className="w-full"
     >
-      <div 
+      <div
         style={{
           display: 'flex',
           flexDirection: layout === 'vertical' ? 'column' : 'row',
@@ -152,59 +152,59 @@ export const SocialFollowBlock: React.FC<{
           width: '100%',
         }}
       >
-          {platforms.map((platform: any, index: number) => {
-             const style = getIconStyle(platform.name, platform.color);
-             const iconNode = SOCIAL_ICONS[platform.name] || <span>{platform.name[0]}</span>;
-             const displayLabel = platform.label || platform.name;
-             const hoverClass = hoverAnimation !== 'none' ? `hover-animate-${hoverAnimation}` : '';
-             
-             return (
-                <a
-                  key={index}
-                  href={getHref(platform.url)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`social-icon-link ${hoverClass}`}
-                  style={style}
-                  aria-label={`Follow us on ${displayLabel}`}
-                  onMouseEnter={(e) => {
-                      const target = e.currentTarget;
-                      if (view === 'custom' && iconHoverPrimaryColor) {
-                          if (buttonStyle === 'solid') target.style.backgroundColor = iconHoverPrimaryColor;
-                          if (buttonStyle === 'framed') {
-                              target.style.borderColor = iconHoverPrimaryColor;
-                              target.style.color = iconHoverPrimaryColor;
-                          }
-                          if (buttonStyle === 'minimal') target.style.color = iconHoverPrimaryColor;
-                      } else {
-                          target.style.opacity = '0.8';
-                      }
-                  }}
-                  onMouseLeave={(e) => {
-                      const target = e.currentTarget;
-                      if (view === 'custom' && iconHoverPrimaryColor) {
-                           if (buttonStyle === 'solid') target.style.backgroundColor = iconPrimaryColor;
-                           if (buttonStyle === 'framed') {
-                               target.style.borderColor = iconPrimaryColor;
-                               target.style.color = iconPrimaryColor;
-                           }
-                           if (buttonStyle === 'minimal') target.style.color = iconPrimaryColor;
-                      } else {
-                          target.style.opacity = '1';
-                      }
-                  }}
-                >
-                  <span style={{ display: 'flex', alignItems: 'center', fontSize: 'inherit' }}>
-                    {iconNode}
-                  </span>
-                  {showLabels && (
-                    <span style={{ marginLeft: '8px', fontSize: '0.85em', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                      {displayLabel}
-                    </span>
-                  )}
-                </a>
-             );
-          })}
+        {platforms.map((platform: any, index: number) => {
+          const style = getIconStyle(platform.name, platform.color);
+          const iconNode = SOCIAL_ICONS[platform.name] || <span>{platform.name[0]}</span>;
+          const displayLabel = platform.label || platform.name;
+          const hoverClass = hoverAnimation !== 'none' ? `hover-animate-${hoverAnimation}` : '';
+
+          return (
+            <a
+              key={index}
+              href={getHref(platform.url)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`social-icon-link ${hoverClass}`}
+              style={style}
+              aria-label={`Follow us on ${displayLabel}`}
+              onMouseEnter={(e) => {
+                const target = e.currentTarget;
+                if (view === 'custom' && iconHoverPrimaryColor) {
+                  if (buttonStyle === 'solid') target.style.backgroundColor = iconHoverPrimaryColor;
+                  if (buttonStyle === 'framed') {
+                    target.style.borderColor = iconHoverPrimaryColor;
+                    target.style.color = iconHoverPrimaryColor;
+                  }
+                  if (buttonStyle === 'minimal') target.style.color = iconHoverPrimaryColor;
+                } else {
+                  target.style.opacity = '0.8';
+                }
+              }}
+              onMouseLeave={(e) => {
+                const target = e.currentTarget;
+                if (view === 'custom' && iconHoverPrimaryColor) {
+                  if (buttonStyle === 'solid') target.style.backgroundColor = iconPrimaryColor;
+                  if (buttonStyle === 'framed') {
+                    target.style.borderColor = iconPrimaryColor;
+                    target.style.color = iconPrimaryColor;
+                  }
+                  if (buttonStyle === 'minimal') target.style.color = iconPrimaryColor;
+                } else {
+                  target.style.opacity = '1';
+                }
+              }}
+            >
+              <span style={{ display: 'flex', alignItems: 'center', fontSize: 'inherit' }}>
+                {iconNode}
+              </span>
+              {showLabels && (
+                <span style={{ marginLeft: '8px', fontSize: '0.85em', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                  {displayLabel}
+                </span>
+              )}
+            </a>
+          );
+        })}
         <style>{`
             .hover-animate-grow:hover { transform: scale(1.1); }
             .hover-animate-shrink:hover { transform: scale(0.9); }

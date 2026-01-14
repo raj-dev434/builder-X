@@ -263,13 +263,17 @@ export const TestimonialBlock: React.FC<{
     borderRadius: '50%',
     objectFit: 'cover',
     border: `2px solid ${borderColor}`,
-    flexShrink: 0
+    flexShrink: 0,
+    marginLeft: layout !== 'horizontal' && (alignment === 'center' || alignment === 'right') ? 'auto' : 0,
+    marginRight: layout !== 'horizontal' && (alignment === 'center') ? 'auto' : 0,
+    order: layout === 'horizontal' && alignment === 'right' ? 2 : 0 // If horizontal & right, maybe swap order? No, keep simple.
   };
 
   const ratingStyle: React.CSSProperties = {
     display: 'flex',
     gap: '2px',
     marginTop: '8px',
+    width: '100%',
     justifyContent: alignment === 'center' ? 'center' : alignment === 'right' ? 'flex-end' : 'flex-start'
   };
 
@@ -321,7 +325,9 @@ export const TestimonialBlock: React.FC<{
         <div style={{
           display: 'flex',
           flexDirection: layout === 'horizontal' ? 'row' : 'column',
-          alignItems: layout === 'horizontal' ? 'center' : 'stretch',
+          alignItems: layout === 'horizontal' ? 'center' : (alignment === 'center' ? 'center' : alignment === 'right' ? 'flex-end' : 'flex-start'),
+          justifyContent: layout === 'horizontal' ? (alignment === 'center' ? 'center' : alignment === 'right' ? 'flex-end' : 'flex-start') : 'flex-start',
+          textAlign: alignment,
           gap: '12px',
           flexShrink: 0
         }}>
@@ -337,7 +343,7 @@ export const TestimonialBlock: React.FC<{
             />
           )}
 
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 1, width: layout === 'horizontal' ? 'auto' : '100%' }}>
             <h4 style={authorStyle}>
               {currentItem.author}
             </h4>
@@ -374,6 +380,6 @@ export const TestimonialBlock: React.FC<{
           </div>
         )}
       </div>
-    </BaseBlock>
+    </BaseBlock >
   );
 };

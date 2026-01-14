@@ -312,7 +312,7 @@ export const TextBlockInspector: React.FC<InspectorProps> = ({ block, updateBloc
             />
           </div>
 
-          {/* <ControlGroup label="Text Align">
+          <ControlGroup label="Text Align">
             <div className="flex items-center gap-2">
               <div className="flex bg-[#1a1d21] rounded p-0.5 border border-[#3e444b] w-full">
                 {[
@@ -333,7 +333,6 @@ export const TextBlockInspector: React.FC<InspectorProps> = ({ block, updateBloc
               </div>
             </div>
           </ControlGroup>
- */}
           <ControlGroup label="Block Align">
             <div className="flex items-center gap-2">
               <div className="flex bg-[#1a1d21] rounded p-0.5 border border-[#3e444b]">

@@ -59,6 +59,10 @@ export const NavbarBlock: React.FC<NavbarBlockProps> = ({
     onUpdate({ props: { ...block.props, links: updatedLinks } });
   };
 
+  // Check if advanced background settings are being used  
+  const anyStyleProps = styleProps as any;
+  const hasAdvancedBackground = anyStyleProps.backgroundType || anyStyleProps.backgroundImage || anyStyleProps.backgroundColor || anyStyleProps.usePageBackground;
+
   return (
     <BaseBlock
       block={block}
@@ -69,13 +73,13 @@ export const NavbarBlock: React.FC<NavbarBlockProps> = ({
         position: sticky ? 'sticky' : 'static',
         top: sticky ? 0 : 'auto',
         zIndex: sticky ? 1000 : 'auto',
-        backgroundColor: transparent ? 'transparent' : backgroundColor,
+        // Only apply navbar-specific backgroundColor if no advanced background is set
+        ...(!hasAdvancedBackground && { backgroundColor: transparent ? 'transparent' : backgroundColor }),
         color: textColor,
         padding,
         border,
         borderRadius,
-        boxShadow: shadow,
-        ...styleProps
+        boxShadow: shadow
       }}
     >
       <nav

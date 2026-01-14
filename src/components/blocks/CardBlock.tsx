@@ -17,7 +17,7 @@ export const CardBlock: React.FC<CardBlockProps> = ({
   onUpdate,
   onDelete
 }) => {
-  const { 
+  const {
     title = 'Card Title',
     content = 'This is the card content. You can add any text or HTML here.',
     image,
@@ -27,8 +27,10 @@ export const CardBlock: React.FC<CardBlockProps> = ({
     showContent = true,
     imagePosition = 'top',
     textAlign = 'left',
-    ...styleProps 
-  } = block.props;
+    imageHeight = '200px',
+    imageObjectFit = 'cover',
+    ...styleProps
+  } = block.props as any;
 
   const handleTitleChange = (newTitle: string) => {
     onUpdate({ props: { ...block.props, title: newTitle } });
@@ -40,16 +42,16 @@ export const CardBlock: React.FC<CardBlockProps> = ({
 
   const renderImage = () => {
     if (!showImage || !image) return null;
-    
+
     return (
       <img
         src={image}
         alt={imageAlt}
         style={{
           width: '100%',
-          height: 'auto',
+          height: imageHeight,
           borderRadius: '4px 4px 0 0',
-          objectFit: 'cover'
+          objectFit: imageObjectFit as any
         }}
       />
     );

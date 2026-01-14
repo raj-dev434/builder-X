@@ -99,8 +99,15 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange 
     const quillRef = React.useRef<ReactQuill>(null);
 
     useEffect(() => {
-        setHtmlValue(value);
+        if (value !== htmlValue) {
+            setHtmlValue(value);
+        }
     }, [value]);
+
+    const handleQuillChange = (content: string) => {
+        setHtmlValue(content);
+        onChange(content);
+    };
 
     // Handle image selection/click for deletion
     useEffect(() => {
@@ -211,7 +218,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange 
                             ref={quillRef}
                             theme="snow"
                             value={htmlValue}
-                            onChange={onChange}
+                            onChange={handleQuillChange}
                             modules={modules}
                             formats={formats}
                             className="text-gray-900"
@@ -221,7 +228,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange 
             ) : (
                 <textarea
                     value={htmlValue}
-                    onChange={(e) => onChange(e.target.value)}
+                    onChange={(e) => handleQuillChange(e.target.value)}
                     className="w-full min-h-[240px] p-3 font-mono text-xs bg-[#1e1e1e] text-gray-300 outline-none resize-y"
                     placeholder="Enter HTML code here..."
                 />

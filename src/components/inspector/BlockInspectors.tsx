@@ -10,7 +10,8 @@ import {
   Square, Layout as LayoutIcon, Layers, Link2, Link2Off,
   Video, Map as MapIcon, Minus, GripHorizontal,
   CheckSquare, List, Settings, X, MousePointer2 as Pointer,
-  Plus, Calendar, Lock, Trash2, RotateCcw, Code, MoveVertical
+  Plus, Calendar, Lock, Trash2, RotateCcw, Code, MoveVertical,
+  AlertCircle, Star, HelpCircle
 } from 'lucide-react';
 import { DEFAULT_FORM_FIELDS } from '../blocks/formConstants';
 
@@ -263,6 +264,75 @@ export const NumberControl = memo(({
     </div>
   );
 });
+
+export const TextShadowControl = ({ value, onChange }: { value: string | undefined; onChange: (val: string) => void }) => {
+  // Parse text-shadow: x y blur color
+  // Default: 0px 0px 0px #000000
+  const parseShadow = (str: string | undefined) => {
+    if (!str || str === 'none') return { x: '0px', y: '0px', blur: '0px', color: '#000000' };
+
+    // Regex ensuring we handle color (hex/rgba) and lengths
+    // Simple parser assuming standard format: 2px 2px 4px #000000
+    // Try to split by space but respect color function if possible (though simple hex is most common here)
+    const parts = str.split(' ');
+    // Needs robust parsing if we want to support everything, but for this builder:
+    // We can enforce specific order in builder: x y blur color
+
+    if (parts.length >= 4) {
+      return {
+        x: parts[0],
+        y: parts[1],
+        blur: parts[2],
+        color: parts.slice(3).join(' ')
+      };
+    }
+    return { x: '0px', y: '0px', blur: '0px', color: '#000000' };
+  };
+
+  const { x, y, blur, color } = parseShadow(value);
+
+  const update = (key: string, newVal: string) => {
+    const current = parseShadow(value);
+    const updated = { ...current, [key]: newVal };
+    onChange(`${updated.x} ${updated.y} ${updated.blur} ${updated.color}`);
+  };
+
+  return (
+    <div className="mb-2">
+      <label className="text-[9px] text-gray-400 mb-1 block uppercase tracking-wider">Text Shadow</label>
+      <div className="space-y-2">
+        <div className="grid grid-cols-3 gap-2">
+          <div>
+            <label className="text-[9px] text-gray-500 mb-0.5 block">X</label>
+            <UnitControl value={x} onChange={(val) => update('x', val)} placeholder="0px" />
+          </div>
+          <div>
+            <label className="text-[9px] text-gray-500 mb-0.5 block">Y</label>
+            <UnitControl value={y} onChange={(val) => update('y', val)} placeholder="0px" />
+          </div>
+          <div>
+            <label className="text-[9px] text-gray-500 mb-0.5 block">Blur</label>
+            <UnitControl value={blur} onChange={(val) => update('blur', val)} placeholder="0px" />
+          </div>
+        </div>
+        <div className="flex gap-2 items-center">
+          <input
+            type="color"
+            value={color}
+            onChange={(e) => update('color', e.target.value)}
+            className="w-full h-6 rounded border border-[#3e444b] bg-transparent cursor-pointer p-0"
+          />
+          <input
+            type="text"
+            className={inputClasses}
+            value={color}
+            onChange={(e) => update('color', e.target.value)}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const LinkedUnitInput = ({
   label,
@@ -567,7 +637,7 @@ export const TypographyGroup: React.FC<GroupProps & { title?: string }> = ({ blo
       </div>
 
       <div className="mb-2">
-        <label className="text-[9px] text-gray-400 mb-1 block uppercase tracking-wider">Alignment</label>
+        {/* <label className="text-[9px] text-gray-400 mb-1 block uppercase tracking-wider">Alignment</label>
         <div className="flex bg-[#1a1d21] rounded border border-[#3e444b] overflow-hidden">
           {[
             { value: 'left', icon: AlignLeft },
@@ -584,8 +654,15 @@ export const TypographyGroup: React.FC<GroupProps & { title?: string }> = ({ blo
               <option.icon className="w-3.5 h-3.5" />
             </button>
           ))}
-        </div>
+        </div> */}
       </div>
+
+      <TextShadowControl
+        value={props.textShadow}
+        onChange={(val) => onChange('textShadow', val)}
+      />
+
+
 
       <div className="grid grid-cols-3 gap-2 mb-2">
         <div>
@@ -2850,21 +2927,74 @@ export const TextareaBlockInspector: React.FC<{ block: Block; updateBlock: (id: 
   return (
     <div className="flex flex-col space-y-2">
       {activeTab === 'content' && (
-        <PropertySection title="Textarea" icon={Type} defaultOpen={true}>
-          <ControlGroup label="Placeholder">
-            <input type="text" className={inputClasses} value={props.placeholder || ''} onChange={(e) => updateProp('placeholder', e.target.value)} placeholder="Enter placeholder..." />
-          </ControlGroup>
-          <ControlGroup label="Rows">
-            <input type="number" className={inputClasses} value={props.rows || 4} onChange={(e) => updateProp('rows', parseInt(e.target.value))} />
-          </ControlGroup>
-          <ControlGroup label="Name">
-            <input type="text" className={inputClasses} value={props.name || ''} onChange={(e) => updateProp('name', e.target.value)} placeholder="field_name" />
-          </ControlGroup>
-          <div className="flex items-center space-x-2 px-1">
-            <input type="checkbox" checked={!!props.required} onChange={(e) => updateProp('required', e.target.checked)} className="rounded bg-[#1a1d21] border-[#3e444b]" />
-            <span className="text-xs text-gray-300">Required</span>
-          </div>
-        </PropertySection>
+        <>
+          <PropertySection title="Textarea" icon={Type} defaultOpen={true}>
+            <ControlGroup label="Placeholder">
+              <input type="text" className={inputClasses} value={props.placeholder || ''} onChange={(e) => updateProp('placeholder', e.target.value)} placeholder="Enter placeholder..." />
+            </ControlGroup>
+            <ControlGroup label="Rows">
+              <input type="number" className={inputClasses} value={props.rows || 4} onChange={(e) => updateProp('rows', parseInt(e.target.value))} />
+            </ControlGroup>
+            <ControlGroup label="Name">
+              <input type="text" className={inputClasses} value={props.name || ''} onChange={(e) => updateProp('name', e.target.value)} placeholder="field_name" />
+            </ControlGroup>
+            <div className="flex items-center space-x-2 px-1">
+              <input type="checkbox" checked={!!props.required} onChange={(e) => updateProp('required', e.target.checked)} className="rounded bg-[#1a1d21] border-[#3e444b]" />
+              <span className="text-xs text-gray-300">Required</span>
+            </div>
+          </PropertySection>
+
+          <PropertySection title="Submit Button" icon={MousePointer2}>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[10px] uppercase font-bold text-gray-400">Show Submit Button</span>
+                <input type="checkbox" checked={!!props.showSubmitButton} onChange={(e) => updateProp('showSubmitButton', e.target.checked)} className="rounded" />
+              </div>
+
+              {props.showSubmitButton && (
+                <>
+                  <ControlGroup label="Button Text">
+                    <input type="text" className={inputClasses} value={props.submitButtonText || 'Submit'} onChange={(e) => updateProp('submitButtonText', e.target.value)} />
+                  </ControlGroup>
+
+                  <ControlGroup label="Button Color">
+                    <div className="flex gap-2">
+                      <input type="color" value={props.submitButtonColor || '#3b82f6'} onChange={(e) => updateProp('submitButtonColor', e.target.value)} className="w-8 h-8 rounded border border-gray-600 bg-transparent p-0" />
+                      <input type="text" value={props.submitButtonColor || ''} onChange={(e) => updateProp('submitButtonColor', e.target.value)} className={inputClasses} placeholder="#3b82f6" />
+                    </div>
+                  </ControlGroup>
+
+                  <ControlGroup label="Text Color">
+                    <div className="flex gap-2">
+                      <input type="color" value={props.submitButtonTextColor || '#ffffff'} onChange={(e) => updateProp('submitButtonTextColor', e.target.value)} className="w-8 h-8 rounded border border-gray-600 bg-transparent p-0" />
+                      <input type="text" value={props.submitButtonTextColor || ''} onChange={(e) => updateProp('submitButtonTextColor', e.target.value)} className={inputClasses} placeholder="#ffffff" />
+                    </div>
+                  </ControlGroup>
+
+                  <ControlGroup label="Alignment">
+                    <select className={inputClasses} value={props.submitButtonAlignment || 'left'} onChange={(e) => updateProp('submitButtonAlignment', e.target.value)}>
+                      <option value="left">Left</option>
+                      <option value="center">Center</option>
+                      <option value="right">Right</option>
+                    </select>
+                  </ControlGroup>
+
+                  <ControlGroup label="Submit Action">
+                    <select className={inputClasses} value={props.submitAction || 'alert'} onChange={(e) => updateProp('submitAction', e.target.value)}>
+                      <option value="alert">Show Alert</option>
+                      <option value="console">Log to Console</option>
+                      <option value="clear">Clear After Submit</option>
+                    </select>
+                  </ControlGroup>
+
+                  <ControlGroup label="Success Message">
+                    <input type="text" className={inputClasses} value={props.successMessage || 'Submitted successfully!'} onChange={(e) => updateProp('successMessage', e.target.value)} placeholder="Submitted successfully!" />
+                  </ControlGroup>
+                </>
+              )}
+            </div>
+          </PropertySection>
+        </>
       )}
       {activeTab === 'style' && (
         <>
@@ -3028,24 +3158,92 @@ export const LabelBlockInspector: React.FC<{ block: Block; updateBlock: (id: str
   return (
     <div className="flex flex-col space-y-2">
       {activeTab === 'content' && (
-        <PropertySection title="Label" icon={Type} defaultOpen={true}>
-          <ControlGroup label="Text">
-            <input type="text" className={inputClasses} value={props.text || ''} onChange={(e) => updateProp('text', e.target.value)} placeholder="Label Text" />
-          </ControlGroup>
-          <ControlGroup label="For ID">
-            <input type="text" className={inputClasses} value={props.for || ''} onChange={(e) => updateProp('for', e.target.value)} placeholder="input_id" />
-          </ControlGroup>
-          <ControlGroup label="Required">
-            <div className="flex items-center h-full">
-              <input
-                type="checkbox"
-                checked={props.required || false}
-                onChange={(e) => updateProp('required', e.target.checked)}
-                className="rounded border-[#2d3237] bg-transparent text-blue-500 focus:ring-0 w-3.5 h-3.5 cursor-pointer"
-              />
+        <>
+          <PropertySection title="Label" icon={Type} defaultOpen={true}>
+            <ControlGroup label="Text">
+              <input type="text" className={inputClasses} value={props.text || ''} onChange={(e) => updateProp('text', e.target.value)} placeholder="Label Text" />
+            </ControlGroup>
+            <ControlGroup label="For ID">
+              <input type="text" className={inputClasses} value={props.for || ''} onChange={(e) => updateProp('for', e.target.value)} placeholder="input_id" />
+            </ControlGroup>
+            <ControlGroup label="Layout">
+              <select className={inputClasses} value={props.layout || 'horizontal'} onChange={(e) => updateProp('layout', e.target.value)}>
+                <option value="horizontal">Horizontal</option>
+                <option value="vertical">Vertical</option>
+              </select>
+            </ControlGroup>
+          </PropertySection>
+
+          <PropertySection title="Required Indicator" icon={AlertCircle}>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[10px] uppercase font-bold text-gray-400">Show Required</span>
+                <input
+                  type="checkbox"
+                  checked={props.required || false}
+                  onChange={(e) => updateProp('required', e.target.checked)}
+                  className="rounded border-[#2d3237] bg-transparent text-blue-500 focus:ring-0 w-3.5 h-3.5 cursor-pointer"
+                />
+              </div>
+
+              {props.required && (
+                <>
+                  <ControlGroup label="Indicator">
+                    <input type="text" className={inputClasses} value={props.requiredIndicator || '*'} onChange={(e) => updateProp('requiredIndicator', e.target.value)} placeholder="*" maxLength={3} />
+                  </ControlGroup>
+                  <ControlGroup label="Color">
+                    <div className="flex gap-2">
+                      <input type="color" value={props.requiredColor || '#dc3545'} onChange={(e) => updateProp('requiredColor', e.target.value)} className="w-8 h-8 rounded border border-gray-600 bg-transparent p-0" />
+                      <input type="text" value={props.requiredColor || ''} onChange={(e) => updateProp('requiredColor', e.target.value)} className={inputClasses} placeholder="#dc3545" />
+                    </div>
+                  </ControlGroup>
+                </>
+              )}
             </div>
-          </ControlGroup>
-        </PropertySection>
+          </PropertySection>
+
+          <PropertySection title="Icon" icon={Star}>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[10px] uppercase font-bold text-gray-400">Show Icon</span>
+                <input type="checkbox" checked={!!props.showIcon} onChange={(e) => updateProp('showIcon', e.target.checked)} className="rounded" />
+              </div>
+
+              {props.showIcon && (
+                <>
+                  <ControlGroup label="Icon">
+                    <input type="text" className={inputClasses} value={props.icon || '📝'} onChange={(e) => updateProp('icon', e.target.value)} placeholder="📝 or text" />
+                  </ControlGroup>
+                  <ControlGroup label="Position">
+                    <select className={inputClasses} value={props.iconPosition || 'left'} onChange={(e) => updateProp('iconPosition', e.target.value)}>
+                      <option value="left">Left</option>
+                      <option value="right">Right</option>
+                    </select>
+                  </ControlGroup>
+                </>
+              )}
+            </div>
+          </PropertySection>
+
+          <PropertySection title="Help & Tooltip" icon={HelpCircle}>
+            <div className="space-y-3">
+              <ControlGroup label="Help Text">
+                <input type="text" className={inputClasses} value={props.helpText || ''} onChange={(e) => updateProp('helpText', e.target.value)} placeholder="Optional help text..." />
+              </ControlGroup>
+
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[10px] uppercase font-bold text-gray-400">Show Tooltip</span>
+                <input type="checkbox" checked={!!props.showTooltip} onChange={(e) => updateProp('showTooltip', e.target.checked)} className="rounded" />
+              </div>
+
+              {props.showTooltip && (
+                <ControlGroup label="Tooltip Text">
+                  <textarea className={`${inputClasses} min-h-[60px]`} value={props.tooltipText || ''} onChange={(e) => updateProp('tooltipText', e.target.value)} placeholder="Tooltip on hover..." />
+                </ControlGroup>
+              )}
+            </div>
+          </PropertySection>
+        </>
       )}
       {activeTab === 'style' && (
         <>
@@ -4892,6 +5090,33 @@ export const TestimonialBlockInspector: React.FC<{ block: Block; updateBlock: (i
             </div>
           </PropertySection>
 
+          <PropertySection title="Layout & Alignment" icon={LayoutIcon}>
+            {/* <ControlGroup label="Layout">
+              <select className={inputClasses} value={props.layout || 'vertical'} onChange={(e) => updateProp('layout', e.target.value)}>
+                <option value="vertical">Vertical (Stack)</option>
+                <option value="horizontal">Horizontal (Side-by-side)</option>
+              </select>
+            </ControlGroup> */}
+            <ControlGroup label="Alignment">
+              <div className="flex bg-[#1a1d21] rounded border border-[#3e444b] overflow-hidden">
+                {[
+                  { value: 'left', icon: AlignLeft },
+                  { value: 'center', icon: AlignCenter },
+                  { value: 'right', icon: AlignRight }
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => updateProp('alignment', option.value)}
+                    className={`flex-1 p-1.5 flex justify-center hover:bg-[#2d3237] transition-colors ${(props.alignment || 'left') === option.value ? 'bg-[#3b82f6] text-white' : 'text-gray-400'}`}
+                    title={option.value.charAt(0).toUpperCase() + option.value.slice(1)}
+                  >
+                    <option.icon className="w-3.5 h-3.5" />
+                  </button>
+                ))}
+              </div>
+            </ControlGroup>
+          </PropertySection>
+
           <PropertySection title="Avatar" icon={ImageIcon}>
             <div className="bg-[#1a1d21] p-3 rounded border border-[#3e444b] text-center">
               {props.avatarUrl ? (
@@ -5163,6 +5388,32 @@ export const CardBlockInspector: React.FC<{ block: Block; updateBlock: (id: stri
               <span className="text-[10px] uppercase font-bold text-gray-400">Show Image</span>
               <input type="checkbox" checked={props.showImage !== false} onChange={(e) => updateProp('showImage', e.target.checked)} className="rounded" />
             </div>
+            {props.showImage !== false && props.image && (
+              <>
+                <ControlGroup label="Height">
+                  <input
+                    type="text"
+                    className={inputClasses}
+                    value={props.imageHeight || '200px'}
+                    onChange={(e) => updateProp('imageHeight', e.target.value)}
+                    placeholder="200px, 100%, auto"
+                  />
+                </ControlGroup>
+                <ControlGroup label="Fit">
+                  <select
+                    className={inputClasses}
+                    value={props.imageObjectFit || 'cover'}
+                    onChange={(e) => updateProp('imageObjectFit', e.target.value)}
+                  >
+                    <option value="cover">Cover</option>
+                    <option value="contain">Contain</option>
+                    <option value="fill">Fill</option>
+                    <option value="none">None</option>
+                    <option value="scale-down">Scale Down</option>
+                  </select>
+                </ControlGroup>
+              </>
+            )}
           </PropertySection>
 
           <PropertySection title="Card Content" icon={Type}>
@@ -5387,7 +5638,130 @@ export const AlertBlockInspector: React.FC<{ block: Block; updateBlock: (id: str
     </div>
   );
 };
-export const ProgressBlockInspector = ProgressBarBlockInspector;
+export const ProgressBlockInspector: React.FC<{ block: Block; updateBlock: (id: string, updates: Partial<Block>) => void; activeTab: 'content' | 'style' | 'advanced'; }> = ({ block, updateBlock, activeTab }) => {
+  const props = block.props as any;
+  const updateProp = (k: string | object, v?: any) => {
+    if (typeof k === 'object') {
+      updateBlock(block.id, { props: { ...props, ...k } });
+    } else {
+      updateBlock(block.id, { props: { ...props, [k]: v } });
+    }
+  };
+
+  return (
+    <div className="flex flex-col space-y-2">
+      {activeTab === 'content' && (
+        <>
+          <PropertySection title="Progress Info" icon={Type} defaultOpen={true}>
+            <ControlGroup label="Value">
+              <div className="flex items-center gap-2">
+                <input type="range" min="0" max={props.max || 100} value={props.value || 0} onChange={(e) => updateProp('value', parseInt(e.target.value))} className="flex-1" />
+                <span className="text-xs w-8 text-right">{props.value || 0}</span>
+              </div>
+            </ControlGroup>
+            <ControlGroup label="Max Value">
+              <input type="number" className={inputClasses} value={props.max || 100} onChange={(e) => updateProp('max', parseInt(e.target.value))} />
+            </ControlGroup>
+            <div className="flex items-center justify-between px-1 mt-2">
+              <span className="text-[10px] uppercase font-bold text-gray-400">Show Title</span>
+              <input type="checkbox" checked={props.showTitle !== false} onChange={(e) => updateProp('showTitle', e.target.checked)} className="rounded" />
+            </div>
+            {props.showTitle !== false && (
+              <ControlGroup label="Title">
+                <input type="text" className={inputClasses} value={props.title || props.label || 'Progress'} onChange={(e) => updateProp('title', e.target.value)} />
+              </ControlGroup>
+            )}
+            <div className="flex items-center justify-between px-1 mt-2">
+              <span className="text-[10px] uppercase font-bold text-gray-400">Show Description</span>
+              <input type="checkbox" checked={props.showDescription === true} onChange={(e) => updateProp('showDescription', e.target.checked)} className="rounded" />
+            </div>
+            {props.showDescription && (
+              <ControlGroup label="Description">
+                <textarea className={inputClasses} value={props.description || ''} onChange={(e) => updateProp('description', e.target.value)} rows={2} />
+              </ControlGroup>
+            )}
+            <div className="flex items-center justify-between px-1 mt-2">
+              <span className="text-[10px] uppercase font-bold text-gray-400">Show Percentage</span>
+              <input type="checkbox" checked={props.showPercentage !== false} onChange={(e) => updateProp('showPercentage', e.target.checked)} className="rounded" />
+            </div>
+            <div className="flex items-center justify-between px-1 mt-2">
+              <span className="text-[10px] uppercase font-bold text-gray-400">Show X/Y Value</span>
+              <input type="checkbox" checked={props.showValue === true} onChange={(e) => updateProp('showValue', e.target.checked)} className="rounded" />
+            </div>
+          </PropertySection>
+
+          <PropertySection title="Style" icon={Palette} defaultOpen={true}>
+            <ControlGroup label="Type">
+              <select className={inputClasses} value={props.style || 'line'} onChange={(e) => updateProp('style', e.target.value)}>
+                <option value="line">Linear Bar</option>
+                <option value="circle">Circular</option>
+              </select>
+            </ControlGroup>
+
+            {(props.style === 'line' || !props.style) && (
+              <>
+                <ControlGroup label="Size">
+                  <select className={inputClasses} value={props.size || 'medium'} onChange={(e) => updateProp('size', e.target.value)}>
+                    <option value="small">Small</option>
+                    <option value="medium">Medium</option>
+                    <option value="large">Large</option>
+                  </select>
+                </ControlGroup>
+                <div className="flex items-center justify-between px-1 mt-2">
+                  <span className="text-[10px] uppercase font-bold text-gray-400">Striped</span>
+                  <input type="checkbox" checked={props.striped === true} onChange={(e) => updateProp('striped', e.target.checked)} className="rounded" />
+                </div>
+                <div className="flex items-center justify-between px-1 mt-2">
+                  <span className="text-[10px] uppercase font-bold text-gray-400">Animated</span>
+                  <input type="checkbox" checked={props.animated !== false} onChange={(e) => updateProp('animated', e.target.checked)} className="rounded" />
+                </div>
+              </>
+            )}
+
+            <ControlGroup label="Thickness">
+              <input type="text" className={inputClasses} value={props.thickness || ''} onChange={(e) => updateProp('thickness', e.target.value)} placeholder={props.style === 'circle' ? '120px' : 'Default'} />
+            </ControlGroup>
+
+            <ControlGroup label="Variant">
+              <select className={inputClasses} value={props.variant || 'default'} onChange={(e) => updateProp('variant', e.target.value)}>
+                <option value="default">Default (Blue)</option>
+                <option value="success">Success (Green)</option>
+                <option value="warning">Warning (Orange)</option>
+                <option value="danger">Danger (Red)</option>
+                <option value="info">Info (Blue)</option>
+              </select>
+            </ControlGroup>
+
+            <ControlGroup label="Custom Color">
+              <div className="flex gap-2">
+                <input type="color" value={props.progressColor || '#3b82f6'} onChange={(e) => updateProp('progressColor', e.target.value)} className="w-8 h-8 rounded border border-gray-600 bg-transparent p-0" />
+                <input type="text" value={props.progressColor || ''} onChange={(e) => updateProp('progressColor', e.target.value)} className={inputClasses} placeholder="Override variant" />
+              </div>
+            </ControlGroup>
+            <ControlGroup label="Track Color">
+              <div className="flex gap-2">
+                <input type="color" value={props.barBackgroundColor || '#e9ecef'} onChange={(e) => updateProp('barBackgroundColor', e.target.value)} className="w-8 h-8 rounded border border-gray-600 bg-transparent p-0" />
+                <input type="text" value={props.barBackgroundColor || ''} onChange={(e) => updateProp('barBackgroundColor', e.target.value)} className={inputClasses} placeholder="#e9ecef" />
+              </div>
+            </ControlGroup>
+          </PropertySection>
+        </>
+      )}
+
+      {activeTab === 'style' && (
+        <>
+          <PropertySection title="Container" icon={Maximize2}>
+            <SpacingGroup block={block} onChange={updateProp} />
+            <BorderGroup block={block} onChange={updateProp} />
+            <EffectsGroup block={block} onChange={updateProp} />
+          </PropertySection>
+        </>
+      )}
+
+      {activeTab === 'advanced' && <AdvancedPanel block={block} onUpdate={(u) => updateBlock(block.id, u)} />}
+    </div>
+  );
+};
 export const InvoiceBlockInspector: React.FC<{ block: Block; updateBlock: (id: string, updates: Partial<Block>) => void; activeTab: 'content' | 'style' | 'advanced'; }> = ({ block, updateBlock, activeTab }) => {
   const props = block.props as any;
   const updateProp = (k: string, v: any) => updateBlock(block.id, { props: { ...props, [k]: v } });

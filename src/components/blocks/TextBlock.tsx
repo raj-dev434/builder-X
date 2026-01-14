@@ -233,7 +233,7 @@ export const TextBlock: React.FC<TextBlockProps> = ({
     // Use margin auto for alignment
     // If no explicit width is set, use a reasonable default (50%) to make alignment visible
     const styles: React.CSSProperties = {
-      width: block.props.width || '50%',
+      width: block.props.width || 'fit-content',
       maxWidth: block.props.maxWidth || '100%',
       display: 'block'
     };
@@ -322,6 +322,7 @@ export const TextBlock: React.FC<TextBlockProps> = ({
             role="textbox"
             aria-label="Edit text content"
             tabIndex={0}
+            data-text-align={block.props.textAlign || 'left'}
             dangerouslySetInnerHTML={{ __html: content }}
           />
         ) : (
@@ -332,6 +333,7 @@ export const TextBlock: React.FC<TextBlockProps> = ({
             role="button"
             aria-label="Double-click to edit text"
             tabIndex={0}
+            data-text-align={block.props.textAlign || 'left'}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
@@ -388,6 +390,12 @@ export const TextBlock: React.FC<TextBlockProps> = ({
         .text-content li {
           margin-bottom: 0.25rem !important;
           display: list-item !important;
+        }
+        .text-content[data-text-align="center"] ul,
+        .text-content[data-text-align="center"] ol,
+        .text-content[data-text-align="right"] ul,
+        .text-content[data-text-align="right"] ol {
+           list-style-position: inside !important;
         }
         .text-content .ql-align-center {
           text-align: center !important;
