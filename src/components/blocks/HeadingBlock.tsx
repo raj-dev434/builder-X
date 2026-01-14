@@ -33,20 +33,30 @@ export const HeadingBlock: React.FC<HeadingBlockProps> = ({
     switch (size) {
       case 'small':
         return { fontSize: '0.875rem', lineHeight: '1.25rem' };
+      case 'medium':
+        return { fontSize: '1.25rem', lineHeight: '1.75rem' };
       case 'large':
         return { fontSize: '2.25rem', lineHeight: '2.5rem' };
       case 'xl':
         return { fontSize: '3rem', lineHeight: '1' };
       case 'xxl':
         return { fontSize: '3.75rem', lineHeight: '1' };
-      case 'medium':
       case 'default':
       default:
-        return { fontSize: '1.5rem', lineHeight: '2rem' };
+        // Default sizes based on heading level
+        switch (level) {
+          case 1: return { fontSize: '3rem', lineHeight: '1.1', fontWeight: '800' };
+          case 2: return { fontSize: '2.25rem', lineHeight: '1.2', fontWeight: '700' };
+          case 3: return { fontSize: '1.875rem', lineHeight: '1.3', fontWeight: '600' };
+          case 4: return { fontSize: '1.5rem', lineHeight: '1.4', fontWeight: '600' };
+          case 5: return { fontSize: '1.25rem', lineHeight: '1.5', fontWeight: '600' };
+          case 6: return { fontSize: '1rem', lineHeight: '1.5', fontWeight: '600' };
+          default: return { fontSize: '2.25rem', lineHeight: '1.2' };
+        }
     }
   };
 
-  const HeadingTag = `h${level}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+
 
   return (
     <BaseBlock
@@ -54,20 +64,15 @@ export const HeadingBlock: React.FC<HeadingBlockProps> = ({
       isSelected={isSelected}
       onSelect={onSelect}
       onDelete={onDelete}
-      style={styleProps}
+      style={{
+        margin: 0,
+        padding: 0,
+        ...getSizeStyles(),
+        ...styleProps,
+        color: styleProps.color || 'inherit'
+      }}
     >
-      <HeadingTag
-        style={{
-          margin: 0,
-          padding: 0,
-          ...getSizeStyles(),
-          ...styleProps,
-          color: styleProps.color || 'inherit'
-        }}
-        onClick={onSelect}
-      >
-        {text}
-      </HeadingTag>
+      {text}
     </BaseBlock>
   );
 };

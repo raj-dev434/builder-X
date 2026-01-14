@@ -123,14 +123,14 @@ export const BaseBlock: React.FC<BaseBlockProps> = ({
   if (styleProps.marginLeft) cssProperties.marginLeft = styleProps.marginLeft;
 
   // Border
-  if (styleProps.border) cssProperties.border = styleProps.border;
-  if (styleProps.borderWidth) cssProperties.borderWidth = styleProps.borderWidth;
-  if (styleProps.borderTopWidth) cssProperties.borderTopWidth = styleProps.borderTopWidth;
-  if (styleProps.borderRightWidth) cssProperties.borderRightWidth = styleProps.borderRightWidth;
-  if (styleProps.borderBottomWidth) cssProperties.borderBottomWidth = styleProps.borderBottomWidth;
-  if (styleProps.borderLeftWidth) cssProperties.borderLeftWidth = styleProps.borderLeftWidth;
-  if (styleProps.borderStyle) cssProperties.borderStyle = styleProps.borderStyle as any;
-  if (styleProps.borderColor) cssProperties.borderColor = styleProps.borderColor;
+  if (styleProps.border && styleProps.border !== 'none') cssProperties.border = styleProps.border;
+  if (styleProps.borderWidth && styleProps.borderWidth !== '0' && styleProps.borderWidth !== 0) cssProperties.borderWidth = styleProps.borderWidth;
+  if (styleProps.borderTopWidth && styleProps.borderTopWidth !== '0' && styleProps.borderTopWidth !== 0) cssProperties.borderTopWidth = styleProps.borderTopWidth;
+  if (styleProps.borderRightWidth && styleProps.borderRightWidth !== '0' && styleProps.borderRightWidth !== 0) cssProperties.borderRightWidth = styleProps.borderRightWidth;
+  if (styleProps.borderBottomWidth && styleProps.borderBottomWidth !== '0' && styleProps.borderBottomWidth !== 0) cssProperties.borderBottomWidth = styleProps.borderBottomWidth;
+  if (styleProps.borderLeftWidth && styleProps.borderLeftWidth !== '0' && styleProps.borderLeftWidth !== 0) cssProperties.borderLeftWidth = styleProps.borderLeftWidth;
+  if (styleProps.borderStyle && styleProps.borderStyle !== 'none') cssProperties.borderStyle = styleProps.borderStyle as any;
+  if (styleProps.borderColor && styleProps.borderColor !== 'transparent') cssProperties.borderColor = styleProps.borderColor;
   if (styleProps.borderRadius) cssProperties.borderRadius = styleProps.borderRadius;
   if (styleProps.borderTopLeftRadius) cssProperties.borderTopLeftRadius = styleProps.borderTopLeftRadius;
   if (styleProps.borderTopRightRadius) cssProperties.borderTopRightRadius = styleProps.borderTopRightRadius;

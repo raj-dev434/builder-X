@@ -17,7 +17,8 @@ import {
 // --- ICONS ---
 import {
   AlignLeft, AlignCenter, AlignRight, AlignJustify,
-  RotateCcw, ArrowRight,
+  //RotateCcw,
+  ArrowRight,
   Layout, ArrowUp, ArrowDown, MoveVertical, MoveHorizontal,
   Maximize2
 } from 'lucide-react';
@@ -323,7 +324,28 @@ export const TextBlockInspector: React.FC<InspectorProps> = ({ block, updateBloc
                 ].map((opt) => (
                   <button
                     key={opt.value}
-                    onClick={() => handleUpdate('textAlign', opt.value)}
+                    onClick={() => {
+                      // When applying global alignment, we must remove internal alignment overrides
+                      // to ensure the global setting takes precedence
+                      let newContent = props.content || '';
+
+                      // 1. Remove Quill alignment classes
+                      newContent = newContent.replace(/\s?ql-align-(center|right|justify)/g, '');
+
+                      // 2. Remove inline text-align styles
+                      newContent = newContent.replace(/text-align\s*:\s*(left|center|right|justify|start|end|inherit)\s*;?/gi, '');
+
+                      // 3. Remove align attributes
+                      newContent = newContent.replace(/\salign=["'](left|center|right|justify)["']/gi, '');
+
+                      updateBlock(block.id, {
+                        props: {
+                          ...props,
+                          textAlign: opt.value,
+                          content: newContent
+                        }
+                      });
+                    }}
                     className={`flex-1 p-1.5 rounded-sm transition-colors ${props.textAlign === opt.value ? 'bg-[#3b82f6] text-white' : 'text-gray-400 hover:text-white'}`}
                     title={opt.label}
                   >
@@ -333,7 +355,7 @@ export const TextBlockInspector: React.FC<InspectorProps> = ({ block, updateBloc
               </div>
             </div>
           </ControlGroup>
-          <ControlGroup label="Block Align">
+          {/* <ControlGroup label="Block Align">
             <div className="flex items-center gap-2">
               <div className="flex bg-[#1a1d21] rounded p-0.5 border border-[#3e444b]">
                 {['flex-start', 'center', 'flex-end', 'stretch'].map((align) => (
@@ -358,7 +380,7 @@ export const TextBlockInspector: React.FC<InspectorProps> = ({ block, updateBloc
                 <RotateCcw className="w-3.5 h-3.5" />
               </button>
             </div>
-          </ControlGroup>
+          </ControlGroup> */}
         </PropertySection>
       </div>
     );

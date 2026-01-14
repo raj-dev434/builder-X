@@ -1740,14 +1740,16 @@ export const ElementorHeadingInspector: React.FC<{
 
             <ControlGroup label="HTML Tag">
               <select
-                value={
-                  props.level
-                    ? String(props.level)
-                    : (props.htmlTag ? props.htmlTag.replace('h', '') : '2')
-                }
+                value={(() => {
+                  if (props.level) return String(props.level);
+                  if (props.htmlTag && props.htmlTag.startsWith('h')) {
+                    return props.htmlTag.replace('h', '');
+                  }
+                  return "2";
+                })()}
                 onChange={(e) => {
                   const val = e.target.value;
-                  updateProp({ level: parseInt(val), htmlTag: `h${val}` });
+                  updateProp({ level: parseInt(val, 10), htmlTag: `h${val}` });
                 }}
                 className={inputClasses}
               >
@@ -2725,19 +2727,35 @@ export const SpecificDividerInspector: React.FC<{ block: Block; updateBlock: (id
     <div className="flex flex-col space-y-2">
       {activeTab === 'content' && (
         <>
-          <PropertySection title="Divider" icon={Minus} defaultOpen={true}>
+          <PropertySection title="Layout" icon={Minus} defaultOpen={true}>
             <ControlGroup label="Style">
               <select className={inputClasses} value={props.style || 'solid'} onChange={(e) => updateProp('style', e.target.value)}>
-                <option value="solid">Solid</option>
-                <option value="dashed">Dashed</option>
-                <option value="dotted">Dotted</option>
-                <option value="double">Double</option>
+                <optgroup label="Line">
+                  <option value="solid">Solid</option>
+                  <option value="double">Double</option>
+                  <option value="dotted">Dotted</option>
+                  <option value="dashed">Dashed</option>
+                  <option value="curly">Curly</option>
+                  <option value="curved">Curved</option>
+                  <option value="slashes">Slashes</option>
+                  <option value="squared">Squared</option>
+                  <option value="wavy">Wavy</option>
+                  <option value="zigzag">Zigzag</option>
+                </optgroup>
+                <optgroup label="Pattern">
+                  <option value="arrows">Arrows</option>
+                  <option value="circles">Circles</option>
+                  <option value="diamonds">Diamonds</option>
+                  <option value="stars">Stars</option>
+                  <option value="pluses">Pluses</option>
+                  <option value="crosses">Crosses</option>
+                </optgroup>
               </select>
             </ControlGroup>
             <ControlGroup label="Width">
               <UnitControl value={props.width} onChange={(v) => updateProp('width', v)} placeholder="100%" />
             </ControlGroup>
-            <ControlGroup label="Alignment">
+            {/* <ControlGroup label="Alignment">
               <div className="flex bg-[#1a1d21] rounded p-0.5 border border-[#3e444b] w-max">
                 {['flex-start', 'center', 'flex-end'].map((align) => (
                   <button
@@ -2751,7 +2769,7 @@ export const SpecificDividerInspector: React.FC<{ block: Block; updateBlock: (id
                   </button>
                 ))}
               </div>
-            </ControlGroup>
+            </ControlGroup> */}
           </PropertySection>
         </>
       )}
@@ -2759,10 +2777,13 @@ export const SpecificDividerInspector: React.FC<{ block: Block; updateBlock: (id
         <>
           <PropertySection title="Look" icon={Palette} defaultOpen={true}>
             <ControlGroup label="Color">
-              <input type="color" className="w-8 h-8 rounded cursor-pointer bg-transparent border border-gray-600" value={props.color || '#000000'} onChange={(e) => updateProp('color', e.target.value)} />
+              <div className="flex gap-2">
+                <input type="color" className="w-8 h-8 rounded cursor-pointer bg-transparent border border-gray-600" value={props.color || '#000000'} onChange={(e) => updateProp('color', e.target.value)} />
+                <input type="text" className={inputClasses} value={props.color || '#000000'} onChange={(e) => updateProp('color', e.target.value)} />
+              </div>
             </ControlGroup>
             <ControlGroup label="Thickness">
-              <UnitControl value={props.height} onChange={(v) => updateProp('height', v)} placeholder="1px" />
+              <UnitControl value={props.thickness} onChange={(v) => updateProp('thickness', v)} placeholder="2px" />
             </ControlGroup>
             <ControlGroup label="Visual Gap">
               <UnitControl value={props.padding} onChange={(v) => updateProp('padding', v)} placeholder="10px" />

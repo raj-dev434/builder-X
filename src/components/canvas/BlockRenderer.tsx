@@ -371,6 +371,9 @@ const SortableBlockWrapper: React.FC<{
     ...(userZIndex !== undefined && userZIndex !== '' ? { zIndex: userZIndex } : {}),
   };
 
+  // Check if this is a divider block to exclude from hover outline styling
+  const isDividerBlock = block.type === 'divider';
+
   return (
     <div
       ref={setNodeRef}
@@ -380,8 +383,8 @@ const SortableBlockWrapper: React.FC<{
       className={`
         relative 
         ${isSelected && !userZIndex ? 'z-10' : ''}
-        ${!isPreviewMode ? 'hover:outline hover:outline-1 hover:outline-blue-400 cursor-move' : ''} 
-        ${isOver && !isDragging && !isPreviewMode ? 'ring-2 ring-blue-500 bg-blue-50/20 z-20' : ''}
+        ${!isPreviewMode && !isDividerBlock ? 'hover:outline hover:outline-1 hover:outline-blue-400 cursor-move' : !isPreviewMode && isDividerBlock ? 'cursor-move' : ''} 
+        ${isOver && !isDragging && !isPreviewMode && !isDividerBlock ? 'ring-2 ring-blue-500 bg-blue-50/20 z-20' : ''}
         transition-all duration-200
         group
         ${isDragging ? 'opacity-30' : ''}
