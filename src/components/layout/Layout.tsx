@@ -240,6 +240,15 @@ export const Layout: React.FC = () => {
     if (!over) return;
     const data = active.data.current;
 
+    // Handle drop on empty canvas placeholder
+    if (over.id === 'canvas-drop-zone') {
+      const { addBlock } = useCanvasStore.getState();
+      if (data?.type === 'template') {
+        addBlock(data.template.block);
+      }
+      return;
+    }
+
     if (over.data.current?.type === 'GRID_CELL') {
       const { parentId, index: dropIndex } = over.data.current;
       const { moveBlock, addBlock, updateBlock } = useCanvasStore.getState();

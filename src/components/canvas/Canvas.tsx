@@ -1,5 +1,6 @@
 import React from 'react';
 import { useDroppable } from '@dnd-kit/core';
+
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useCanvasStore } from '../../store/canvasStore';
 import { BlockRenderer } from './BlockRenderer';
@@ -141,6 +142,7 @@ export const Canvas: React.FC<CanvasProps> = ({ isDragging = false, isPreviewMod
               {/* Always active full-size drop zone for empty state */}
               <div className="absolute inset-0 z-10" />
             </div>
+
           ) : (
             <SortableContext
               items={allBlockIds}
