@@ -58,19 +58,29 @@ export const HeadingBlock: React.FC<HeadingBlockProps> = ({
 
 
 
+  const defaultStyles = getSizeStyles();
+
+  // Ensure defaults are applied if styleProps has empty/falsy values for these properties
+  // This prevents empty strings (from cleared inputs) from overriding the level-based defaults
+  const finalStyle: React.CSSProperties = {
+    margin: 0,
+    padding: 0,
+    ...defaultStyles,
+    ...styleProps,
+    color: styleProps.color || 'inherit'
+  };
+
+  if (!styleProps.fontSize) finalStyle.fontSize = defaultStyles.fontSize;
+  if (!styleProps.lineHeight) finalStyle.lineHeight = defaultStyles.lineHeight;
+  if (!styleProps.fontWeight) finalStyle.fontWeight = defaultStyles.fontWeight;
+
   return (
     <BaseBlock
       block={block}
       isSelected={isSelected}
       onSelect={onSelect}
       onDelete={onDelete}
-      style={{
-        margin: 0,
-        padding: 0,
-        ...getSizeStyles(),
-        ...styleProps,
-        color: styleProps.color || 'inherit'
-      }}
+      style={finalStyle}
     >
       {text}
     </BaseBlock>
