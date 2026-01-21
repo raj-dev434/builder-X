@@ -3974,6 +3974,57 @@ export const SurveyBlockInspector: React.FC<{ block: Block; updateBlock: (id: st
                       updateProp('questions', newQs);
                     }} />
                   </ControlGroup>
+
+                  {['single', 'multiple'].includes(q.type) && (
+                    <div className="pt-2 border-t border-[#3e444b] mt-2 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Options</label>
+                      </div>
+                      <div className="space-y-2">
+                        {(q.options || []).map((opt: string, optIndex: number) => (
+                          <div key={optIndex} className="flex gap-1">
+                            <input
+                              type="text"
+                              className={inputClasses}
+                              value={opt}
+                              onChange={(e) => {
+                                const newQs = [...props.questions];
+                                const newOpts = [...(newQs[index].options || [])];
+                                newOpts[optIndex] = e.target.value;
+                                newQs[index] = { ...newQs[index], options: newOpts };
+                                updateProp('questions', newQs);
+                              }}
+                            />
+                            <button
+                              onClick={() => {
+                                const newQs = [...props.questions];
+                                const newOpts = [...(newQs[index].options || [])];
+                                newOpts.splice(optIndex, 1);
+                                newQs[index] = { ...newQs[index], options: newOpts };
+                                updateProp('questions', newQs);
+                              }}
+                              className="p-1 hover:bg-red-500/20 text-gray-500 hover:text-red-400 rounded transition-colors flex items-center justify-center h-full aspect-square"
+                              title="Remove Option"
+                            >
+                              <Minus size={12} />
+                            </button>
+                          </div>
+                        ))}
+                        <button
+                          onClick={() => {
+                            const newQs = [...props.questions];
+                            const newOpts = [...(newQs[index].options || [])];
+                            newOpts.push(`Option ${newOpts.length + 1}`);
+                            newQs[index] = { ...newQs[index], options: newOpts };
+                            updateProp('questions', newQs);
+                          }}
+                          className="w-full py-1.5 bg-[#202328] hover:bg-[#2d3237] text-[10px] text-blue-400 font-bold uppercase rounded border border-[#3e444b] transition-all hover:border-blue-500/30"
+                        >
+                          + Add Option
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
               <button
