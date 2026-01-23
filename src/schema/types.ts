@@ -1763,6 +1763,7 @@ export interface ProgressBlock extends BaseBlock {
     size?: "small" | "medium" | "large";
     animated?: boolean;
     striped?: boolean;
+    dynamicValue?: string;
   } & BaseStyleProps;
 }
 

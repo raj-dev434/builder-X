@@ -35,8 +35,35 @@ export const ProgressBlock: React.FC<ProgressBlockProps> = ({
     variant = 'default',
     progressColor,
     barBackgroundColor,
+    dynamicValue,
     ...styleProps
   } = block.props as any;
+
+  // Resolve dynamic value if present
+  const [resolvedValue, setResolvedValue] = React.useState<number | null>(null);
+
+  React.useEffect(() => {
+    if (dynamicValue) {
+      // Simple data binding simulation - check window object or try to parse
+      const checkValue = () => {
+        const val = (window as any)[dynamicValue];
+        if (typeof val === 'number') {
+          setResolvedValue(val);
+        } else if (!isNaN(Number(dynamicValue))) {
+          // Direct number string
+          setResolvedValue(Number(dynamicValue));
+        }
+      };
+
+      checkValue();
+      const interval = setInterval(checkValue, 1000); // Poll for changes (simulating reactive data)
+      return () => clearInterval(interval);
+    } else {
+      setResolvedValue(null);
+    }
+  }, [dynamicValue]);
+
+  const activeValue = resolvedValue !== null ? resolvedValue : value;
 
   const displayTitle = title || label;
 
@@ -48,7 +75,7 @@ export const ProgressBlock: React.FC<ProgressBlockProps> = ({
     onUpdate({ props: { ...block.props, title: newTitle, label: newTitle } as any });
   };
 
-  const percentage = Math.round((value / max) * 100);
+  const percentage = Math.round((activeValue / max) * 100);
 
   // Variant Colors
   const getVariantColor = () => {
@@ -90,20 +117,40 @@ export const ProgressBlock: React.FC<ProgressBlockProps> = ({
           width: `${percentage}%`,
           height: '100%',
           backgroundColor: themeColor,
-          transition: animated ? 'width 0.3s ease' : 'none',
+          transition: animated ? 'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
           backgroundImage: striped
             ? 'linear-gradient(45deg, rgba(255,255,255,.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.15) 50%, rgba(255,255,255,.15) 75%, transparent 75%, transparent)'
             : 'none',
           backgroundSize: striped ? '1rem 1rem' : 'auto',
-          animation: (striped && animated) ? 'progress-bar-stripes 1s linear infinite' : 'none'
+          animation: (striped && animated) ? 'progress-bar-stripes 1s linear infinite' : 'none',
+          position: 'relative',
+          overflow: 'hidden'
         }}
-      />
-      {/* Add keyframes for stripe animation globally or via styled-components implies style tag here */}
-      {(striped && animated) && (
+      >
+        {/* Shimmer Effect Overlay */}
+        {animated && !striped && (
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            bottom: 0,
+            width: '100%',
+            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+            transform: 'translateX(-100%)',
+            animation: 'progress-shimmer 2s infinite',
+          }} />
+        )}
+      </div>
+
+      {animated && (
         <style>{`
           @keyframes progress-bar-stripes {
             from { background-position: 1rem 0; }
             to { background-position: 0 0; }
+          }
+          @keyframes progress-shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
           }
         `}</style>
       )}

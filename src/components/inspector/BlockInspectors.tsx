@@ -5734,6 +5734,15 @@ export const ProgressBlockInspector: React.FC<{ block: Block; updateBlock: (id: 
             <ControlGroup label="Max Value">
               <input type="number" className={inputClasses} value={props.max || 100} onChange={(e) => updateProp('max', parseInt(e.target.value))} />
             </ControlGroup>
+            <ControlGroup label="Dynamic Value">
+              <input
+                type="text"
+                className={inputClasses}
+                value={props.dynamicValue || ''}
+                onChange={(e) => updateProp('dynamicValue', e.target.value)}
+                placeholder="Variable or Number"
+              />
+            </ControlGroup>
             <div className="flex items-center justify-between px-1 mt-2">
               <span className="text-[10px] uppercase font-bold text-gray-400">Show Title</span>
               <input type="checkbox" checked={props.showTitle !== false} onChange={(e) => updateProp('showTitle', e.target.checked)} className="rounded" />
