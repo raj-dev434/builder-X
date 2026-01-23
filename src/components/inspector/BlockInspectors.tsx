@@ -6117,15 +6117,25 @@ export const GridBlockInspector: React.FC<{ block: Block; updateBlock: (id: stri
                 <ControlGroup label="Columns">
                   <NumberControl
                     value={props.columns || 3}
-                    onChange={(v) => updateProp('columns', v)}
+                    onChange={(v) => updateProp({
+                      columns: v,
+                      gridTemplateColumns: '',
+                      gridTemplateColumns_tablet: '',
+                      gridTemplateColumns_mobile: ''
+                    })}
                     min={1}
                     max={12}
                   />
                 </ControlGroup>
                 <ControlGroup label="Rows">
                   <NumberControl
-                    value={props.rows || 2}
-                    onChange={(v) => updateProp('rows', v)}
+                    value={props.rows || 3}
+                    onChange={(v) => updateProp({
+                      rows: v,
+                      gridTemplateRows: '',
+                      gridTemplateRows_tablet: '',
+                      gridTemplateRows_mobile: ''
+                    })}
                     min={1}
                     max={12}
                   />

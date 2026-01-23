@@ -31,16 +31,30 @@ export const GridBlock: React.FC<{
     const columns = props.columns || 3;
     const rows = props.rows || 2;
 
-    const gridTemplateColumns = props.gridTemplateColumns || `repeat(${columns}, 1fr)`;
-    const gridTemplateRows = props.gridTemplateRows || `repeat(${rows}, auto)`;
+
+
+    // Unified Gap Logic
+    const gap = props.gap || getResponsiveValue(props.gap, props.gap_tablet, props.gap_mobile) || '20px';
+    const rowGap = props.rowGap ? getResponsiveValue(props.rowGap, props.rowGap_tablet, props.rowGap_mobile) : undefined;
+    const colGap = props.columnGap ? getResponsiveValue(props.columnGap, props.columnGap_tablet, props.columnGap_mobile) : undefined;
 
     const gridStyle: React.CSSProperties = {
         display: 'grid',
-        gridTemplateColumns: getResponsiveValue(gridTemplateColumns, props.gridTemplateColumns_tablet, props.gridTemplateColumns_mobile || '1fr'),
-        gridTemplateRows: getResponsiveValue(gridTemplateRows, props.gridTemplateRows_tablet, props.gridTemplateRows_mobile),
-        gap: props.gap || getResponsiveValue(props.gap, props.gap_tablet, props.gap_mobile),
-        rowGap: getResponsiveValue(props.rowGap, props.rowGap_tablet, props.rowGap_mobile),
-        columnGap: getResponsiveValue(props.columnGap, props.columnGap_tablet, props.columnGap_mobile),
+        // Prioritize explicit props, valid fallback to calculated columns
+        gridTemplateColumns: getResponsiveValue(
+            props.gridTemplateColumns,
+            props.gridTemplateColumns_tablet,
+            props.gridTemplateColumns_mobile || '1fr'
+        ) || `repeat(${columns}, 1fr)`,
+
+        gridTemplateRows: getResponsiveValue(
+            props.gridTemplateRows,
+            props.gridTemplateRows_tablet,
+            props.gridTemplateRows_mobile
+        ) || `repeat(${rows}, min-content)`,
+
+        gridAutoFlow: 'row',
+        gap: rowGap || colGap ? `${rowGap || gap} ${colGap || gap}` : gap,
         justifyItems: props.justifyItems || 'stretch',
         alignItems: props.alignItems || 'stretch',
         justifyContent: props.justifyContent,
@@ -63,16 +77,16 @@ export const GridBlock: React.FC<{
             onUpdate={onUpdate}
             onDelete={onDelete}
             style={{}}
-            className={`w-full group ${blockChildren.length === 0 ? 'min-h-[120px]' : ''}`}
+            className={`w-full group ${blockChildren.length === 0 ? 'min-h-[200px]' : ''}`}
         >
             <div
-                className={`w-full h-full transition-all duration-200 ${isHovered ? 'ring-1 ring-blue-200 ring-inset' : ''}`}
+                className={`w-full transition-all duration-200 ${isHovered ? 'ring-1 ring-blue-200 ring-inset' : ''}`}
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
             >
                 {/* Content width wrapper */}
                 <div
-                    className="w-full h-full"
+                    className="w-full"
                     style={{
                         maxWidth: props.contentWidth === 'boxed' ? (props.contentWidthValue || '1140px') : '100%',
                         margin: props.contentWidth === 'boxed' ? '0 auto' : undefined,
@@ -81,12 +95,13 @@ export const GridBlock: React.FC<{
                     <SortableContext items={blockChildren.map(c => c.id)} strategy={rectSortingStrategy}>
                         <div
                             style={gridStyle}
-                            className="relative"
+                            className="relative w-full"
                         >
                             {Array.from({ length: totalCells }).map((_, i) => {
                                 // Find child that belongs to this cell (by gridIndex prop)
                                 const childBlock = blockChildren.find((c) => c?.props?.gridIndex === i);
                                 const hasValidChild = !!childBlock;
+
 
                                 return (
                                     <GridCell
@@ -138,7 +153,7 @@ const GridCell: React.FC<{
     return (
         <div
             ref={setNodeRef}
-            className={`relative flex flex-col items-stretch justify-center min-h-[100px] transition-all duration-300 rounded-lg ${showOutline
+            className={`relative w-full flex flex-col items-stretch justify-center min-h-[90px] transition-all duration-300 rounded-lg ${showOutline
                 ? hasChild
                     ? 'border border-blue-400/10 bg-transparent shadow-sm'
                     : 'border-2 border-dashed border-blue-400/20 bg-blue-500/5 hover:bg-blue-500/10 hover:border-blue-500/40 hover:shadow-md'
